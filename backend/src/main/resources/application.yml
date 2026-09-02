@@ -3,7 +3,7 @@ spring:
     name: radar-api
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/radar_db
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/radar_db}
     username: ${DB_USERNAME:radar_user}
     password: ${DB_PASSWORD:changeme_local_dev}
     driver-class-name: org.postgresql.Driver
@@ -19,7 +19,7 @@ spring:
     open-in-view: false
 
 server:
-  port: 8080
+  port: ${PORT:8080}
 
 # Clave HMAC para firmar los JWT (minimo 32 caracteres). Sobrescribir con variable de entorno en produccion.
 jwt:
