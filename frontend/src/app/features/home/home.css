@@ -1,0 +1,2 @@
+/* Los pines de reporte (.report-pin) viven en styles.css: Leaflet los inyecta
+   fuera del arbol de Angular, asi que el encapsulamiento de estilos no los alcanza. */

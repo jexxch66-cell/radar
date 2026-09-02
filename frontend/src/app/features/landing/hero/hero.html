@@ -1,0 +1,128 @@
+<section class="relative w-full overflow-hidden h-screen bg-black" style="height: 100dvh">
+  <!-- Imagen base: la zona urbana tal como se ve normalmente -->
+  <div
+    class="absolute inset-0 bg-center bg-cover bg-no-repeat z-10 hero-zoom"
+    [style.background-image]="'url(' + baseImage + ')'"
+  ></div>
+
+  <!-- Capa revelada por el cursor: la misma zona con los reportes marcados -->
+  <app-reveal-layer [image]="revealImage" [cursor]="cursor()" />
+
+  <!-- Encabezado -->
+  <div class="absolute top-[14%] left-0 right-0 flex flex-col items-center text-center px-5 pointer-events-none z-50">
+    <h1 class="text-white leading-[0.95]">
+      <span
+        class="hero-anim hero-reveal block font-playfair italic font-normal text-5xl sm:text-7xl md:text-8xl"
+        style="animation-delay: 0.25s; letter-spacing: -0.05em"
+      >
+        Lo que ves,
+      </span>
+      <span
+        class="hero-anim hero-reveal block font-normal text-5xl sm:text-7xl md:text-8xl -mt-1"
+        style="animation-delay: 0.42s; letter-spacing: -0.08em"
+      >
+        repórtalo ahora
+      </span>
+    </h1>
+  </div>
+
+  <!-- Párrafo inferior izquierdo -->
+  <div
+    class="hero-anim hero-fade hidden sm:block absolute bottom-14 left-10 md:left-14 max-w-[260px] z-50"
+    style="animation-delay: 0.7s"
+  >
+    <p class="text-sm text-white/80 leading-relaxed">
+      Cada reporte que envías se suma a un mapa vivo de tu ciudad: baches, zonas oscuras, escombros y basura,
+      visibles para todos.
+    </p>
+  </div>
+
+  <!-- Bloque inferior derecho -->
+  <div
+    class="hero-anim hero-fade absolute bottom-10 sm:bottom-24 left-5 right-5 sm:left-auto sm:right-10 md:right-14 max-w-full sm:max-w-[260px] flex flex-col items-start gap-4 sm:gap-5 z-50"
+    style="animation-delay: 0.85s"
+  >
+    <p class="text-xs sm:text-sm text-white/80 leading-relaxed">
+      Nuestro mapa interactivo conecta a vecinos y autoridades para priorizar arreglos donde más se necesitan,
+      barrio por barrio.
+    </p>
+    <a
+      routerLink="/registro"
+      class="bg-[#e8702a] hover:bg-[#d2611f] text-white text-sm font-medium px-7 py-3 rounded-full transition-all hover:scale-[1.03] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
+    >
+      Empieza a reportar
+    </a>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between p-4 sm:p-5">
+    <a routerLink="/" class="flex items-center gap-2">
+      <svg width="26" height="26" viewBox="0 0 256 256" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
+      </svg>
+      <span class="text-white text-2xl font-playfair italic">RADAR</span>
+    </a>
+
+    <div
+      class="hidden md:flex absolute left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-md border border-white/30 rounded-full px-2 py-2 items-center gap-1"
+    >
+      <a routerLink="/mapa" class="px-4 py-1.5 rounded-full text-sm font-medium text-white">Mapa</a>
+      <a
+        href="#como-funciona"
+        class="px-4 py-1.5 rounded-full text-sm font-medium text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+      >
+        Cómo funciona
+      </a>
+      <a
+        href="#comunidad"
+        class="px-4 py-1.5 rounded-full text-sm font-medium text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+      >
+        Comunidad
+      </a>
+      <a
+        href="#planes"
+        class="px-4 py-1.5 rounded-full text-sm font-medium text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+      >
+        Planes
+      </a>
+    </div>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a routerLink="/login" class="text-white text-sm font-medium px-4 py-2 hover:text-white/80 transition-colors">
+        Iniciar sesión
+      </a>
+      <a
+        routerLink="/registro"
+        class="bg-white text-gray-900 text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-gray-100 transition-colors"
+      >
+        Registrarse
+      </a>
+    </div>
+
+    <button type="button" class="md:hidden text-white" (click)="toggleMenu()" aria-label="Abrir menú">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </nav>
+
+  @if (menuOpen()) {
+    <div class="md:hidden fixed top-16 left-4 right-4 z-[100] bg-black/90 backdrop-blur-md border border-white/20 rounded-2xl p-4 flex flex-col gap-1">
+      <a routerLink="/mapa" class="text-white text-sm font-medium px-3 py-2" (click)="closeMenu()">Mapa</a>
+      <a href="#como-funciona" class="text-white/80 text-sm font-medium px-3 py-2" (click)="closeMenu()">Cómo funciona</a>
+      <a href="#comunidad" class="text-white/80 text-sm font-medium px-3 py-2" (click)="closeMenu()">Comunidad</a>
+      <a href="#planes" class="text-white/80 text-sm font-medium px-3 py-2" (click)="closeMenu()">Planes</a>
+      <hr class="border-white/20 my-1" />
+      <a routerLink="/login" class="text-white text-sm font-medium px-3 py-2" (click)="closeMenu()">Iniciar sesión</a>
+      <a
+        routerLink="/registro"
+        class="bg-white text-gray-900 text-sm font-semibold px-3 py-2 rounded-full text-center"
+        (click)="closeMenu()"
+      >
+        Registrarse
+      </a>
+    </div>
+  }
+</section>

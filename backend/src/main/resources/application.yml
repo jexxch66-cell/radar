@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: radar-api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/radar_db
+    username: ${DB_USERNAME:radar_user}
+    password: ${DB_PASSWORD:changeme_local_dev}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # update es comodo en desarrollo; usar migraciones (Flyway/Liquibase) en produccion
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+server:
+  port: 8080
+
+# Clave HMAC para firmar los JWT (minimo 32 caracteres). Sobrescribir con variable de entorno en produccion.
+jwt:
+  secret: ${JWT_SECRET:cambia-esta-clave-secreta-por-una-real-de-al-menos-32-caracteres}
+  expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+app:
+  cors:
+    allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}

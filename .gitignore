@@ -1,0 +1,33 @@
+# Backend (Maven / Java)
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# Frontend build output (frontend/.gitignore also covers this, kept here for safety)
+frontend/dist/
+frontend/node_modules/
+frontend/.angular/
+
+# Vercel
+.vercel
+
+# Claude Code local settings (contains machine-specific permissions/paths)
+.claude/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+application-local.yml
+application-local.yaml
+
+# IDEs and editors
+.idea/
+.vscode/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0704"/>
+      <stop offset="100%" stop-color="#22140a"/>
+    </linearGradient>
+    <linearGradient id="road2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#241a12"/>
+      <stop offset="100%" stop-color="#0a0b0e"/>
+    </linearGradient>
+    <radialGradient id="heat" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8702a" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#e8702a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="800" fill="url(#sky2)"/>
+
+  <!-- Skyline -->
+  <g fill="#1a130d">
+    <rect x="40" y="360" width="120" height="260"/>
+    <rect x="180" y="300" width="90" height="320"/>
+    <rect x="290" y="400" width="150" height="220"/>
+    <rect x="460" y="260" width="110" height="360"/>
+    <rect x="600" y="340" width="140" height="280"/>
+    <rect x="770" y="300" width="100" height="320"/>
+    <rect x="900" y="380" width="160" height="240"/>
+    <rect x="1080" y="320" width="110" height="300"/>
+    <rect x="1200" y="380" width="60" height="240"/>
+  </g>
+
+  <!-- Ventanas encendidas -->
+  <g fill="#ffb37a" opacity="0.85">
+    <rect x="60" y="390" width="10" height="14"/>
+    <rect x="90" y="430" width="10" height="14"/>
+    <rect x="200" y="340" width="10" height="14"/>
+    <rect x="480" y="300" width="10" height="14"/>
+    <rect x="620" y="380" width="10" height="14"/>
+    <rect x="790" y="340" width="10" height="14"/>
+    <rect x="920" y="420" width="10" height="14"/>
+    <rect x="1100" y="360" width="10" height="14"/>
+  </g>
+
+  <!-- Calle -->
+  <polygon points="480,620 800,620 1000,800 280,800" fill="url(#road2)"/>
+  <polygon points="620,620 660,620 700,800 580,800" fill="#3a2a1a" opacity="0.5"/>
+
+  <!-- Halos de calor de reportes -->
+  <circle cx="640" cy="700" r="140" fill="url(#heat)"/>
+  <circle cx="360" cy="580" r="110" fill="url(#heat)"/>
+  <circle cx="920" cy="580" r="110" fill="url(#heat)"/>
+
+  <!-- Postes de luz encendidos -->
+  <g stroke="#e8702a" stroke-width="4">
+    <line x1="360" y1="640" x2="360" y2="560"/>
+    <line x1="920" y1="640" x2="920" y2="560"/>
+  </g>
+  <circle cx="360" cy="555" r="8" fill="#ffb37a"/>
+  <circle cx="920" cy="555" r="8" fill="#ffb37a"/>
+
+  <!-- Bache -->
+  <ellipse cx="640" cy="720" rx="46" ry="14" fill="#000000" opacity="0.6"/>
+
+  <!-- Marcadores de reportes -->
+  <g fill="#e8702a" stroke="#ffffff" stroke-width="2">
+    <circle cx="640" cy="700" r="9"/>
+    <circle cx="420" cy="660" r="7"/>
+    <circle cx="800" cy="680" r="7"/>
+    <circle cx="360" cy="600" r="7"/>
+    <circle cx="920" cy="600" r="7"/>
+    <circle cx="560" cy="740" r="7"/>
+  </g>
+</svg>

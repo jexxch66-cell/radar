@@ -1,0 +1,124 @@
+<section class="relative w-full min-h-screen overflow-hidden bg-black flex items-center justify-center" style="min-height: 100dvh">
+  <!-- Fondo: misma escena urbana de la landing, oscurecida para dar contraste al formulario -->
+  <div
+    class="absolute inset-0 bg-center bg-cover bg-no-repeat"
+    style="background-image: url(/images/street-base.svg)"
+  ></div>
+  <div class="absolute inset-0 bg-black/70"></div>
+  <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/10"></div>
+
+  <!-- Navegación mínima -->
+  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 sm:p-5">
+    <a routerLink="/bienvenida" class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 256 256" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
+      </svg>
+      <span class="text-white text-xl font-playfair italic">RADAR</span>
+    </a>
+    <a routerLink="/bienvenida" class="text-white/70 text-sm font-medium hover:text-white transition-colors">
+      ← Volver
+    </a>
+  </nav>
+
+  <!-- Tarjeta de registro -->
+  <div class="relative z-10 w-full max-w-[400px] mx-5 my-24">
+    <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
+      <h1 class="text-white font-playfair italic text-3xl sm:text-4xl" style="letter-spacing: -0.02em">
+        Crea tu cuenta
+      </h1>
+      <p class="text-white/60 text-sm mt-2 mb-8">
+        Únete y empieza a reportar lo que pasa en tu ciudad.
+      </p>
+
+      <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-white/80 text-sm font-medium" for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            type="text"
+            formControlName="nombre"
+            autocomplete="name"
+            class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-white/15 transition-colors"
+            placeholder="Tu nombre"
+          />
+          @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
+            <span class="text-red-400 text-xs">El nombre es obligatorio.</span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-white/80 text-sm font-medium" for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            autocomplete="email"
+            class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-white/15 transition-colors"
+            placeholder="tucorreo@ejemplo.com"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <span class="text-red-400 text-xs">
+              @if (form.controls.email.hasError('required')) { El email es obligatorio. }
+              @if (form.controls.email.hasError('email')) { Ingresa un email válido. }
+            </span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-white/80 text-sm font-medium" for="password">Contraseña</label>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            autocomplete="new-password"
+            class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-white/15 transition-colors"
+            placeholder="••••••••"
+          />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <span class="text-red-400 text-xs">
+              @if (form.controls.password.hasError('required')) { La contraseña es obligatoria. }
+              @if (form.controls.password.hasError('minlength')) { Debe tener mínimo 8 caracteres. }
+            </span>
+          }
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-white/80 text-sm font-medium" for="confirmarPassword">Confirmar contraseña</label>
+          <input
+            id="confirmarPassword"
+            type="password"
+            formControlName="confirmarPassword"
+            autocomplete="new-password"
+            class="bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-white/15 transition-colors"
+            placeholder="••••••••"
+          />
+          @if (form.controls.confirmarPassword.touched && form.controls.confirmarPassword.invalid) {
+            <span class="text-red-400 text-xs">
+              @if (form.controls.confirmarPassword.hasError('required')) { Confirma tu contraseña. }
+              @if (form.controls.confirmarPassword.hasError('mismatch')) { Las contraseñas no coinciden. }
+            </span>
+          }
+        </div>
+
+        @if (errorMessage()) {
+          <div class="bg-red-500/10 border border-red-500/30 text-red-300 text-sm rounded-lg p-3">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="mt-1 bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-7 py-3 rounded-full transition-all hover:scale-[1.02] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
+        >
+          {{ submitting() ? 'Creando cuenta…' : 'Registrarme' }}
+        </button>
+      </form>
+
+      <p class="text-white/60 text-sm text-center mt-6">
+        ¿Ya tienes cuenta?
+        <a routerLink="/login" class="text-white font-medium hover:text-[#e8702a] transition-colors">Inicia sesión</a>
+      </p>
+    </div>
+  </div>
+</section>

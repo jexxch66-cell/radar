@@ -1,0 +1,117 @@
+<div
+  class="relative w-full h-screen overflow-hidden flex flex-col"
+  style="height: 100dvh; background: linear-gradient(180deg, #ff9d5c 0%, #e8702a 100%)"
+>
+  <!-- "404" de fondo, recortado con una mascara que se desvanece hacia abajo -->
+  <div
+    class="absolute inset-0 flex items-center justify-center pointer-events-none"
+    style="
+      opacity: 0.8;
+      mask-image: linear-gradient(to bottom, black 40%, transparent 92%);
+      -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 92%);
+    "
+  >
+    <span
+      class="text-white font-black leading-none tracking-tighter whitespace-nowrap"
+      style="font-size: clamp(160px, 42vw, 640px); transform: scale(1.15, 1.3)"
+    >
+      404
+    </span>
+  </div>
+
+  <!-- Destellos decorativos -->
+  <span class="sparkle absolute text-white/80 text-2xl" style="top: 18%; left: 12%; animation-delay: 0.2s">✦</span>
+  <span class="sparkle absolute text-white/70 text-lg" style="top: 30%; right: 14%; animation-delay: 0.9s">✦</span>
+  <span class="sparkle absolute text-white/60 text-xl" style="bottom: 30%; left: 20%; animation-delay: 1.5s">✦</span>
+
+  <!-- Navegación mínima -->
+  <nav class="relative z-20 flex items-center justify-between px-4 sm:px-6 md:px-12 py-4 sm:py-5">
+    <a routerLink="/bienvenida" class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 256 256" fill="#ffffff" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
+      </svg>
+      <span class="text-white text-lg sm:text-xl font-playfair italic">RADAR</span>
+    </a>
+    <a
+      routerLink="/bienvenida"
+      class="bg-white text-[#c85a1c] text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-opacity"
+    >
+      Volver al inicio
+    </a>
+  </nav>
+
+  <!-- Mascota: Rufo reportando -->
+  <div class="relative z-10 flex-1 flex items-center justify-center" style="margin-top: -2vh">
+    <div class="fox-float w-[220px] sm:w-[280px] md:w-[320px]">
+      <svg viewBox="0 0 320 360" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+        <!-- sombra -->
+        <ellipse cx="160" cy="345" rx="88" ry="13" fill="#000000" opacity="0.15" />
+
+        <!-- cola -->
+        <g class="fox-tail">
+          <ellipse cx="262" cy="208" rx="34" ry="68" fill="#e8702a" transform="rotate(24 262 208)" />
+          <ellipse cx="266" cy="152" rx="19" ry="24" fill="#fdf3ea" transform="rotate(24 266 152)" />
+        </g>
+
+        <!-- cuerpo -->
+        <rect x="95" y="188" width="130" height="140" rx="55" fill="#1f2430" />
+        <ellipse cx="160" cy="194" rx="36" ry="12" fill="#2b3040" />
+
+        <!-- brazos y patas -->
+        <ellipse cx="107" cy="252" rx="17" ry="30" fill="#1f2430" transform="rotate(-12 107 252)" />
+        <ellipse cx="213" cy="252" rx="17" ry="30" fill="#1f2430" transform="rotate(12 213 252)" />
+        <circle cx="99" cy="280" r="15" fill="#fdf3ea" />
+        <circle cx="221" cy="278" r="15" fill="#fdf3ea" />
+
+        <!-- telefono -->
+        <rect x="129" y="252" width="56" height="92" rx="11" fill="#12141a" />
+        <rect x="135" y="260" width="44" height="70" rx="5" fill="#e8702a" />
+        <circle cx="157" cy="295" r="4" fill="#fdf3ea" />
+        <circle cx="157" cy="295" r="10" fill="none" stroke="#fdf3ea" stroke-width="2" opacity="0.6" />
+        <circle cx="157" cy="295" r="16" fill="none" stroke="#fdf3ea" stroke-width="2" opacity="0.3" />
+
+        <!-- cabeza -->
+        <g>
+          <!-- orejas -->
+          <path d="M100,95 L68,24 L130,80 Z" fill="#e8702a" />
+          <path d="M96,86 L79,45 L118,79 Z" fill="#fdf3ea" />
+          <path d="M220,95 L252,24 L190,80 Z" fill="#e8702a" />
+          <path d="M224,86 L241,45 L202,79 Z" fill="#fdf3ea" />
+
+          <!-- cara -->
+          <circle cx="160" cy="140" r="78" fill="#e8702a" />
+          <ellipse cx="160" cy="166" rx="47" ry="38" fill="#fdf3ea" />
+
+          <!-- mejillas -->
+          <ellipse cx="115" cy="160" rx="11" ry="6" fill="#ffffff" opacity="0.3" />
+          <ellipse cx="205" cy="160" rx="11" ry="6" fill="#ffffff" opacity="0.3" />
+
+          <!-- ojos -->
+          <circle cx="134" cy="134" r="9" fill="#20222b" />
+          <circle cx="186" cy="134" r="9" fill="#20222b" />
+          <circle cx="131" cy="131" r="2.5" fill="#ffffff" />
+          <circle cx="183" cy="131" r="2.5" fill="#ffffff" />
+
+          <!-- nariz -->
+          <ellipse cx="160" cy="160" rx="9" ry="7" fill="#20222b" />
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Contenido inferior -->
+  <div class="relative z-30 mt-auto pb-10 sm:pb-16 flex flex-col items-center text-center px-4">
+    <h1 class="text-white font-playfair italic text-2xl sm:text-3xl md:text-4xl mb-2">
+      ¡Uy! Rufo no encontró esta página
+    </h1>
+    <p class="text-white/85 text-sm sm:text-base mb-6 max-w-sm">
+      Parece que esto se perdió en el camino, como un bache que todavía nadie reportó.
+    </p>
+    <a
+      routerLink="/bienvenida"
+      class="inline-flex items-center gap-2 bg-white text-[#c85a1c] font-semibold text-sm sm:text-base px-7 py-3.5 rounded-full hover:scale-105 hover:shadow-lg transition-all"
+    >
+      ← Volver al inicio
+    </a>
+  </div>
+</div>
