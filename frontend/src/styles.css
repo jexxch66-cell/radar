@@ -2,6 +2,43 @@
 @import "tailwindcss";
 @import 'leaflet/dist/leaflet.css';
 
+/* Tema claro/oscuro: ThemeService pone la clase .dark en <html>.
+   Los tokens permiten usar bg-bg, text-fg, bg-panel, border-fg/20, etc. y que cambien solos. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-bg: var(--theme-bg);
+  --color-fg: var(--theme-fg);
+  --color-panel: var(--theme-panel);
+}
+
+:root {
+  --theme-bg: #f6f5f2;
+  --theme-fg: #111827;
+  --theme-panel: #ffffff;
+  color-scheme: light;
+}
+
+.dark {
+  --theme-bg: #0a0a0a;
+  --theme-fg: #ffffff;
+  --theme-panel: #171717;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--theme-bg);
+  color: var(--theme-fg);
+}
+
+/* Mapa en modo oscuro: se invierten los tiles de OpenStreetMap en lugar de cargar otro proveedor */
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
+.dark .leaflet-container {
+  background: #1b1b1b;
+}
+
 * {
   font-family: 'Inter', sans-serif;
 }
@@ -156,4 +193,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .fox-float, .fox-tail, .sparkle { animation: none; }
+}
+
+/* Landing en modo claro: la escena nocturna se invierte para verse como de día
+   (el naranja de las ventanas y los pines conserva su tono) */
+:root:not(.dark) .landing-scene {
+  filter: invert(1) hue-rotate(180deg) brightness(1.02);
 }

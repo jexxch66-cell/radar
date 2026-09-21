@@ -1,6 +1,7 @@
 package com.radar.api.service;
 
 import com.radar.api.dto.request.CreateReportRequest;
+import com.radar.api.dto.request.UpdateReportRequest;
 import com.radar.api.dto.request.UpdateReportStatusRequest;
 import com.radar.api.dto.response.ReportResponse;
 import com.radar.api.exception.ReportNotFoundException;
@@ -52,6 +53,21 @@ public class ReportService {
         report.setEstado(request.getEstado());
         reportRepository.save(report);
         return toResponse(report);
+    }
+
+    public ReportResponse update(Long id, UpdateReportRequest request) {
+        Report report = getOrThrow(id);
+        report.setCategoria(request.getCategoria());
+        report.setDescripcion(request.getDescripcion());
+        reportRepository.save(report);
+        return toResponse(report);
+    }
+
+    public void delete(Long id) {
+        if (!reportRepository.existsById(id)) {
+            throw new ReportNotFoundException(id);
+        }
+        reportRepository.deleteById(id);
     }
 
     private Report getOrThrow(Long id) {

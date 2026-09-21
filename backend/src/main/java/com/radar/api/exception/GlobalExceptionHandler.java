@@ -3,6 +3,7 @@ package com.radar.api.exception;
 import com.radar.api.dto.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -54,6 +55,16 @@ public class GlobalExceptionHandler {
                 .message("Email o contrasena invalidos")
                 .build();
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
+    // Sin este handler, el @PreAuthorize denegado caeria en el handler generico y responderia 500
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        ErrorResponse body = ErrorResponse.builder()
+                .status(HttpStatus.FORBIDDEN.value())
+                .message("No tienes permiso para realizar esta accion")
+                .build();
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(Exception.class)

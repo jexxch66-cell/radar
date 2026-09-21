@@ -1,0 +1,321 @@
+<section class="min-h-screen bg-bg text-fg px-4 py-6 sm:px-8" style="min-height: 100dvh">
+  <header class="flex flex-wrap items-center justify-between gap-3 mb-8">
+    <div class="flex items-center gap-2">
+      <svg width="22" height="22" viewBox="0 0 256 256" fill="var(--theme-fg)" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
+      </svg>
+      <span class="text-lg font-playfair italic">RADAR · Administrador</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <app-theme-toggle />
+      <a
+        routerLink="/mapa"
+        class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
+      >
+        Ver mapa
+      </a>
+      <a
+        routerLink="/admin/nuevo"
+        class="text-sm text-fg/80 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
+      >
+        + Nuevo administrador
+      </a>
+      <button
+        type="button"
+        (click)="logout()"
+        class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
+      >
+        Cerrar sesión
+      </button>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-sm rounded-lg p-3 mb-6 flex items-center justify-between gap-3">
+      <span>{{ errorMessage() }}</span>
+      <button type="button" (click)="loadReports()" class="underline shrink-0">Reintentar</button>
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="text-fg/60 text-sm">Cargando reportes…</p>
+  } @else {
+    <!-- Resumen: KPIs -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div class="bg-panel border border-fg/10 rounded-2xl p-4 sm:p-5">
+        <p class="text-fg/60 text-xs uppercase tracking-wide">Total de reportes</p>
+        <p class="text-3xl sm:text-4xl font-semibold mt-2 tabular-nums">{{ total() }}</p>
+      </div>
+      @for (status of statuses; track status) {
+        <div class="bg-panel border border-fg/10 rounded-2xl p-4 sm:p-5">
+          <p class="text-fg/60 text-xs uppercase tracking-wide flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full" [style.background]="statusColors[status]"></span>
+            {{ statusLabels[status] }}
+          </p>
+          <p class="text-3xl sm:text-4xl font-semibold mt-2 tabular-nums">{{ countByStatus()[status] }}</p>
+          @if (status === 'RESUELTO') {
+            <p class="text-fg/60 text-xs mt-1">{{ resolvedPercent() }}% del total</p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Gráficas -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+      <div class="bg-panel border border-fg/10 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-4">Reportes por categoría</h2>
+        <ul class="flex flex-col gap-3">
+          @for (row of byCategory(); track row.value) {
+            <li class="flex items-center gap-3 text-sm" [title]="row.label + ': ' + row.count">
+              <span class="w-28 shrink-0 text-fg/80 truncate">{{ row.icon }} {{ row.label }}</span>
+              <div class="flex-1 h-3 rounded-full bg-fg/10 overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-[width] duration-500"
+                  [style.width.%]="row.width"
+                  [style.background]="row.color"
+                ></div>
+              </div>
+              <span class="w-8 text-right tabular-nums text-fg/80">{{ row.count }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="bg-panel border border-fg/10 rounded-2xl p-5">
+        <h2 class="text-sm font-semibold mb-4">Estado de los reportes</h2>
+        @if (total() === 0) {
+          <p class="text-fg/60 text-sm">Aún no hay datos para mostrar.</p>
+        } @else {
+          <div class="flex h-4 rounded-full overflow-hidden bg-fg/10 gap-0.5" role="img" aria-label="Distribución por estado">
+            @for (status of statuses; track status) {
+              @if (countByStatus()[status] > 0) {
+                <div
+                  class="h-full transition-[width] duration-500"
+                  [style.width.%]="percentOf(countByStatus()[status])"
+                  [style.background]="statusColors[status]"
+                  [title]="statusLabels[status] + ': ' + countByStatus()[status]"
+                ></div>
+              }
+            }
+          </div>
+          <ul class="mt-5 flex flex-col gap-2.5">
+            @for (status of statuses; track status) {
+              <li class="flex items-center justify-between text-sm">
+                <span class="flex items-center gap-2 text-fg/80">
+                  <span class="inline-block w-2.5 h-2.5 rounded-full" [style.background]="statusColors[status]"></span>
+                  {{ statusLabels[status] }}
+                </span>
+                <span class="tabular-nums text-fg/80">
+                  {{ countByStatus()[status] }}
+                  <span class="text-fg/50">· {{ percentOf(countByStatus()[status]).toFixed(0) }}%</span>
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+
+    <!-- Gestión (CRUD) -->
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+      <h2 class="text-lg font-playfair italic">Gestión de reportes</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          placeholder="Buscar descripción o autor…"
+          class="bg-fg/5 border border-fg/20 rounded-full px-4 py-2 text-sm placeholder-fg/40 focus:outline-none focus:border-[#e8702a] w-full sm:w-64"
+        />
+        <select
+          [ngModel]="filterCategory()"
+          (ngModelChange)="filterCategory.set($event)"
+          class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
+          aria-label="Filtrar por categoría"
+        >
+          <option value="">Todas las categorías</option>
+          @for (cat of categories; track cat.value) {
+            <option [value]="cat.value">{{ cat.label }}</option>
+          }
+        </select>
+        <select
+          [ngModel]="filterStatus()"
+          (ngModelChange)="filterStatus.set($event)"
+          class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
+          aria-label="Filtrar por estado"
+        >
+          <option value="">Todos los estados</option>
+          @for (status of statuses; track status) {
+            <option [value]="status">{{ statusLabels[status] }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    @if (reports().length === 0) {
+      <p class="text-fg/60 text-sm">Todavía no hay reportes.</p>
+    } @else if (filtered().length === 0) {
+      <p class="text-fg/60 text-sm">
+        Ningún reporte coincide con los filtros.
+        <button type="button" (click)="clearFilters()" class="underline">Limpiar filtros</button>
+      </p>
+    } @else {
+      <div class="overflow-x-auto rounded-2xl border border-fg/10 bg-panel">
+        <table class="w-full text-sm">
+          <thead class="bg-fg/5 text-fg/60 text-left">
+            <tr>
+              <th class="px-4 py-3 font-medium">Categoría</th>
+              <th class="px-4 py-3 font-medium">Descripción</th>
+              <th class="px-4 py-3 font-medium">Autor</th>
+              <th class="px-4 py-3 font-medium">Fecha</th>
+              <th class="px-4 py-3 font-medium">Estado</th>
+              <th class="px-4 py-3 font-medium text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (report of filtered(); track report.id) {
+              <tr class="border-t border-fg/10">
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-2">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full" [style.background]="categoryMeta(report.categoria).color"></span>
+                    {{ categoryMeta(report.categoria).label }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 max-w-[320px] truncate" [title]="report.descripcion">{{ report.descripcion }}</td>
+                <td class="px-4 py-3">{{ report.autorNombre }}</td>
+                <td class="px-4 py-3 text-fg/60 whitespace-nowrap">{{ report.createdAt | date: 'short' }}</td>
+                <td class="px-4 py-3">
+                  <select
+                    class="bg-panel border border-fg/20 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:border-[#e8702a]"
+                    [value]="report.estado"
+                    (change)="onEstadoChange(report, $any($event.target).value)"
+                    [attr.aria-label]="'Estado del reporte ' + report.id"
+                  >
+                    @for (status of statuses; track status) {
+                      <option [value]="status">{{ statusLabels[status] }}</option>
+                    }
+                  </select>
+                </td>
+                <td class="px-4 py-3 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    (click)="openEdit(report)"
+                    class="text-fg/80 hover:text-fg border border-fg/20 rounded-full px-3 py-1.5 text-xs transition-colors mr-2"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="askDelete(report)"
+                    class="text-red-600 dark:text-red-300 border border-red-500/40 hover:bg-red-500/10 rounded-full px-3 py-1.5 text-xs transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="text-fg/50 text-xs mt-2">Mostrando {{ filtered().length }} de {{ total() }} reportes</p>
+    }
+  }
+
+  <!-- Modal: editar reporte -->
+  @if (editing(); as report) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" (click)="closeEdit()">
+      <div
+        class="w-full max-w-[440px] bg-panel border border-fg/10 rounded-3xl p-6 shadow-2xl"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Editar reporte"
+        (click)="$event.stopPropagation()"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-playfair italic text-2xl">Editar reporte</h2>
+          <button type="button" (click)="closeEdit()" class="text-fg/50 hover:text-fg text-xl leading-none" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-4">
+          @for (cat of categories; track cat.value) {
+            <button
+              type="button"
+              (click)="editCategory.set(cat.value)"
+              class="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full border transition-colors"
+              [class]="editCategory() === cat.value ? 'text-white border-transparent' : 'text-fg/80 border-fg/15 hover:border-fg/30'"
+              [style.background]="editCategory() === cat.value ? cat.color : 'transparent'"
+            >
+              <span>{{ cat.icon }}</span>{{ cat.label }}
+            </button>
+          }
+        </div>
+
+        <textarea
+          [ngModel]="editDescripcion()"
+          (ngModelChange)="editDescripcion.set($event)"
+          rows="4"
+          maxlength="500"
+          class="w-full bg-transparent border border-fg/15 rounded-xl px-3 py-2.5 text-sm placeholder-fg/40 focus:outline-none focus:border-[#e8702a] resize-none"
+        ></textarea>
+        <p class="text-fg/50 text-xs text-right mt-1">{{ editDescripcion().length }}/500 · reporte #{{ report.id }} de {{ report.autorNombre }}</p>
+
+        @if (editError()) {
+          <p class="text-red-600 dark:text-red-300 text-xs mt-2">{{ editError() }}</p>
+        }
+
+        <div class="flex justify-end gap-2 mt-5">
+          <button
+            type="button"
+            (click)="closeEdit()"
+            class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-5 py-2.5 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="saveEdit()"
+            [disabled]="saving()"
+            class="bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-all"
+          >
+            {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal: confirmar eliminación -->
+  @if (deleting(); as report) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" (click)="cancelDelete()">
+      <div
+        class="w-full max-w-[400px] bg-panel border border-fg/10 rounded-3xl p-6 shadow-2xl"
+        role="alertdialog"
+        aria-modal="true"
+        aria-label="Confirmar eliminación"
+        (click)="$event.stopPropagation()"
+      >
+        <h2 class="font-playfair italic text-2xl mb-2">¿Eliminar reporte?</h2>
+        <p class="text-fg/70 text-sm mb-1">Esta acción no se puede deshacer.</p>
+        <p class="text-fg/60 text-sm truncate" [title]="report.descripcion">“{{ report.descripcion }}”</p>
+
+        <div class="flex justify-end gap-2 mt-5">
+          <button
+            type="button"
+            (click)="cancelDelete()"
+            class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-5 py-2.5 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="confirmDelete()"
+            [disabled]="deleteBusy()"
+            class="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-all"
+          >
+            {{ deleteBusy() ? 'Eliminando…' : 'Sí, eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

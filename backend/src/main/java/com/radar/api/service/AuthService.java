@@ -5,8 +5,10 @@ import com.radar.api.dto.request.RegisterRequest;
 import com.radar.api.dto.response.AuthResponse;
 import com.radar.api.exception.EmailAlreadyExistsException;
 import com.radar.api.exception.InvalidCredentialsException;
+import com.radar.api.model.Administrador;
 import com.radar.api.model.Role;
 import com.radar.api.model.User;
+import com.radar.api.repository.AdministradorRepository;
 import com.radar.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final AdministradorRepository administradorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -47,6 +50,7 @@ public class AuthService {
                 .id(user.getId())
                 .nombre(user.getNombre())
                 .email(user.getEmail())
+                .role(Role.USER.name())
                 .build();
     }
 
@@ -57,6 +61,19 @@ public class AuthService {
             );
         } catch (BadCredentialsException ex) {
             throw new InvalidCredentialsException();
+        }
+
+        var adminMatch = administradorRepository.findByEmail(request.getEmail());
+        if (adminMatch.isPresent()) {
+            Administrador admin = adminMatch.get();
+            String token = jwtService.generateToken(userDetailsService.loadUserByUsername(admin.getEmail()));
+            return AuthResponse.builder()
+                    .token(token)
+                    .id(admin.getId())
+                    .nombre(admin.getNombre())
+                    .email(admin.getEmail())
+                    .role(Role.ADMIN.name())
+                    .build();
         }
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -70,6 +87,7 @@ public class AuthService {
                 .id(user.getId())
                 .nombre(user.getNombre())
                 .email(user.getEmail())
+                .role(user.getRole().name())
                 .build();
     }
 }

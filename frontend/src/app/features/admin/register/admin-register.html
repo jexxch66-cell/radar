@@ -1,37 +1,13 @@
-<section class="relative w-full min-h-screen overflow-hidden bg-bg flex items-center justify-center" style="min-height: 100dvh">
-  <!-- Fondo: misma escena urbana de la landing, oscurecida para dar contraste al formulario -->
-  <div
-    class="absolute inset-0 bg-center bg-cover bg-no-repeat"
-    style="background-image: url(/images/street-base.svg)"
-  ></div>
-  <div class="absolute inset-0 bg-bg/70"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-bg via-bg/40 to-bg/10"></div>
-
-  <!-- Navegación mínima -->
-  <nav class="fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 sm:p-5">
-    <a routerLink="/bienvenida" class="flex items-center gap-2">
-      <svg width="24" height="24" viewBox="0 0 256 256" fill="var(--theme-fg)" xmlns="http://www.w3.org/2000/svg">
-        <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
-      </svg>
-      <span class="text-fg text-xl font-playfair italic">RADAR</span>
-    </a>
-    <div class="flex items-center gap-4">
+<section class="min-h-screen bg-bg text-fg px-4 py-8 sm:px-8 flex items-start justify-center" style="min-height: 100dvh">
+  <div class="w-full max-w-[420px] mt-10">
+    <div class="flex items-center justify-between">
+      <a routerLink="/admin" class="text-fg/60 text-sm hover:text-fg transition-colors">← Volver al panel</a>
       <app-theme-toggle />
-      <a routerLink="/bienvenida" class="text-fg/70 text-sm font-medium hover:text-fg transition-colors">
-      ← Volver
-    </a>
     </div>
-  </nav>
 
-  <!-- Tarjeta de registro -->
-  <div class="relative z-10 w-full max-w-[400px] mx-5 my-24">
-    <div class="bg-panel/70 backdrop-blur-xl border border-fg/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
-      <h1 class="text-fg font-playfair italic text-3xl sm:text-4xl" style="letter-spacing: -0.02em">
-        Crea tu cuenta
-      </h1>
-      <p class="text-fg/60 text-sm mt-2 mb-8">
-        Únete y empieza a reportar lo que pasa en tu ciudad.
-      </p>
+    <div class="bg-panel border border-fg/10 rounded-3xl p-8 sm:p-10 mt-6">
+      <h1 class="font-playfair italic text-3xl" style="letter-spacing: -0.02em">Nuevo administrador</h1>
+      <p class="text-fg/60 text-sm mt-2 mb-8">Crea acceso de administrador para otra persona del equipo.</p>
 
       <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="flex flex-col gap-1.5">
@@ -42,7 +18,7 @@
             formControlName="nombre"
             autocomplete="name"
             class="bg-fg/10 border border-fg/20 rounded-xl px-4 py-3 text-fg placeholder-fg/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-fg/15 transition-colors"
-            placeholder="Tu nombre"
+            placeholder="Nombre completo"
           />
           @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
             <span class="text-red-600 dark:text-red-300 text-xs">El nombre es obligatorio.</span>
@@ -57,7 +33,7 @@
             formControlName="email"
             autocomplete="email"
             class="bg-fg/10 border border-fg/20 rounded-xl px-4 py-3 text-fg placeholder-fg/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-fg/15 transition-colors"
-            placeholder="tucorreo@ejemplo.com"
+            placeholder="admin@ejemplo.com"
           />
           @if (form.controls.email.touched && form.controls.email.invalid) {
             <span class="text-red-600 dark:text-red-300 text-xs">
@@ -97,7 +73,7 @@
           />
           @if (form.controls.confirmarPassword.touched && form.controls.confirmarPassword.invalid) {
             <span class="text-red-600 dark:text-red-300 text-xs">
-              @if (form.controls.confirmarPassword.hasError('required')) { Confirma tu contraseña. }
+              @if (form.controls.confirmarPassword.hasError('required')) { Confirma la contraseña. }
               @if (form.controls.confirmarPassword.hasError('mismatch')) { Las contraseñas no coinciden. }
             </span>
           }
@@ -109,19 +85,20 @@
           </div>
         }
 
+        @if (successMessage()) {
+          <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-sm rounded-lg p-3">
+            {{ successMessage() }}
+          </div>
+        }
+
         <button
           type="submit"
           [disabled]="submitting()"
           class="mt-1 bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-7 py-3 rounded-full transition-all hover:scale-[1.02] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
         >
-          {{ submitting() ? 'Creando cuenta…' : 'Registrarme' }}
+          {{ submitting() ? 'Creando…' : 'Crear administrador' }}
         </button>
       </form>
-
-      <p class="text-fg/60 text-sm text-center mt-6">
-        ¿Ya tienes cuenta?
-        <a routerLink="/login" class="text-fg font-medium hover:text-[#e8702a] transition-colors">Inicia sesión</a>
-      </p>
     </div>
   </div>
 </section>

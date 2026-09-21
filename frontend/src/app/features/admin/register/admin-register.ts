@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AuthService } from '../../../core/services/auth.service';
+import { AdminService } from '../../../core/services/admin.service';
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 import { ApiErrorResponse } from '../../../core/models/auth.models';
 
@@ -18,14 +18,14 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 }
 
 @Component({
-  selector: 'app-register',
+  selector: 'app-admin-register',
   imports: [ReactiveFormsModule, RouterLink, ThemeToggle],
-  templateUrl: './register.html',
-  styleUrl: './register.css',
+  templateUrl: './admin-register.html',
+  styleUrl: './admin-register.css',
 })
-export class Register {
+export class AdminRegister {
   private readonly fb = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
+  private readonly adminService = inject(AdminService);
   private readonly router = inject(Router);
 
   readonly form = this.fb.nonNullable.group(
@@ -40,6 +40,7 @@ export class Register {
 
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly successMessage = signal<string | null>(null);
 
   onSubmit(): void {
     if (this.form.invalid || this.submitting()) {
@@ -49,17 +50,19 @@ export class Register {
 
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.successMessage.set(null);
 
     const { nombre, email, password } = this.form.getRawValue();
-    this.authService.register({ nombre, email, password }).subscribe({
-      next: () => {
+    this.adminService.registrarAdministrador({ nombre, email, password }).subscribe({
+      next: (admin) => {
         this.submitting.set(false);
-        this.router.navigateByUrl('/mapa');
+        this.successMessage.set(`Administrador "${admin.nombre}" creado correctamente.`);
+        this.form.reset();
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
-        this.errorMessage.set(body?.message ?? 'No se pudo completar el registro. Intenta nuevamente.');
+        this.errorMessage.set(body?.message ?? 'No se pudo crear el administrador. Intenta nuevamente.');
       },
     });
   }

@@ -7,7 +7,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, effect, inp
   template: `
     <canvas #maskCanvas class="absolute inset-0 pointer-events-none" style="display: none"></canvas>
     <div
-      class="absolute inset-0 bg-center bg-cover bg-no-repeat z-30 pointer-events-none"
+      class="landing-scene absolute inset-0 bg-center bg-cover bg-no-repeat z-30 pointer-events-none"
       [style.background-image]="'url(' + image() + ')'"
       [style.mask-image]="maskDataUrl() ? 'url(' + maskDataUrl() + ')' : 'none'"
       [style.-webkit-mask-image]="maskDataUrl() ? 'url(' + maskDataUrl() + ')' : 'none'"

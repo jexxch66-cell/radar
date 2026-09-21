@@ -9,6 +9,8 @@ export interface LoginRequest {
   password: string;
 }
 
+export type UserRole = 'USER' | 'ADMIN';
+
 // Espejo del AuthResponse del backend (nunca se expone la entidad User completa)
 export interface AuthResponse {
   token: string;
@@ -16,12 +18,14 @@ export interface AuthResponse {
   id: number;
   nombre: string;
   email: string;
+  role: UserRole;
 }
 
 export interface AuthUser {
   id: number;
   nombre: string;
   email: string;
+  role: UserRole;
 }
 
 // Forma del error JSON que devuelve el GlobalExceptionHandler del backend

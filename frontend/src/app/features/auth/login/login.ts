@@ -3,11 +3,12 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 import { ApiErrorResponse } from '../../../core/models/auth.models';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggle],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -36,7 +37,7 @@ export class Login {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl('/mapa');
+        this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);

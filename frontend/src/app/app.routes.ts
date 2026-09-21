@@ -1,11 +1,12 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'mapa',
+    redirectTo: 'bienvenida',
   },
   {
     path: 'bienvenida',
@@ -23,6 +24,18 @@ export const routes: Routes = [
     path: 'mapa',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
     canActivate: [authGuard],
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/dashboard/admin-dashboard').then((m) => m.AdminDashboard),
+    canActivate: [adminGuard],
+  },
+  {
+    path: 'admin/nuevo',
+    loadComponent: () =>
+      import('./features/admin/register/admin-register').then((m) => m.AdminRegister),
+    canActivate: [adminGuard],
   },
   {
     path: '**',

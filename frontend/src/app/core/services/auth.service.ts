@@ -47,8 +47,17 @@ export class AuthService {
     return expiration === null || expiration > Date.now();
   }
 
+  isAdmin(): boolean {
+    return this.currentUser()?.role === 'ADMIN';
+  }
+
   private storeSession(response: AuthResponse): void {
-    const user: AuthUser = { id: response.id, nombre: response.nombre, email: response.email };
+    const user: AuthUser = {
+      id: response.id,
+      nombre: response.nombre,
+      email: response.email,
+      role: response.role,
+    };
     localStorage.setItem(TOKEN_KEY, response.token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
     this.currentUser.set(user);

@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, effect, inj
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import * as L from 'leaflet';
+import { ThemeToggle } from '../../shared/theme-toggle/theme-toggle';
 import { AuthService } from '../../core/services/auth.service';
 import { ReportService } from '../../core/services/report.service';
 import {
@@ -18,7 +19,7 @@ const DEFAULT_ZOOM = 13;
 
 @Component({
   selector: 'app-home',
-  imports: [FormsModule],
+  imports: [FormsModule, ThemeToggle],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

@@ -29,3 +29,6 @@ jwt:
 app:
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}
+  admin:
+    default-email: ${ADMIN_DEFAULT_EMAIL:admin@radar.com}
+    default-password: ${ADMIN_DEFAULT_PASSWORD:Admin123!}

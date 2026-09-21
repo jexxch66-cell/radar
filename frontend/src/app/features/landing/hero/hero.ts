@@ -1,12 +1,13 @@
 import { Component, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RevealLayer } from './reveal-layer';
+import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 
 // Landing pública de RADAR: hero con efecto spotlight que revela, al mover el cursor,
 // un segundo estado de la misma zona urbana con los reportes marcados sobre el mapa.
 @Component({
   selector: 'app-hero',
-  imports: [RouterLink, RevealLayer],
+  imports: [RouterLink, RevealLayer, ThemeToggle],
   templateUrl: './hero.html',
   styleUrl: './hero.css',
 })

@@ -8,6 +8,11 @@ export interface CreateReportRequest {
   longitud: number;
 }
 
+export interface UpdateReportRequest {
+  categoria: ReportCategory;
+  descripcion: string;
+}
+
 // Espejo del ReportResponse del backend
 export interface Report {
   id: number;
@@ -28,6 +33,13 @@ export const REPORT_CATEGORIES: { value: ReportCategory; label: string; color: s
   { value: 'BASURA', label: 'Basura', color: '#16a34a', icon: '🗑️' },
   { value: 'OTRO', label: 'Otro', color: '#6b7280', icon: '📍' },
 ];
+
+// Colores de estado, fijos en ambos temas; siempre van acompañados de texto (nunca solo color)
+export const REPORT_STATUS_COLORS: Record<ReportStatus, string> = {
+  PENDIENTE: '#fab219',
+  EN_PROGRESO: '#2a78d6',
+  RESUELTO: '#0ca30c',
+};
 
 export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
   PENDIENTE: 'Pendiente',
