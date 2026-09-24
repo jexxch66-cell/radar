@@ -21,6 +21,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
   },
   {
+    path: 'politica-privacidad',
+    loadComponent: () => import('./features/legal/privacy/privacy').then((m) => m.Privacy),
+  },
+  {
+    path: 'politica-cookies',
+    loadComponent: () => import('./features/legal/cookies/cookies').then((m) => m.CookiesPolicy),
+  },
+  {
     path: 'mapa',
     loadComponent: () => import('./features/home/home').then((m) => m.Home),
     canActivate: [authGuard],

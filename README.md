@@ -40,6 +40,25 @@ mvn spring-boot:run
 Las tablas se crean solas. También se crea un admin por defecto:
 `admin@radar.com` / `Admin123!`
 
+### Google, CAPTCHA y consentimientos
+
+El login con Google usa Google Identity Services y el backend valida el `id_token` antes de emitir el JWT de RADAR. Para activarlo, registra una aplicación web en Google Cloud Console y configura su Client ID en los archivos de entorno del frontend:
+
+```ts
+googleClientId: 'TU_CLIENT_ID.apps.googleusercontent.com'
+recaptchaSiteKey: 'TU_SITE_KEY'
+```
+
+En el backend configura las mismas credenciales mediante variables de entorno:
+
+```text
+GOOGLE_CLIENT_ID=TU_CLIENT_ID.apps.googleusercontent.com
+RECAPTCHA_ENABLED=true
+RECAPTCHA_SECRET_KEY=TU_SECRET_KEY
+```
+
+Durante desarrollo local `RECAPTCHA_ENABLED` permanece desactivado. La casilla de tratamiento de datos es obligatoria al crear una cuenta y el banner de cookies guarda la elección en `localStorage`.
+
 ### 3. Frontend (http://localhost:4200)
 
 ```bash

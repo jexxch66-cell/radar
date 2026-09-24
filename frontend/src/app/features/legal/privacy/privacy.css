@@ -1,0 +1,72 @@
+.legal-page {
+  min-height: 100vh;
+  background: var(--theme-bg);
+  color: var(--theme-fg);
+}
+
+.legal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem clamp(1.25rem, 5vw, 5rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--theme-fg) 12%, transparent);
+}
+
+.brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.legal-content {
+  width: min(44rem, calc(100% - 2.5rem));
+  margin: 0 auto;
+  padding: 4rem 0 5rem;
+}
+
+.eyebrow {
+  color: #e8702a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+h1, h2 {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+}
+
+h1 {
+  margin: 0.5rem 0;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  line-height: 1.05;
+}
+
+h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+p {
+  color: color-mix(in srgb, var(--theme-fg) 72%, transparent);
+  line-height: 1.7;
+}
+
+.updated {
+  font-size: 0.8rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 2rem;
+  color: #e8702a;
+  font-weight: 700;
+  text-decoration: underline;
+}

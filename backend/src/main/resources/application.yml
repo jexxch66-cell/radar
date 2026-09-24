@@ -3,9 +3,9 @@ spring:
     name: radar-api
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/radar_db}
-    username: ${DB_USERNAME:radar_user}
-    password: ${DB_PASSWORD:changeme_local_dev}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:radar_db}?sslmode=${DB_SSLMODE:prefer}}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:radar_user}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:changeme_local_dev}}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -25,6 +25,13 @@ server:
 jwt:
   secret: ${JWT_SECRET:cambia-esta-clave-secreta-por-una-real-de-al-menos-32-caracteres}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
+google:
+  client-id: ${GOOGLE_CLIENT_ID:}
+
+recaptcha:
+  enabled: ${RECAPTCHA_ENABLED:false}
+  secret-key: ${RECAPTCHA_SECRET_KEY:}
 
 app:
   cors:

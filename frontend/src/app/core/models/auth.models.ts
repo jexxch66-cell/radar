@@ -2,11 +2,19 @@ export interface RegisterRequest {
   nombre: string;
   email: string;
   password: string;
+  acceptDataTreatment: boolean;
+  captchaToken?: string | null;
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface GoogleAuthRequest {
+  idToken: string;
+  acceptDataTreatment: boolean;
+  captchaToken?: string | null;
 }
 
 export type UserRole = 'USER' | 'ADMIN';

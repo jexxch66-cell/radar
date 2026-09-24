@@ -9,6 +9,6 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 COPY start.sh .
-RUN chmod +x start.sh
+RUN sed -i 's/\r$//' start.sh && chmod +x start.sh
 EXPOSE 8080
 ENTRYPOINT ["./start.sh"]

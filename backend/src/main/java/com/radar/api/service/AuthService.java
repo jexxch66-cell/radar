@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -28,8 +31,11 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsServiceImpl userDetailsService;
+    private final GoogleTokenService googleTokenService;
+    private final RecaptchaService recaptchaService;
 
     public AuthResponse register(RegisterRequest request) {
+        recaptchaService.verify(request.getCaptchaToken());
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
@@ -38,6 +44,7 @@ public class AuthService {
                 .nombre(request.getNombre())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .privacyConsentAt(Instant.now())
                 .role(Role.USER)
                 .build();
         userRepository.save(user);
@@ -84,6 +91,35 @@ public class AuthService {
 
         return AuthResponse.builder()
                 .token(token)
+                .id(user.getId())
+                .nombre(user.getNombre())
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
+    }
+
+    public AuthResponse loginWithGoogle(String idToken, boolean acceptDataTreatment, String captchaToken) {
+        recaptchaService.verify(captchaToken);
+        GoogleTokenService.GoogleProfile profile = googleTokenService.verify(idToken);
+
+        User user = userRepository.findByEmail(profile.email()).orElseGet(() -> {
+            if (!acceptDataTreatment) {
+                throw new IllegalArgumentException("Debes aceptar el tratamiento de datos personales");
+            }
+            User created = User.builder()
+                    .nombre(profile.name())
+                    .email(profile.email())
+                    .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                    .googleSubject(profile.subject())
+                    .privacyConsentAt(Instant.now())
+                    .role(Role.USER)
+                    .build();
+            return userRepository.save(created);
+        });
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        return AuthResponse.builder()
+                .token(jwtService.generateToken(userDetails))
                 .id(user.getId())
                 .nombre(user.getNombre())
                 .email(user.getEmail())

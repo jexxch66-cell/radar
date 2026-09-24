@@ -1,6 +1,7 @@
 package com.radar.api.controller;
 
 import com.radar.api.dto.request.LoginRequest;
+import com.radar.api.dto.request.GoogleAuthRequest;
 import com.radar.api.dto.request.RegisterRequest;
 import com.radar.api.dto.response.AuthResponse;
 import com.radar.api.service.AuthService;
@@ -29,6 +30,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> loginWithGoogle(@Valid @RequestBody GoogleAuthRequest request) {
+        AuthResponse response = authService.loginWithGoogle(
+                request.getIdToken(), request.isAcceptDataTreatment(), request.getCaptchaToken());
         return ResponseEntity.ok(response);
     }
 }

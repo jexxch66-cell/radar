@@ -34,6 +34,8 @@
       </p>
 
       <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <div #googleButton class="flex min-h-10 justify-center"></div>
+        <div class="flex items-center gap-3 text-xs text-fg/40"><span class="h-px flex-1 bg-fg/15"></span>o continúa con tu email<span class="h-px flex-1 bg-fg/15"></span></div>
         <div class="flex flex-col gap-1.5">
           <label class="text-fg/80 text-sm font-medium" for="email">Email</label>
           <input

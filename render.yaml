@@ -16,7 +16,29 @@ services:
         fromDatabase:
           name: radar-db
           property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: radar-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: radar-db
+          property: port
+      - key: DB_USERNAME
+        fromDatabase:
+          name: radar-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: radar-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: radar-db
+          property: database
+      - key: DB_SSLMODE
+        value: require
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ALLOWED_ORIGIN
-        value: https://frontend-two-beta-35.vercel.app
+        value: https://frontend-two-beta-35.vercel.app,http://localhost:4200

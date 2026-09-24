@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, AuthUser, LoginRequest, RegisterRequest } from '../models/auth.models';
+import { AuthResponse, AuthUser, GoogleAuthRequest, LoginRequest, RegisterRequest } from '../models/auth.models';
 
 const TOKEN_KEY = 'radar_token';
 const USER_KEY = 'radar_user';
@@ -17,14 +17,18 @@ export class AuthService {
   constructor(private readonly http: HttpClient) {}
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.apiUrl}/register`, request)
-      .pipe(tap((response) => this.storeSession(response)));
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request);
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http
       .post<AuthResponse>(`${this.apiUrl}/login`, request)
+      .pipe(tap((response) => this.storeSession(response)));
+  }
+
+  loginWithGoogle(request: GoogleAuthRequest): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/google`, request)
       .pipe(tap((response) => this.storeSession(response)));
   }
 

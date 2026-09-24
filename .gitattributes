@@ -1,0 +1,10 @@
+# Auto-detect text files and normalize line endings
+* text=auto
+
+# Ensure shell scripts always have LF line endings in the repository and when checked out
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Windows batch files always use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf

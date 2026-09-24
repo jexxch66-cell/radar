@@ -1,0 +1,15 @@
+@if (visible()) {
+  <aside class="cookie-banner" role="dialog" aria-labelledby="cookie-title" aria-describedby="cookie-description">
+    <div>
+      <h2 id="cookie-title">Usamos cookies necesarias</h2>
+      <p id="cookie-description">
+        Utilizamos cookies esenciales para mantener tu sesión y recordar tus preferencias. Puedes aceptar todas o continuar solo con las necesarias.
+        <a href="/politica-cookies" target="_blank" rel="noreferrer">Conocer más</a>
+      </p>
+    </div>
+    <div class="cookie-actions">
+      <button type="button" class="cookie-secondary" (click)="reject()">Solo necesarias</button>
+      <button type="button" class="cookie-primary" (click)="accept()">Aceptar todas</button>
+    </div>
+  </aside>
+}

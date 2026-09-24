@@ -40,6 +40,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "google_subject", unique = true)
+    private String googleSubject;
+
+    @Column(name = "privacy_consent_at")
+    private Instant privacyConsentAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
