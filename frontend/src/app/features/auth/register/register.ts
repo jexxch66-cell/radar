@@ -101,7 +101,7 @@ export class Register implements AfterViewInit {
     }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl('/mapa');
+        this.registrationSuccess.set(true);
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
