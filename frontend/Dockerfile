@@ -7,4 +7,4 @@ COPY . .
 EXPOSE 4200
 RUN chown -R node /usr/src/app
 USER node
-CMD ["npm", "start"]
+CMD ["npm", "start", "--", "--host", "0.0.0.0"]

@@ -1,0 +1,30 @@
+@if (sessionTimeout.isLocked()) {
+  <div class="session-lock-backdrop" role="presentation">
+    <section class="session-lock-dialog" role="dialog" aria-modal="true" aria-labelledby="session-lock-title">
+      <div class="session-lock-mark" aria-hidden="true">RADAR</div>
+      <h2 id="session-lock-title">Sesión bloqueada</h2>
+      <p>Detectamos inactividad. Ingresa tu contraseña para continuar.</p>
+      <p class="session-lock-user">{{ authService.currentUser()?.email }}</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <label for="session-password">Contraseña</label>
+        <input
+          id="session-password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          autofocus
+        />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <span class="session-lock-error">La contraseña es obligatoria.</span>
+        }
+        @if (errorMessage()) {
+          <span class="session-lock-error">{{ errorMessage() }}</span>
+        }
+        <button type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Verificando…' : 'Desbloquear sesión' }}
+        </button>
+      </form>
+    </section>
+  </div>
+}

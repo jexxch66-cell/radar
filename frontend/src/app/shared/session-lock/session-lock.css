@@ -1,0 +1,93 @@
+.session-lock-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgb(10 16 20 / 78%);
+  backdrop-filter: blur(8px);
+}
+
+.session-lock-dialog {
+  width: min(100%, 26rem);
+  padding: 2rem;
+  color: var(--theme-fg, #f7f4ed);
+  background: var(--theme-panel, #182329);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 1.25rem;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 35%);
+}
+
+.session-lock-mark {
+  color: #e8702a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.session-lock-dialog h2 {
+  margin: 0.75rem 0 0;
+  font-size: 1.65rem;
+}
+
+.session-lock-dialog p {
+  margin: 0.55rem 0 0;
+  color: color-mix(in srgb, var(--theme-fg, #f7f4ed) 68%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.session-lock-user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-lock-dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+}
+
+.session-lock-dialog label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.session-lock-dialog input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 0.9rem;
+  color: var(--theme-fg, #f7f4ed);
+  background: rgb(255 255 255 / 8%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 0.7rem;
+  outline: none;
+}
+
+.session-lock-dialog input:focus {
+  border-color: #e8702a;
+}
+
+.session-lock-dialog button {
+  margin-top: 0.65rem;
+  padding: 0.8rem 1rem;
+  color: #fff;
+  font-weight: 700;
+  background: #e8702a;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.session-lock-dialog button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.session-lock-error {
+  color: #fca5a5;
+  font-size: 0.78rem;
+}
