@@ -5,7 +5,7 @@ Angular (frontend) + Spring Boot (backend) + PostgreSQL.
 ## Requisitos
 
 - Git
-- Java 17 o superior (`java -version`)
+- Java 25 (`java -version`)
 - Maven 3.9+ (`mvn -v`)
 - Node 20+ y npm (`node -v`)
 - Docker Desktop (para la base de datos) **o** PostgreSQL instalado a mano
@@ -74,7 +74,7 @@ npm start
 | `Connection to localhost:5432 refused` | La base no está corriendo. Ejecutar `docker compose up -d` (y abrir Docker Desktop). |
 | `password authentication failed` | El usuario/contraseña de Postgres no coincide con los de arriba. |
 | `Port 8080 already in use` | Cerrar el proceso que usa el puerto 8080, o `set PORT=8081` antes de correr el backend. |
-| `release version 17 not supported` | Instalar Java 17 o superior. |
+| `release version 25 not supported` | Instalar Java 25. |
 
 ## Flujo de trabajo en equipo
 
