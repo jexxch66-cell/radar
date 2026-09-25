@@ -27,7 +27,7 @@ jwt:
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 google:
-  client-id: ${GOOGLE_CLIENT_ID:}
+  client-id: ${GOOGLE_CLIENT_ID:485878779082-c5ogc8gk2aisvbs7q5guf9immef5pi7v.apps.googleusercontent.com}
 
 recaptcha:
   enabled: ${RECAPTCHA_ENABLED:false}
