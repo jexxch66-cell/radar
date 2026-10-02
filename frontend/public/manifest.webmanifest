@@ -1,0 +1,28 @@
+{
+  "id": "/",
+  "name": "RADAR | Reportes urbanos",
+  "short_name": "RADAR",
+  "description": "Reporta y consulta incidencias urbanas en tu ciudad.",
+  "lang": "es",
+  "start_url": "/bienvenida",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#111827",
+  "theme_color": "#e8702a",
+  "icons": [
+    {
+      "src": "/icons/radar-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/radar-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

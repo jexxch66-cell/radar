@@ -33,6 +33,7 @@ export class AdminDashboard implements OnInit {
   protected readonly reports = signal<Report[]>([]);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly exporting = signal<'pdf' | 'excel' | null>(null);
 
   // Filtros de la tabla
   protected readonly filterStatus = signal<ReportStatus | ''>('');
@@ -123,6 +124,105 @@ export class AdminDashboard implements OnInit {
     this.search.set('');
   }
 
+  protected async exportPdf(): Promise<void> {
+    const reports = this.filtered();
+    if (reports.length === 0 || this.exporting()) {
+      return;
+    }
+
+    this.exporting.set('pdf');
+    try {
+      const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ]);
+      const document = new jsPDF({ orientation: 'landscape' });
+      const generatedAt = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
+
+      document.setFontSize(16);
+      document.text('RADAR · Reportes urbanos', 14, 16);
+      document.setFontSize(9);
+      document.text(`Generado: ${generatedAt} · Reportes: ${reports.length}`, 14, 23);
+      document.text(`Filtros: ${this.activeFiltersLabel()}`, 14, 29);
+
+      autoTable(document, {
+        startY: 35,
+        head: [['ID', 'Categoría', 'Descripción', 'Autor', 'Fecha', 'Estado', 'Latitud', 'Longitud']],
+        body: reports.map((report) => [
+          report.id,
+          this.categoryMeta(report.categoria).label,
+          report.descripcion,
+          report.autorNombre,
+          new Intl.DateTimeFormat('es-CO', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(report.createdAt)),
+          this.statusLabels[report.estado],
+          report.latitud,
+          report.longitud,
+        ]),
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [232, 112, 42] },
+        margin: { left: 14, right: 14 },
+      });
+
+      document.save(`radar-reportes-${this.exportDateStamp()}.pdf`);
+    } catch {
+      this.errorMessage.set('No se pudo generar el PDF. Intenta nuevamente.');
+    } finally {
+      this.exporting.set(null);
+    }
+  }
+
+  protected async exportExcel(): Promise<void> {
+    const reports = this.filtered();
+    if (reports.length === 0 || this.exporting()) {
+      return;
+    }
+
+    this.exporting.set('excel');
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'RADAR';
+      workbook.created = new Date();
+
+      const worksheet = workbook.addWorksheet('Reportes');
+      worksheet.columns = [
+        { header: 'ID', key: 'id', width: 12 },
+        { header: 'Categoría', key: 'categoria', width: 20 },
+        { header: 'Descripción', key: 'descripcion', width: 42 },
+        { header: 'Autor', key: 'autor', width: 28 },
+        { header: 'Fecha', key: 'fecha', width: 22 },
+        { header: 'Estado', key: 'estado', width: 18 },
+        { header: 'Latitud', key: 'latitud', width: 14 },
+        { header: 'Longitud', key: 'longitud', width: 14 },
+      ];
+      worksheet.addRows(reports.map((report) => ({
+        id: report.id,
+        categoria: this.categoryMeta(report.categoria).label,
+        descripcion: report.descripcion,
+        autor: report.autorNombre,
+        fecha: new Date(report.createdAt),
+        estado: this.statusLabels[report.estado],
+        latitud: report.latitud,
+        longitud: report.longitud,
+      })));
+      worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+      worksheet.autoFilter = 'A1:H1';
+      worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8702A' } };
+      worksheet.getColumn('fecha').numFmt = 'dd/mm/yyyy hh:mm';
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      this.downloadBlob(
+        new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        `radar-reportes-${this.exportDateStamp()}.xlsx`,
+      );
+    } catch {
+      this.errorMessage.set('No se pudo generar el archivo Excel. Intenta nuevamente.');
+    } finally {
+      this.exporting.set(null);
+    }
+  }
+
   // --- Update: estado (inline) ---
   protected onEstadoChange(report: Report, estado: ReportStatus): void {
     if (estado === report.estado) {
@@ -207,5 +307,29 @@ export class AdminDashboard implements OnInit {
 
   private replaceReport(updated: Report): void {
     this.reports.update((current) => current.map((r) => (r.id === updated.id ? updated : r)));
+  }
+
+  private activeFiltersLabel(): string {
+    const category = this.filterCategory();
+    const status = this.filterStatus();
+    const filters = [
+      category ? `Categoría: ${this.categoryMeta(category).label}` : '',
+      status ? `Estado: ${this.statusLabels[status]}` : '',
+      this.search().trim() ? `Búsqueda: ${this.search().trim()}` : '',
+    ].filter(Boolean);
+    return filters.length > 0 ? filters.join(' · ') : 'Ninguno';
+  }
+
+  private exportDateStamp(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private downloadBlob(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

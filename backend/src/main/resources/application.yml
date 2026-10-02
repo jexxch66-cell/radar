@@ -3,7 +3,7 @@ spring:
     name: radar-api
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:radar_db}?sslmode=${DB_SSLMODE:prefer}}}
+    url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:radar_db}?sslmode=${DB_SSLMODE:prefer}}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:radar_user}}
     password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:changeme_local_dev}}
     driver-class-name: org.postgresql.Driver

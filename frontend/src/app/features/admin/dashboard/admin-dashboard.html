@@ -120,6 +120,24 @@
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
       <h2 class="text-lg font-playfair italic">Gestión de reportes</h2>
       <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          (click)="exportPdf()"
+          [disabled]="filtered().length === 0 || exporting() !== null"
+          class="rounded-full border border-fg/20 px-4 py-2 text-sm font-medium text-fg transition-colors hover:bg-fg/5 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Descargar los reportes filtrados en PDF"
+        >
+          {{ exporting() === 'pdf' ? 'Generando PDF…' : 'Exportar PDF' }}
+        </button>
+        <button
+          type="button"
+          (click)="exportExcel()"
+          [disabled]="filtered().length === 0 || exporting() !== null"
+          class="rounded-full bg-[#e8702a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#d2611f] disabled:cursor-not-allowed disabled:opacity-50"
+          title="Descargar los reportes filtrados en Excel"
+        >
+          {{ exporting() === 'excel' ? 'Generando Excel…' : 'Exportar Excel' }}
+        </button>
         <input
           type="search"
           [ngModel]="search()"

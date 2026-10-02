@@ -20,7 +20,7 @@ Abrir 3 terminales en la raíz del proyecto.
 docker compose up -d
 ```
 
-Crea PostgreSQL en `localhost:5432` con base `radar_db`, usuario `radar_user`, contraseña `changeme_local_dev`
+Crea PostgreSQL en `localhost:5433` con base `radar_db`, usuario `radar_user`, contraseña `changeme_local_dev`
 (son los valores por defecto del backend, no hay que configurar nada).
 
 Sin Docker: instalar PostgreSQL y crear la base y el usuario:
@@ -29,6 +29,8 @@ Sin Docker: instalar PostgreSQL y crear la base y el usuario:
 CREATE USER radar_user WITH PASSWORD 'changeme_local_dev';
 CREATE DATABASE radar_db OWNER radar_user;
 ```
+
+Al usar PostgreSQL instalado localmente en el puerto predeterminado, inicia el backend con `DB_PORT=5432`.
 
 ### 2. Backend (http://localhost:8080)
 
@@ -66,6 +68,10 @@ cd frontend
 npm install
 npm start
 ```
+
+### Instalar RADAR como aplicación de escritorio
+
+La versión de producción incluye manifest y service worker. Publica el frontend por HTTPS (Render/Vercel) y abre el sitio en Chrome o Edge; usa el botón **Instalar RADAR** o la opción **Instalar aplicación** del menú del navegador. En desarrollo, `ng serve` funciona en `localhost`, pero el service worker solo se activa en el build de producción.
 
 ## Problemas comunes
 
