@@ -46,3 +46,19 @@ export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
   EN_PROGRESO: 'En progreso',
   RESUELTO: 'Resuelto',
 };
+
+// Detalle específico por categoría: chips de un toque para no depender solo de texto libre
+export const REPORT_DETAILS: Record<ReportCategory, string[]> = {
+  BACHE: ['Pequeño', 'Profundo', 'Cráter grande', 'Con agua'],
+  ZONA_OSCURA: ['Poste apagado', 'Sin alumbrado', 'Poca luz', 'Zona insegura'],
+  ESCOMBROS: ['Escombros en la vía', 'Material de obra', 'Muebles o colchones', 'Ramas o árboles'],
+  BASURA: ['Bolsas en la calle', 'Acumulación', 'Caneca desbordada', 'Punto crítico'],
+  OTRO: [],
+};
+
+export const REPORT_SEVERITIES: { value: string; label: string; color: string }[] = [
+  { value: 'Leve', label: 'Leve', color: '#16a34a' },
+  { value: 'Moderado', label: 'Moderado', color: '#fab219' },
+  { value: 'Grave', label: 'Grave', color: '#e8702a' },
+  { value: 'Bloquea el paso', label: 'Bloquea el paso', color: '#dc2626' },
+];

@@ -37,34 +37,123 @@
     </div>
   }
 
-  <!-- Botón flotante: activar/desactivar modo reportar -->
-  <button
-    type="button"
-    (click)="toggleAddMode()"
-    class="fixed z-[500] bottom-8 left-1/2 -translate-x-1/2 text-sm font-semibold px-7 py-3 rounded-full shadow-xl transition-all hover:scale-[1.03] active:scale-95"
-    [class]="addMode() ? 'bg-fg text-bg' : 'bg-[#e8702a] text-white'"
-  >
-    {{ addMode() ? 'Toca el mapa para ubicar tu reporte ✕' : '+ Reportar algo' }}
-  </button>
+  <!-- Aviso de ubicación -->
+  @if (locStatus() === 'pending') {
+    <div class="fixed z-[500] top-24 left-1/2 -translate-x-1/2 bg-panel/90 backdrop-blur-md text-fg/80 text-sm px-4 py-2 rounded-full shadow-lg">
+      Buscando tu ubicación… acepta el permiso del navegador
+    </div>
+  }
+  @if (locStatus() === 'denied' || locStatus() === 'unavailable') {
+    <div class="fixed z-[500] top-24 left-1/2 -translate-x-1/2 max-w-[92vw] bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-200 text-sm px-4 py-2 rounded-2xl shadow-lg flex items-center gap-3">
+      <span>{{ locStatus() === 'denied' ? 'Ubicación bloqueada: actívala en el candado de la barra de direcciones.' : 'No se pudo obtener tu ubicación.' }}</span>
+      <button type="button" (click)="startLocation()" class="font-semibold underline whitespace-nowrap">Reintentar</button>
+    </div>
+  }
 
-  <!-- Panel: crear reporte -->
-  @if (pendingLatLng()) {
-    <div class="fixed z-[600] inset-x-0 bottom-0 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[380px] bg-panel rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-fg font-playfair italic text-2xl">Nuevo reporte</h2>
-        <button type="button" (click)="cancelForm()" class="text-fg/50 hover:text-fg text-xl leading-none">✕</button>
+  <!-- Recentrar en mi posición (estilo Waze) -->
+  @if (userPos() && !following()) {
+    <button
+      type="button"
+      (click)="recenter()"
+      class="fixed z-[500] bottom-28 right-4 sm:bottom-8 sm:right-6 bg-panel text-[#2a78d6] font-semibold text-sm px-4 py-3 rounded-full shadow-xl flex items-center gap-2 hover:scale-[1.03] transition-transform"
+      aria-label="Volver a mi ubicación"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 21l8-4 8 4z" /></svg>
+      Mi ubicación
+    </button>
+  }
+
+  <!-- Botón flotante: iniciar reporte en mi posición -->
+  @if (!addMode()) {
+    <button
+      type="button"
+      (click)="toggleAddMode()"
+      class="fixed z-[500] bottom-8 left-1/2 -translate-x-1/2 bg-[#e8702a] text-white text-base font-semibold px-8 py-4 rounded-full shadow-xl transition-all hover:scale-[1.03] active:scale-95 flex items-center gap-2"
+    >
+      <span class="text-xl leading-none">⚠️</span> Reportar aquí
+    </button>
+  }
+
+  <!-- Modo ubicar a mano: instrucción -->
+  @if (manualPlacing()) {
+    <div class="fixed z-[700] top-24 left-1/2 -translate-x-1/2 bg-fg text-bg text-sm font-medium px-5 py-2.5 rounded-full shadow-xl">
+      Toca el mapa donde está el problema
+    </div>
+  }
+
+  <!-- Panel: crear reporte (estilo Waze) -->
+  @if (addMode() && !manualPlacing()) {
+    <div class="fixed z-[600] inset-x-0 bottom-0 sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[400px] max-h-[85dvh] overflow-y-auto bg-panel rounded-t-3xl sm:rounded-3xl p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-fg font-playfair italic text-2xl">¿Qué encontraste?</h2>
+        <button type="button" (click)="cancelForm()" class="text-fg/50 hover:text-fg text-xl leading-none" aria-label="Cancelar">✕</button>
       </div>
 
-      <div class="flex flex-wrap gap-2 mb-4">
+      <!-- Ubicación del reporte -->
+      <div class="flex items-start gap-2 bg-fg/5 rounded-2xl px-3 py-2.5 mb-4">
+        <span class="text-[#2a78d6] mt-0.5">📍</span>
+        <div class="min-w-0 flex-1">
+          <p class="text-fg text-sm font-medium truncate">
+            {{ address() ?? (pendingLatLng() ? 'Buscando dirección…' : 'Sin ubicación todavía') }}
+          </p>
+          <p class="text-fg/50 text-xs">
+            {{ pendingLatLng() ? (pendingLatLng()!.lat.toFixed(5) + ', ' + pendingLatLng()!.lng.toFixed(5)) : '' }}
+          </p>
+        </div>
+        <div class="flex flex-col items-end gap-1 text-xs font-semibold">
+          <button type="button" (click)="relocate()" class="text-[#e8702a] hover:underline whitespace-nowrap">Mover</button>
+          @if (userPos()) {
+            <button type="button" (click)="useMyPosition()" class="text-[#2a78d6] hover:underline whitespace-nowrap">Mi posición</button>
+          }
+        </div>
+      </div>
+
+      <!-- Categoría -->
+      <div class="grid grid-cols-5 gap-2 mb-4">
         @for (cat of categories; track cat.value) {
           <button
             type="button"
             (click)="selectCategory(cat.value)"
-            class="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-full border transition-colors"
-            [class]="selectedCategory() === cat.value ? 'text-white border-transparent' : 'text-fg/80 border-fg/15 hover:border-fg/30'"
+            class="flex flex-col items-center gap-1 py-2.5 rounded-2xl border text-[11px] font-medium transition-all"
+            [class]="selectedCategory() === cat.value ? 'text-white border-transparent scale-[1.04]' : 'text-fg/80 border-fg/15 hover:border-fg/30'"
             [style.background]="selectedCategory() === cat.value ? cat.color : 'transparent'"
           >
-            <span>{{ cat.icon }}</span>{{ cat.label }}
+            <span class="text-2xl leading-none">{{ cat.icon }}</span>
+            {{ cat.label }}
+          </button>
+        }
+      </div>
+
+      <!-- Detalle específico -->
+      @if (detailsFor(selectedCategory()).length) {
+        <p class="text-fg/60 text-xs font-semibold uppercase tracking-wide mb-2">Detalle</p>
+        <div class="flex flex-wrap gap-2 mb-4">
+          @for (detail of detailsFor(selectedCategory()); track detail) {
+            <button
+              type="button"
+              (click)="selectedDetail.set(selectedDetail() === detail ? null : detail)"
+              class="text-xs font-medium px-3 py-2 rounded-full border transition-colors"
+              [class]="selectedDetail() === detail ? 'bg-fg text-bg border-transparent' : 'text-fg/80 border-fg/15 hover:border-fg/30'"
+            >
+              {{ detail }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Gravedad -->
+      <p class="text-fg/60 text-xs font-semibold uppercase tracking-wide mb-2">Gravedad</p>
+      <div class="grid grid-cols-4 gap-2 mb-4">
+        @for (sev of severities; track sev.value) {
+          <button
+            type="button"
+            (click)="selectedSeverity.set(sev.value)"
+            class="text-[11px] font-semibold py-2 rounded-xl border-2 transition-all leading-tight"
+            [class]="selectedSeverity() === sev.value ? 'text-white' : 'text-fg/70'"
+            [style.background]="selectedSeverity() === sev.value ? sev.color : 'transparent'"
+            [style.border-color]="sev.color"
+          >
+            {{ sev.label }}
           </button>
         }
       </div>
@@ -72,8 +161,9 @@
       <textarea
         [ngModel]="descripcion()"
         (ngModelChange)="descripcion.set($event)"
-        rows="3"
-        placeholder="Describe lo que encontraste…"
+        rows="2"
+        maxlength="300"
+        placeholder="Nota opcional (referencia, color, tamaño…)"
         class="w-full bg-transparent border border-fg/15 rounded-xl px-3 py-2.5 text-sm text-fg placeholder-fg/40 focus:outline-none focus:border-[#e8702a] resize-none"
       ></textarea>
 
@@ -84,10 +174,10 @@
       <button
         type="button"
         (click)="submitReport()"
-        [disabled]="submitting()"
-        class="mt-4 w-full bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 text-white text-sm font-semibold py-3 rounded-full transition-all"
+        [disabled]="submitting() || !pendingLatLng()"
+        class="mt-4 w-full bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 text-white text-base font-semibold py-3.5 rounded-full transition-all"
       >
-        {{ submitting() ? 'Enviando…' : 'Publicar reporte' }}
+        {{ submitting() ? 'Enviando…' : 'Publicar reporte aquí' }}
       </button>
     </div>
   }

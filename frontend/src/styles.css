@@ -166,6 +166,28 @@ body {
   cursor: pointer;
 }
 
+/* Marcador "tú estás aquí" estilo Waze: flecha de rumbo + pulso de precisión */
+.me-marker { position: relative; width: 44px; height: 44px; }
+.me-marker .me-pulse {
+  position: absolute; inset: 0; border-radius: 9999px;
+  background: rgba(42, 120, 214, 0.25);
+  animation: mePulse 2s ease-out infinite;
+}
+.me-marker .me-arrow {
+  position: absolute; inset: 6px; display: flex; align-items: center; justify-content: center;
+  border-radius: 9999px; background: #2a78d6; border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45); transition: transform 0.3s linear;
+}
+.me-marker .me-arrow svg { width: 16px; height: 16px; fill: #fff; }
+@keyframes mePulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.pending-pin {
+  width: 34px; height: 34px; border-radius: 9999px 9999px 9999px 0; transform: rotate(-45deg);
+  background: #e8702a; border: 3px solid #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
 /* Mascota zorro y ambientación de la pantalla 404 */
 @keyframes foxFloat {
   0%, 100% { transform: translateY(0); }
