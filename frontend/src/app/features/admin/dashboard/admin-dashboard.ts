@@ -3,7 +3,9 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { BackupService } from '../../../core/services/backup.service';
 import { ReportService } from '../../../core/services/report.service';
+import { BackupInfo, BackupStatus } from '../../../core/models/backup.models';
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 import {
   Report,
@@ -22,6 +24,7 @@ import {
 })
 export class AdminDashboard implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly backupService = inject(BackupService);
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
 
@@ -34,6 +37,16 @@ export class AdminDashboard implements OnInit {
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly exporting = signal<'pdf' | 'excel' | null>(null);
+  protected readonly backupStatus = signal<BackupStatus | null>(null);
+  protected readonly backupIntervalHours = signal(24);
+  protected readonly backupScheduleEnabled = signal(false);
+  protected readonly backupLoading = signal(false);
+  protected readonly backupSaving = signal(false);
+  protected readonly backupBusy = signal(false);
+  protected readonly backupError = signal<string | null>(null);
+  protected readonly backupMessage = signal<string | null>(null);
+  protected readonly restoreDialogOpen = signal(false);
+  protected readonly restoreConfirmation = signal('');
 
   // Filtros de la tabla
   protected readonly filterStatus = signal<ReportStatus | ''>('');
@@ -92,6 +105,93 @@ export class AdminDashboard implements OnInit {
 
   ngOnInit(): void {
     this.loadReports();
+    this.loadBackupStatus();
+  }
+
+  protected loadBackupStatus(): void {
+    this.backupLoading.set(true);
+    this.backupError.set(null);
+    this.backupService.getStatus().subscribe({
+      next: (status) => {
+        this.backupStatus.set(status);
+        this.backupIntervalHours.set(status.intervalHours);
+        this.backupScheduleEnabled.set(status.scheduleEnabled);
+        this.backupLoading.set(false);
+      },
+      error: (error: unknown) => {
+        this.backupError.set(this.backupErrorText(error, 'No se pudo cargar el estado de los backups.'));
+        this.backupLoading.set(false);
+      },
+    });
+  }
+
+  protected saveBackupSchedule(): void {
+    if (this.backupSaving()) {
+      return;
+    }
+    this.backupSaving.set(true);
+    this.backupError.set(null);
+    this.backupMessage.set(null);
+    this.backupService.updateSchedule(this.backupScheduleEnabled(), this.backupIntervalHours()).subscribe({
+      next: (status) => {
+        this.backupStatus.set(status);
+        this.backupSaving.set(false);
+        this.backupMessage.set('La programación de backups quedó guardada.');
+      },
+      error: (error: unknown) => {
+        this.backupError.set(this.backupErrorText(error, 'No se pudo guardar la programación.'));
+        this.backupSaving.set(false);
+      },
+    });
+  }
+
+  protected createBackup(): void {
+    if (this.backupBusy()) {
+      return;
+    }
+    this.backupBusy.set(true);
+    this.backupError.set(null);
+    this.backupMessage.set(null);
+    this.backupService.createBackup().subscribe({
+      next: (backup) => this.onBackupCompleted(backup, 'Backup creado'),
+      error: (error: unknown) => {
+        this.backupError.set(this.backupErrorText(error, 'No se pudo crear el backup.'));
+        this.backupBusy.set(false);
+      },
+    });
+  }
+
+  protected openRestoreDialog(): void {
+    this.restoreConfirmation.set('');
+    this.restoreDialogOpen.set(true);
+  }
+
+  protected closeRestoreDialog(): void {
+    if (!this.backupBusy()) {
+      this.restoreDialogOpen.set(false);
+      this.restoreConfirmation.set('');
+    }
+  }
+
+  protected restoreLatestBackup(): void {
+    if (this.backupBusy() || this.restoreConfirmation() !== 'RESTAURAR') {
+      return;
+    }
+    this.backupBusy.set(true);
+    this.backupError.set(null);
+    this.backupMessage.set(null);
+    this.backupService.restoreLatest(this.restoreConfirmation()).subscribe({
+      next: (backup) => {
+        this.restoreDialogOpen.set(false);
+        this.restoreConfirmation.set('');
+        this.onBackupCompleted(backup, 'Backup restaurado');
+        this.loadReports();
+      },
+      error: (error: unknown) => {
+        this.backupError.set(this.backupErrorText(error, 'No se pudo restaurar el backup.'));
+        this.backupBusy.set(false);
+      },
+    });
   }
 
   protected loadReports(): void {
@@ -331,5 +431,22 @@ export class AdminDashboard implements OnInit {
     link.download = fileName;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  private onBackupCompleted(backup: BackupInfo, label: string): void {
+    this.backupMessage.set(`${label}: ${backup.name}`);
+    this.backupBusy.set(false);
+    this.loadBackupStatus();
+  }
+
+  private backupErrorText(error: unknown, fallback: string): string {
+    if (typeof error === 'object' && error !== null && 'error' in error) {
+      const response = error.error;
+      if (typeof response === 'object' && response !== null && 'message' in response
+          && typeof response.message === 'string') {
+        return response.message;
+      }
+    }
+    return fallback;
   }
 }

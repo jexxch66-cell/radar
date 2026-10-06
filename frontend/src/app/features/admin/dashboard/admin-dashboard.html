@@ -60,6 +60,115 @@
       }
     </div>
 
+    <section class="bg-panel border border-fg/10 rounded-2xl p-5 mb-8" aria-labelledby="backup-title">
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 id="backup-title" class="text-lg font-playfair italic">Backups de la base de datos</h2>
+        </div>
+        <button
+          type="button"
+          (click)="loadBackupStatus()"
+          [disabled]="backupLoading()"
+          class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 disabled:opacity-50"
+        >
+          {{ backupLoading() ? 'Actualizando…' : 'Actualizar estado' }}
+        </button>
+      </div>
+
+      @if (backupError()) {
+        <p role="alert" class="text-red-600 dark:text-red-300 text-sm mt-4">{{ backupError() }}</p>
+      }
+      @if (backupMessage()) {
+        <p role="status" class="text-emerald-700 dark:text-emerald-300 text-sm mt-4">{{ backupMessage() }}</p>
+      }
+      @if (backupStatus(); as status) {
+        @if (!status.storageConfigured) {
+          <p class="text-amber-700 dark:text-amber-300 text-sm mt-4">
+            No hay un destino de backup disponible. Revisa la configuración del backend.
+          </p>
+        } @else if (status.storageType !== 'LOCAL') {
+          <p class="text-emerald-700 dark:text-emerald-300 text-sm mt-4">
+            Los backups se guardan en Azure Blob Storage.
+          </p>
+        }
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+          <div class="rounded-xl border border-fg/10 p-4">
+            <p class="text-xs text-fg/60 uppercase tracking-wide">Último backup</p>
+            @if (status.latestBackupAt) {
+              <p class="text-sm mt-2">{{ status.latestBackupAt | date: 'medium' }}</p>
+              <p class="text-xs text-fg/50 mt-1 break-all">{{ status.latestBackupName }}</p>
+            } @else {
+              <p class="text-sm mt-2 text-fg/60">Todavía no hay backups.</p>
+            }
+            @if (status.lastBackupAt) {
+              <p class="text-xs text-fg/50 mt-2">Última ejecución: {{ status.lastBackupAt | date: 'short' }}</p>
+            }
+          </div>
+
+          <div class="rounded-xl border border-fg/10 p-4">
+            <label for="backup-interval" class="text-xs text-fg/60 uppercase tracking-wide">Frecuencia</label>
+            <div class="flex items-center gap-2 mt-2">
+              <input
+                id="backup-interval"
+                type="number"
+                min="1"
+                max="8760"
+                step="1"
+                [ngModel]="backupIntervalHours()"
+                (ngModelChange)="backupIntervalHours.set($event)"
+                class="w-24 bg-fg/5 border border-fg/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
+              />
+              <span class="text-sm text-fg/70">horas (1–8760)</span>
+            </div>
+            <label class="flex items-center gap-2 text-sm mt-3">
+              <input
+                type="checkbox"
+                [ngModel]="backupScheduleEnabled()"
+                (ngModelChange)="backupScheduleEnabled.set($event)"
+                [disabled]="!status.storageConfigured"
+              />
+              Activar backup automático
+            </label>
+            @if (status.nextBackupAt && status.scheduleEnabled) {
+              <p class="text-xs text-fg/50 mt-2">Próximo backup: {{ status.nextBackupAt | date: 'short' }}</p>
+            }
+          </div>
+
+          <div class="rounded-xl border border-fg/10 p-4 flex flex-col justify-center gap-2">
+            <button
+              type="button"
+              (click)="saveBackupSchedule()"
+              [disabled]="backupSaving() || backupIntervalHours() < 1 || backupIntervalHours() > 8760 || (backupScheduleEnabled() && !status.storageConfigured)"
+              class="rounded-full bg-fg/5 border border-fg/20 px-4 py-2 text-sm font-medium hover:bg-fg/10 disabled:opacity-50"
+            >
+              {{ backupSaving() ? 'Guardando…' : 'Guardar frecuencia' }}
+            </button>
+            <button
+              type="button"
+              (click)="createBackup()"
+              [disabled]="backupBusy() || !status.storageConfigured"
+              class="rounded-full bg-[#e8702a] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d2611f] disabled:opacity-50"
+            >
+              {{ backupBusy() ? 'Procesando…' : 'Crear backup ahora' }}
+            </button>
+            <button
+              type="button"
+              (click)="openRestoreDialog()"
+              [disabled]="backupBusy() || !status.storageConfigured || !status.latestBackupName"
+              class="rounded-full border border-red-500/40 px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+            >
+              Restaurar último backup
+            </button>
+          </div>
+        </div>
+
+        @if (status.lastError) {
+          <p class="text-red-600 dark:text-red-300 text-sm mt-4">Error del último backup automático: {{ status.lastError }}</p>
+        }
+      }
+    </section>
+
     <!-- Gráficas -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
       <div class="bg-panel border border-fg/10 rounded-2xl p-5">
@@ -331,6 +440,52 @@
             class="bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-all"
           >
             {{ deleteBusy() ? 'Eliminando…' : 'Sí, eliminar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (restoreDialogOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" (click)="closeRestoreDialog()">
+      <div
+        class="w-full max-w-[440px] bg-panel border border-red-500/30 rounded-3xl p-6 shadow-2xl"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="restore-title"
+        (click)="$event.stopPropagation()"
+      >
+        <h2 id="restore-title" class="font-playfair italic text-2xl mb-2">¿Restaurar el último backup?</h2>
+        <p class="text-fg/70 text-sm">
+          Se reemplazarán los datos actuales de PostgreSQL. Antes de restaurar, el sistema creará una copia de seguridad
+          del estado actual en Azure.
+        </p>
+        <label for="restore-confirmation" class="block text-sm mt-4">
+          Escribe <strong>RESTAURAR</strong> para confirmar.
+        </label>
+        <input
+          id="restore-confirmation"
+          type="text"
+          autocomplete="off"
+          [ngModel]="restoreConfirmation()"
+          (ngModelChange)="restoreConfirmation.set($event)"
+          class="w-full mt-2 bg-fg/5 border border-fg/20 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-red-500"
+        />
+        <div class="flex justify-end gap-2 mt-5">
+          <button
+            type="button"
+            (click)="closeRestoreDialog()"
+            class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-5 py-2.5"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="restoreLatestBackup()"
+            [disabled]="backupBusy() || restoreConfirmation() !== 'RESTAURAR'"
+            class="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+          >
+            {{ backupBusy() ? 'Restaurando…' : 'Confirmar restauración' }}
           </button>
         </div>
       </div>

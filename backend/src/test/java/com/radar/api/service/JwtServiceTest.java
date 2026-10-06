@@ -23,17 +23,26 @@ class JwtServiceTest {
 
     @Test
     void generatesTokenAndExtractsUsername() {
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, "session-one");
 
         assertEquals("user@example.com", jwtService.extractUsername(token));
-        assertTrue(jwtService.isTokenValid(token, userDetails));
+        assertEquals("session-one", jwtService.extractSessionId(token));
+        assertTrue(jwtService.isTokenValid(token, userDetails, "session-one"));
+        assertFalse(jwtService.isTokenValid(token, userDetails, "session-two"));
     }
 
     @Test
     void rejectsTokenForAnotherUser() {
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, "session-one");
         UserDetails anotherUser = User.withUsername("other@example.com").password("encoded").roles("USER").build();
 
-        assertFalse(jwtService.isTokenValid(token, anotherUser));
+        assertFalse(jwtService.isTokenValid(token, anotherUser, "session-one"));
+    }
+
+    @Test
+    void rejectsTokenWithoutAnActiveSession() {
+        String token = jwtService.generateToken(userDetails, "session-one");
+
+        assertFalse(jwtService.isTokenValid(token, userDetails, null));
     }
 }

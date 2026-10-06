@@ -42,6 +42,8 @@ mvn spring-boot:run
 Las tablas se crean solas. También se crea un admin por defecto:
 `admin@radar.com` / `Admin123!`
 
+Cada usuario y administrador mantiene una sola sesión activa. Al iniciar sesión en otro navegador, se invalidan los tokens anteriores; el navegador anterior cierra sesión al hacer su siguiente petición protegida.
+
 ### Google, CAPTCHA y consentimientos
 
 El login con Google usa Google Identity Services y el backend valida el `id_token` antes de emitir el JWT de RADAR. Para activarlo, registra una aplicación web en Google Cloud Console y configura su Client ID en los archivos de entorno del frontend:
@@ -60,6 +62,14 @@ RECAPTCHA_SECRET_KEY=TU_SECRET_KEY
 ```
 
 Durante desarrollo local `RECAPTCHA_ENABLED` permanece desactivado. La casilla de tratamiento de datos es obligatoria al crear una cuenta y el banner de cookies guarda la elección en `localStorage`.
+
+### Backups desde el dashboard del administrador
+
+El dashboard permite crear un backup manual, configurar un intervalo automático de 1 a 8760 horas y restaurar el backup más reciente. Los backups son volcados de PostgreSQL (`pg_dump` en formato custom). Si Azure Blob Storage está configurado se guardan en un contenedor privado; de lo contrario, el modo local los persiste en `%USERPROFILE%\\.radar\\backups` (Windows) o `$HOME/.radar/backups` (Linux/macOS). El modo local es útil para desarrollo, pero no protege ante la pérdida del servidor. La restauración pide escribir `RESTAURAR` y, antes de reemplazar la base de datos, genera automáticamente una copia adicional del estado actual.
+
+Para backups externos, configura `AZURE_STORAGE_CONNECTION_STRING` como variable secreta del entorno del backend y, opcionalmente, `AZURE_STORAGE_BACKUP_CONTAINER` (por defecto `radar-backups`). No guardes esa conexión en el repositorio ni en los backups. Se puede cambiar la carpeta local con `BACKUP_LOCAL_DIRECTORY`. En desarrollo, `BACKUP_DOCKER_CONTAINER` usa por defecto `radar-db` y ejecuta las utilidades PostgreSQL del contenedor de `docker-compose.yml`, sin instalarlas en Windows. Si usas PostgreSQL nativo, establece esa variable vacía y asegúrate de tener `pg_dump` y `pg_restore` en `PATH` o configura `BACKUP_PG_DUMP_PATH` y `BACKUP_PG_RESTORE_PATH`. La imagen Docker de producción desactiva el modo de contenedor y ya instala `postgresql-client`.
+
+Los backups cubren la base de datos (reportes, usuarios y administradores); el proyecto actualmente no almacena archivos subidos. Código y configuración de despliegue se recuperan mediante el control de versiones y el proceso normal de despliegue.
 
 ### 3. Frontend (http://localhost:4200)
 

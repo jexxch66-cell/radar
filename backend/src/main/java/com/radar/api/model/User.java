@@ -43,6 +43,9 @@ public class User {
     @Column(name = "google_subject", unique = true)
     private String googleSubject;
 
+    @Column(name = "active_session_id", length = 36)
+    private String activeSessionId;
+
     @Column(name = "privacy_consent_at")
     private Instant privacyConsentAt;
 

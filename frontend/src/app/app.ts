@@ -51,7 +51,7 @@ export class App {
   }
 
   private isInstalled(): boolean {
-    return window.matchMedia('(display-mode: standalone)').matches ||
+    return (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) ||
       (navigator as Navigator & { standalone?: boolean }).standalone === true;
   }
 

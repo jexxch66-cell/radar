@@ -7,6 +7,10 @@ RUN mvn -B clean package -DskipTests
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
+ENV BACKUP_DOCKER_CONTAINER=""
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app/target/*.jar app.jar
 COPY start.sh .
 RUN sed -i 's/\r$//' start.sh && chmod +x start.sh

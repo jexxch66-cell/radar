@@ -38,6 +38,9 @@ public class Administrador {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "active_session_id", length = 36)
+    private String activeSessionId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

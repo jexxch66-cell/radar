@@ -51,14 +51,16 @@ class AuthServiceTest {
             user.setId(savedUser.getId());
             return user;
         });
+        when(jwtService.newSessionId()).thenReturn("register-session");
         when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
-        when(jwtService.generateToken(details)).thenReturn("token");
+        when(jwtService.generateToken(details, "register-session")).thenReturn("token");
 
         var response = service.register(request);
 
         assertEquals("token", response.getToken());
         assertEquals(7L, response.getId());
         assertEquals(Role.USER.name(), response.getRole());
+        verify(userRepository).save(argThat(user -> "register-session".equals(user.getActiveSessionId())));
         verify(userRepository).save(any(User.class));
     }
 
@@ -86,16 +88,45 @@ class AuthServiceTest {
         Administrador admin = Administrador.builder().id(3L).nombre("Admin").email(request.getEmail()).build();
         UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
                 .password("encoded").roles("ADMIN").build();
+        when(jwtService.newSessionId()).thenReturn("admin-session");
+        when(administradorRepository.updateActiveSessionId(request.getEmail(), "admin-session")).thenReturn(1);
         when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(admin));
         when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
-        when(jwtService.generateToken(details)).thenReturn("admin-token");
+        when(jwtService.generateToken(details, "admin-session")).thenReturn("admin-token");
 
         var response = service.login(request);
 
         assertEquals("admin-token", response.getToken());
         assertEquals(3L, response.getId());
         assertEquals(Role.ADMIN.name(), response.getRole());
+        verify(administradorRepository).updateActiveSessionId(request.getEmail(), "admin-session");
         verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void logsInUserAndReplacesThePreviousSession() {
+        LoginRequest request = loginRequest();
+        User user = User.builder()
+                .id(7L)
+                .nombre("User")
+                .email(request.getEmail())
+                .role(Role.USER)
+                .build();
+        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
+                .password("encoded").roles("USER").build();
+        when(authenticationManager.authenticate(any())).thenReturn(null);
+        when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(jwtService.newSessionId()).thenReturn("new-user-session");
+        when(userRepository.updateActiveSessionId(request.getEmail(), "new-user-session")).thenReturn(1);
+        when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
+        when(jwtService.generateToken(details, "new-user-session")).thenReturn("user-token");
+
+        var response = service.login(request);
+
+        assertEquals("user-token", response.getToken());
+        assertEquals(Role.USER.name(), response.getRole());
+        verify(userRepository).updateActiveSessionId(request.getEmail(), "new-user-session");
     }
 
     private RegisterRequest registerRequest() {

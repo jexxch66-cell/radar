@@ -32,6 +32,11 @@
       <p class="text-fg/60 text-sm mt-2 mb-8">
         Ingresa para ver y reportar lo que pasa en tu ciudad.
       </p>
+      @if (sessionExpired) {
+        <div role="alert" class="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm rounded-lg p-3 mb-5">
+          Tu sesión se cerró porque se inició sesión en otro navegador. Vuelve a ingresar para continuar.
+        </div>
+      }
 
       <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div #googleButton class="flex min-h-10 justify-center"></div>

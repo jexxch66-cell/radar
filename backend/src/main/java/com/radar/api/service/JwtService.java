@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 import java.util.function.Function;
 
 // Genera, lee y valida los JWT usados para autenticar peticiones (sin sesiones en el servidor)
@@ -21,10 +22,11 @@ public class JwtService {
     @Value("${jwt.expiration-ms}")
     private long expirationMs;
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, String sessionId) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
                 .subject(userDetails.getUsername())
+                .claim("sid", sessionId)
                 .issuedAt(new Date(now))
                 .expiration(new Date(now + expirationMs))
                 .signWith(getSigningKey())
@@ -35,9 +37,21 @@ public class JwtService {
         return extractClaim(token, claims -> claims.getSubject());
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public String extractSessionId(String token) {
+        return extractClaim(token, claims -> claims.get("sid", String.class));
+    }
+
+    public String newSessionId() {
+        return UUID.randomUUID().toString();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails, String activeSessionId) {
         String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        String tokenSessionId = extractSessionId(token);
+        return username.equals(userDetails.getUsername())
+                && tokenSessionId != null
+                && tokenSessionId.equals(activeSessionId)
+                && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

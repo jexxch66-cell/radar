@@ -5,6 +5,7 @@ import com.radar.api.model.User;
 import com.radar.api.repository.AdministradorRepository;
 import com.radar.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .map(this::toUserDetails)
                 .or(() -> administradorRepository.findByEmail(email).map(this::toUserDetails))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
+    }
+
+    public boolean isActiveSession(String email, String sessionId) {
+        return userRepository.findByEmail(email)
+                .map(user -> sessionId != null && sessionId.equals(user.getActiveSessionId()))
+                .orElseGet(() -> administradorRepository.findByEmail(email)
+                        .map(admin -> sessionId != null && sessionId.equals(admin.getActiveSessionId()))
+                        .orElse(false));
     }
 
     private UserDetails toUserDetails(User user) {

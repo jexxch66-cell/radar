@@ -39,3 +39,11 @@ app:
   admin:
     default-email: ${ADMIN_DEFAULT_EMAIL:admin@radar.com}
     default-password: ${ADMIN_DEFAULT_PASSWORD:Admin123!}
+  backup:
+    azure-connection-string: ${AZURE_STORAGE_CONNECTION_STRING:}
+    azure-container: ${AZURE_STORAGE_BACKUP_CONTAINER:radar-backups}
+    local-directory: ${BACKUP_LOCAL_DIRECTORY:}
+    docker-container: ${BACKUP_DOCKER_CONTAINER:radar-db}
+    docker-path: ${BACKUP_DOCKER_PATH:docker}
+    pg-dump-path: ${BACKUP_PG_DUMP_PATH:pg_dump}
+    pg-restore-path: ${BACKUP_PG_RESTORE_PATH:pg_restore}

@@ -56,4 +56,34 @@ class UserDetailsServiceImplTest {
         assertThrows(UsernameNotFoundException.class,
                 () -> service.loadUserByUsername("missing@example.com"));
     }
+
+    @Test
+    void validatesOnlyTheCurrentUserSession() {
+        User user = User.builder()
+                .email("user@example.com")
+                .password("hash")
+                .role(Role.USER)
+                .activeSessionId("new-session")
+                .build();
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+
+        assertTrue(service.isActiveSession(user.getEmail(), "new-session"));
+        assertFalse(service.isActiveSession(user.getEmail(), "old-session"));
+        assertFalse(service.isActiveSession(user.getEmail(), null));
+        verifyNoInteractions(administradorRepository);
+    }
+
+    @Test
+    void validatesTheCurrentAdministratorSession() {
+        Administrador admin = Administrador.builder()
+                .email("admin@example.com")
+                .password("hash")
+                .activeSessionId("admin-session")
+                .build();
+        when(userRepository.findByEmail(admin.getEmail())).thenReturn(Optional.empty());
+        when(administradorRepository.findByEmail(admin.getEmail())).thenReturn(Optional.of(admin));
+
+        assertTrue(service.isActiveSession(admin.getEmail(), "admin-session"));
+        assertFalse(service.isActiveSession(admin.getEmail(), "stale-session"));
+    }
 }

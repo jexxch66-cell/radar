@@ -40,17 +40,19 @@ public class AuthService {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
 
+        String sessionId = jwtService.newSessionId();
         User user = User.builder()
                 .nombre(request.getNombre())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .privacyConsentAt(Instant.now())
                 .role(Role.USER)
+                .activeSessionId(sessionId)
                 .build();
         userRepository.save(user);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, sessionId);
 
         return AuthResponse.builder()
                 .token(token)
@@ -73,7 +75,10 @@ public class AuthService {
         var adminMatch = administradorRepository.findByEmail(request.getEmail());
         if (adminMatch.isPresent()) {
             Administrador admin = adminMatch.get();
-            String token = jwtService.generateToken(userDetailsService.loadUserByUsername(admin.getEmail()));
+            String sessionId = jwtService.newSessionId();
+            requireSessionUpdated(administradorRepository.updateActiveSessionId(admin.getEmail(), sessionId));
+            String token = jwtService.generateToken(
+                    userDetailsService.loadUserByUsername(admin.getEmail()), sessionId);
             return AuthResponse.builder()
                     .token(token)
                     .id(admin.getId())
@@ -86,8 +91,10 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
 
+        String sessionId = jwtService.newSessionId();
+        requireSessionUpdated(userRepository.updateActiveSessionId(user.getEmail(), sessionId));
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String token = jwtService.generateToken(userDetails);
+        String token = jwtService.generateToken(userDetails, sessionId);
 
         return AuthResponse.builder()
                 .token(token)
@@ -117,13 +124,21 @@ public class AuthService {
             return userRepository.save(created);
         });
 
+        String sessionId = jwtService.newSessionId();
+        requireSessionUpdated(userRepository.updateActiveSessionId(user.getEmail(), sessionId));
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         return AuthResponse.builder()
-                .token(jwtService.generateToken(userDetails))
+                .token(jwtService.generateToken(userDetails, sessionId))
                 .id(user.getId())
                 .nombre(user.getNombre())
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+    private void requireSessionUpdated(int updatedAccounts) {
+        if (updatedAccounts != 1) {
+            throw new IllegalStateException("No se pudo activar la sesión. Intenta iniciar sesión nuevamente.");
+        }
     }
 }

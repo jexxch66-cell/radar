@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
@@ -17,6 +17,7 @@ import { RecaptchaService } from '../../../core/services/recaptcha.service';
 export class Login implements AfterViewInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly googleIdentity = inject(GoogleIdentityService);
   private readonly recaptcha = inject(RecaptchaService);
@@ -30,6 +31,7 @@ export class Login implements AfterViewInit {
 
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
 
   ngAfterViewInit(): void {
     this.renderGoogleButton();
