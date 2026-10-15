@@ -31,6 +31,7 @@ export class Login implements AfterViewInit {
 
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly canForceLogin = signal(false);
   readonly sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
 
   ngAfterViewInit(): void {
@@ -44,7 +45,7 @@ export class Login implements AfterViewInit {
     window.setTimeout(() => this.renderGoogleButton(), 500);
   }
 
-  onSubmit(): void {
+  onSubmit(force = false): void {
     if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
       return;
@@ -52,32 +53,44 @@ export class Login implements AfterViewInit {
 
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.canForceLogin.set(false);
 
-    this.authService.login(this.form.getRawValue()).subscribe({
+    this.authService.login({ ...this.form.getRawValue(), force }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
+        void this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
+        if (err.status === 409) {
+          this.canForceLogin.set(true);
+        }
         this.errorMessage.set(body?.message ?? 'No se pudo iniciar sesión. Intenta nuevamente.');
       },
     });
   }
 
-  private async loginWithGoogle(idToken: string): Promise<void> {
+  onForceLogin(): void {
+    this.onSubmit(true);
+  }
+
+  private async loginWithGoogle(idToken: string, force = false): Promise<void> {
     this.submitting.set(true);
     this.errorMessage.set(null);
+    this.canForceLogin.set(false);
     const captchaToken = await this.recaptcha.execute('google_login');
-    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: false, captchaToken }).subscribe({
+    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: false, captchaToken, force }).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
+        void this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
       },
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
+        if (err.status === 409) {
+          this.canForceLogin.set(true);
+        }
         this.errorMessage.set(body?.message ?? 'No se pudo iniciar sesión con Google.');
       },
     });

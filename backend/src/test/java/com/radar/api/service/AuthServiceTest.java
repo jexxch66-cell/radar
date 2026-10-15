@@ -2,6 +2,7 @@ package com.radar.api.service;
 
 import com.radar.api.dto.request.LoginRequest;
 import com.radar.api.dto.request.RegisterRequest;
+import com.radar.api.exception.ConcurrentSessionException;
 import com.radar.api.exception.EmailAlreadyExistsException;
 import com.radar.api.exception.InvalidCredentialsException;
 import com.radar.api.model.Administrador;
@@ -19,10 +20,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,7 +92,7 @@ class AuthServiceTest {
         UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
                 .password("encoded").roles("ADMIN").build();
         when(jwtService.newSessionId()).thenReturn("admin-session");
-        when(administradorRepository.updateActiveSessionId(request.getEmail(), "admin-session")).thenReturn(1);
+        when(administradorRepository.updateActiveSessionId(eq(request.getEmail()), eq("admin-session"), any(Instant.class))).thenReturn(1);
         when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(admin));
         when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
         when(jwtService.generateToken(details, "admin-session")).thenReturn("admin-token");
@@ -99,12 +102,12 @@ class AuthServiceTest {
         assertEquals("admin-token", response.getToken());
         assertEquals(3L, response.getId());
         assertEquals(Role.ADMIN.name(), response.getRole());
-        verify(administradorRepository).updateActiveSessionId(request.getEmail(), "admin-session");
+        verify(administradorRepository).updateActiveSessionId(eq(request.getEmail()), eq("admin-session"), any(Instant.class));
         verifyNoInteractions(userRepository);
     }
 
     @Test
-    void logsInUserAndReplacesThePreviousSession() {
+    void logsInUserWhenNoActiveSession() {
         LoginRequest request = loginRequest();
         User user = User.builder()
                 .id(7L)
@@ -118,7 +121,7 @@ class AuthServiceTest {
         when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
         when(jwtService.newSessionId()).thenReturn("new-user-session");
-        when(userRepository.updateActiveSessionId(request.getEmail(), "new-user-session")).thenReturn(1);
+        when(userRepository.updateActiveSessionId(eq(request.getEmail()), eq("new-user-session"), any(Instant.class))).thenReturn(1);
         when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
         when(jwtService.generateToken(details, "new-user-session")).thenReturn("user-token");
 
@@ -126,7 +129,54 @@ class AuthServiceTest {
 
         assertEquals("user-token", response.getToken());
         assertEquals(Role.USER.name(), response.getRole());
-        verify(userRepository).updateActiveSessionId(request.getEmail(), "new-user-session");
+        verify(userRepository).updateActiveSessionId(eq(request.getEmail()), eq("new-user-session"), any(Instant.class));
+    }
+
+    @Test
+    void rejectsLoginWhenSessionIsAlreadyActive() {
+        LoginRequest request = loginRequest();
+        User user = User.builder()
+                .id(7L)
+                .nombre("User")
+                .email(request.getEmail())
+                .role(Role.USER)
+                .activeSessionId("existing-session")
+                .lastActiveAt(Instant.now())
+                .build();
+        when(authenticationManager.authenticate(any())).thenReturn(null);
+        when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+
+        assertThrows(ConcurrentSessionException.class, () -> service.login(request));
+        verify(userRepository, never()).updateActiveSessionId(any(), any(), any());
+    }
+
+    @Test
+    void allowsLoginWhenForceIsTrueEvenIfSessionIsActive() {
+        LoginRequest request = loginRequest();
+        request.setForce(true);
+        User user = User.builder()
+                .id(7L)
+                .nombre("User")
+                .email(request.getEmail())
+                .role(Role.USER)
+                .activeSessionId("existing-session")
+                .lastActiveAt(Instant.now())
+                .build();
+        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
+                .password("encoded").roles("USER").build();
+        when(authenticationManager.authenticate(any())).thenReturn(null);
+        when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(jwtService.newSessionId()).thenReturn("forced-session");
+        when(userRepository.updateActiveSessionId(eq(request.getEmail()), eq("forced-session"), any(Instant.class))).thenReturn(1);
+        when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
+        when(jwtService.generateToken(details, "forced-session")).thenReturn("forced-token");
+
+        var response = service.login(request);
+
+        assertEquals("forced-token", response.getToken());
+        verify(userRepository).updateActiveSessionId(eq(request.getEmail()), eq("forced-session"), any(Instant.class));
     }
 
     private RegisterRequest registerRequest() {

@@ -14,4 +14,6 @@ public class GoogleAuthRequest {
     private boolean acceptDataTreatment;
 
     private String captchaToken;
+
+    private boolean force;
 }

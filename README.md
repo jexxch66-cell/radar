@@ -42,7 +42,7 @@ mvn spring-boot:run
 Las tablas se crean solas. También se crea un admin por defecto:
 `admin@radar.com` / `Admin123!`
 
-Cada usuario y administrador mantiene una sola sesión activa. Al iniciar sesión en otro navegador, se invalidan los tokens anteriores; el navegador anterior cierra sesión al hacer su siguiente petición protegida.
+Cada usuario y administrador mantiene una sola sesión activa. Si ya existe una sesión en uso en otro navegador o dispositivo, el sistema bloquea cualquier intento de inicio de sesión simultáneo mostrando una advertencia (permitiendo forzar el cierre de la sesión remota si el usuario lo desea). Además, las pestañas del mismo navegador se sincronizan en tiempo real mediante BroadcastChannel y eventos de almacenamiento, impidiendo múltiples inicios de sesión paralelos.
 
 ### Google, CAPTCHA y consentimientos
 

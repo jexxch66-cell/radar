@@ -15,4 +15,6 @@ public class LoginRequest {
 
     @NotBlank(message = "La contrasena es obligatoria")
     private String password;
+
+    private boolean force;
 }

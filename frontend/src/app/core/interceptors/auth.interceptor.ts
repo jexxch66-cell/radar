@@ -24,9 +24,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         error !== null &&
         'status' in error &&
         error.status === 401 &&
-        !req.url.includes('/auth/')
+        !req.url.endsWith('/auth/login') &&
+        !req.url.endsWith('/auth/register') &&
+        !req.url.endsWith('/auth/google')
       ) {
-        authService.logout();
+        authService.logout(false);
         void router.navigate(['/login'], { queryParams: { sessionExpired: 'true' } });
       }
       return throwError(() => error);

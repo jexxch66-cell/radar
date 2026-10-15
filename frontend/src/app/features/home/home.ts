@@ -384,4 +384,9 @@ export class Home implements AfterViewInit, OnDestroy {
       marker.addTo(this.markersLayer);
     }
   }
+
+  protected logout(): void {
+    this.authService.logout();
+    void this.router.navigateByUrl('/login');
+  }
 }

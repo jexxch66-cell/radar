@@ -9,12 +9,14 @@ export interface RegisterRequest {
 export interface LoginRequest {
   email: string;
   password: string;
+  force?: boolean;
 }
 
 export interface GoogleAuthRequest {
   idToken: string;
   acceptDataTreatment: boolean;
   captchaToken?: string | null;
+  force?: boolean;
 }
 
 export type UserRole = 'USER' | 'ADMIN';

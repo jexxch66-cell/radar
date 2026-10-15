@@ -46,6 +46,9 @@ public class User {
     @Column(name = "active_session_id", length = 36)
     private String activeSessionId;
 
+    @Column(name = "last_active_at")
+    private Instant lastActiveAt;
+
     @Column(name = "privacy_consent_at")
     private Instant privacyConsentAt;
 

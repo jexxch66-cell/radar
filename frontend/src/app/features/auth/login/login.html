@@ -78,8 +78,18 @@
         </div>
 
         @if (errorMessage()) {
-          <div class="bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-300 text-sm rounded-lg p-3">
-            {{ errorMessage() }}
+          <div class="bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-300 text-sm rounded-lg p-3 flex flex-col gap-2.5">
+            <span>{{ errorMessage() }}</span>
+            @if (canForceLogin()) {
+              <button
+                type="button"
+                (click)="onForceLogin()"
+                [disabled]="submitting()"
+                class="self-start text-xs bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 text-white font-semibold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
+              >
+                Cerrar la otra sesión e ingresar aquí
+              </button>
+            }
           </div>
         }
 
