@@ -1,24 +1,27 @@
 <section class="min-h-screen bg-bg text-fg px-4 py-8 sm:px-8 flex items-start justify-center" style="min-height: 100dvh">
   <div class="w-full max-w-[420px] mt-10">
     <div class="flex items-center justify-between">
-      <a routerLink="/admin" class="text-fg/60 text-sm hover:text-fg transition-colors">← Volver al panel</a>
-      <app-theme-toggle />
+      <a routerLink="/admin" class="text-fg/60 text-sm hover:text-fg transition-colors">{{ i18n.t('nav.backToPanel') }}</a>
+      <div class="flex items-center gap-2">
+        <app-language-toggle />
+        <app-theme-toggle />
+      </div>
     </div>
 
     <div class="bg-panel border border-fg/10 rounded-3xl p-8 sm:p-10 mt-6">
-      <h1 class="font-playfair italic text-3xl" style="letter-spacing: -0.02em">Nuevo administrador</h1>
-      <p class="text-fg/60 text-sm mt-2 mb-8">Crea acceso de administrador para otra persona del equipo.</p>
+      <h1 class="font-playfair italic text-3xl" style="letter-spacing: -0.02em">{{ i18n.t('adminNew.title') }}</h1>
+      <p class="text-fg/60 text-sm mt-2 mb-8">{{ i18n.t('adminNew.subtitle') }}</p>
 
       <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="nombre">Nombre</label>
+          <label class="text-fg/80 text-sm font-medium" for="nombre">{{ i18n.t('register.name') }}</label>
           <input
             id="nombre"
             type="text"
             formControlName="nombre"
             autocomplete="name"
             class="bg-fg/10 border border-fg/20 rounded-xl px-4 py-3 text-fg placeholder-fg/30 text-sm focus:outline-none focus:border-[#e8702a] focus:bg-fg/15 transition-colors"
-            placeholder="Nombre completo"
+            [placeholder]="i18n.t('register.namePlaceholder')"
           />
           @if (form.controls.nombre.touched && form.controls.nombre.hasError('required')) {
             <span class="text-red-600 dark:text-red-300 text-xs">El nombre es obligatorio.</span>
@@ -26,7 +29,7 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="email">Email</label>
+          <label class="text-fg/80 text-sm font-medium" for="email">{{ i18n.t('login.email') }}</label>
           <input
             id="email"
             type="email"
@@ -44,7 +47,7 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="password">Contraseña</label>
+          <label class="text-fg/80 text-sm font-medium" for="password">{{ i18n.t('login.password') }}</label>
           <input
             id="password"
             type="password"
@@ -62,7 +65,7 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="confirmarPassword">Confirmar contraseña</label>
+          <label class="text-fg/80 text-sm font-medium" for="confirmarPassword">{{ i18n.t('register.confirmPassword') }}</label>
           <input
             id="confirmarPassword"
             type="password"
@@ -96,7 +99,7 @@
           [disabled]="submitting()"
           class="mt-1 bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-7 py-3 rounded-full transition-all hover:scale-[1.02] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
         >
-          {{ submitting() ? 'Creando…' : 'Crear administrador' }}
+          {{ submitting() ? i18n.t('adminNew.submitting') : i18n.t('adminNew.submit') }}
         </button>
       </form>
     </div>

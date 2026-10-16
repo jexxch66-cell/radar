@@ -1,9 +1,14 @@
+// Importaciones de Angular para componentes, referencias al DOM y reactividad con signals
 import { AfterViewInit, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+// Herramientas de formularios reactivos y validadores personalizados
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+// Servicios de autenticación, tema, idioma, Google OAuth y protección reCAPTCHA
 import { AuthService } from '../../../core/services/auth.service';
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
+import { LanguageToggle } from '../../../shared/language-toggle/language-toggle';
+import { LanguageService } from '../../../core/services/language.service';
 import { ApiErrorResponse } from '../../../core/models/auth.models';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
 import { RecaptchaService } from '../../../core/services/recaptcha.service';
@@ -19,21 +24,26 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
   return null;
 }
 
+// Componente de registro de nuevos usuarios ciudadanos (con consentimiento de tratamiento de datos obligatorio)
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggle],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggle, LanguageToggle],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register implements AfterViewInit {
+  // Inyección de dependencias para formularios, autenticación, navegación e idioma
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly googleIdentity = inject(GoogleIdentityService);
   private readonly recaptcha = inject(RecaptchaService);
+  protected readonly i18n = inject(LanguageService);
 
+  // Contenedor para el botón oficial de registro con Google
   @ViewChild('googleButton') private googleButton?: ElementRef<HTMLElement>;
 
+  // Formulario reactivo con validaciones de campos obligatorios, formato de email y consentimiento de privacidad
   readonly form = this.fb.nonNullable.group(
     {
       nombre: ['', [Validators.required]],
@@ -45,6 +55,7 @@ export class Register implements AfterViewInit {
     { validators: passwordsMatchValidator },
   );
 
+  // Signals reactivos para el estado de envío, errores y modal de confirmación exitosa
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly registrationSuccess = signal(false);
@@ -60,6 +71,7 @@ export class Register implements AfterViewInit {
     window.setTimeout(() => this.renderGoogleButton(), 500);
   }
 
+  // Envía el formulario de registro al backend previo token de seguridad reCAPTCHA
   async onSubmit(): Promise<void> {
     if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
@@ -84,6 +96,7 @@ export class Register implements AfterViewInit {
     });
   }
 
+  // Registra o autentica con Google exigiendo haber marcado la casilla de tratamiento de datos personales
   private async registerWithGoogle(idToken: string): Promise<void> {
     if (!this.form.controls.acceptDataTreatment.value) {
       this.form.controls.acceptDataTreatment.markAsTouched();
@@ -111,6 +124,7 @@ export class Register implements AfterViewInit {
     });
   }
 
+  // Cierra el modal de confirmación y redirige a la pantalla de login
   goToLogin(): void {
     this.registrationSuccess.set(false);
     this.router.navigateByUrl('/login');

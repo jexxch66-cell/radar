@@ -1,16 +1,20 @@
+# Configuración principal del backend Spring Boot (RADAR API)
 spring:
   application:
+    # Nombre identificador del microservicio / API
     name: radar-api
 
+  # Configuración de conexión a la base de datos PostgreSQL (lee variables de entorno o usa valores locales por defecto)
   datasource:
     url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5433}/${DB_NAME:radar_db}?sslmode=${DB_SSLMODE:prefer}}}
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:radar_user}}
     password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:changeme_local_dev}}
     driver-class-name: org.postgresql.Driver
 
+  # Configuración de JPA / Hibernate (ORM que convierte clases Java @Entity en tablas SQL)
   jpa:
     hibernate:
-      # update es comodo en desarrollo; usar migraciones (Flyway/Liquibase) en produccion
+      # update actualiza el esquema automáticamente en desarrollo; usar migraciones (Flyway/Liquibase) en producción
       ddl-auto: update
     show-sql: true
     properties:
@@ -18,21 +22,39 @@ spring:
         format_sql: true
     open-in-view: false
 
+# Puerto HTTP donde escucha el servidor embebido Apache Tomcat (por defecto 8080)
 server:
   port: ${PORT:8080}
 
-# Clave HMAC para firmar los JWT (minimo 32 caracteres). Sobrescribir con variable de entorno en produccion.
+# Configuración de la carpeta de LOGS de Spring Boot (SLF4J + Logback)
+# Guarda todos los eventos del sistema, auditoría de sesiones, reportes y errores en la carpeta logs/
+logging:
+  file:
+    name: ${LOG_FILE_PATH:logs/radar-api.log}
+  logback:
+    rollingpolicy:
+      file-name-pattern: logs/archived/radar-api-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      max-history: 30
+  level:
+    root: INFO
+    com.radar.api: INFO
+
+# Clave HMAC-SHA256 para firmar los tokens JWT (mínimo 32 caracteres) y tiempo de expiración (24h = 86400000 ms)
 jwt:
   secret: ${JWT_SECRET:cambia-esta-clave-secreta-por-una-real-de-al-menos-32-caracteres}
   expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
+# Credenciales de Google Identity Services (OAuth 2.0) para validar el id_token al iniciar sesión con Google
 google:
   client-id: ${GOOGLE_CLIENT_ID:485878779082-c5ogc8gk2aisvbs7q5guf9immef5pi7v.apps.googleusercontent.com}
 
+# Configuración de Google reCAPTCHA para proteger el login y el registro contra bots
 recaptcha:
   enabled: ${RECAPTCHA_ENABLED:false}
   secret-key: ${RECAPTCHA_SECRET_KEY:}
 
+# Parámetros propios de la aplicación RADAR (CORS, cuenta admin semilla y respaldos de base de datos)
 app:
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:4200}

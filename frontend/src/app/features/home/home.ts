@@ -1,9 +1,15 @@
+// Importaciones de Angular para ciclo de vida, manipulación del DOM y reactividad con signals y effects
 import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+// Leaflet: librería de mapas interactivos OpenStreetMap
 import * as L from 'leaflet';
+// Botones de cambio de tema (claro/oscuro) y cambio de idioma (ES/EN)
 import { ThemeToggle } from '../../shared/theme-toggle/theme-toggle';
+import { LanguageToggle } from '../../shared/language-toggle/language-toggle';
+// Servicios de autenticación, idioma y gestión de reportes urbanos
 import { AuthService } from '../../core/services/auth.service';
+import { LanguageService } from '../../core/services/language.service';
 import { ReportService } from '../../core/services/report.service';
 import {
   CreateReportRequest,
@@ -21,23 +27,29 @@ const DEFAULT_ZOOM = 13;
 const NAV_ZOOM = 18;
 const ARROW_SVG = '<svg viewBox="0 0 24 24"><path d="M12 2 4 21l8-4 8 4z"/></svg>';
 
+// Vista principal del mapa interactivo: geolocalización en vivo estilo Waze y creación/consulta de reportes
 @Component({
   selector: 'app-home',
-  imports: [FormsModule, ThemeToggle],
+  imports: [FormsModule, ThemeToggle, LanguageToggle],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
 export class Home implements AfterViewInit, OnDestroy {
+  // Inyección de servicios de usuario, idioma, reportes y enrutador
   protected readonly authService = inject(AuthService);
+  protected readonly i18n = inject(LanguageService);
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
 
+  // Referencia al <div #mapContainer> donde Leaflet dibuja el mapa interactivo
   @ViewChild('mapContainer') private mapContainer!: ElementRef<HTMLDivElement>;
 
+  // Catálogos de categorías, niveles de gravedad y etiquetas de estado de los reportes
   protected readonly categories = REPORT_CATEGORIES;
   protected readonly severities = REPORT_SEVERITIES;
   protected readonly statusLabels = REPORT_STATUS_LABELS;
 
+  // Signals reactivos para la lista de reportes cargados desde el backend
   protected readonly reports = signal<Report[]>([]);
   protected readonly loadingReports = signal(true);
   protected readonly loadError = signal<string | null>(null);
@@ -382,11 +394,6 @@ export class Home implements AfterViewInit, OnDestroy {
         this.selectedReport.set(report);
       });
       marker.addTo(this.markersLayer);
-    }
-  }
-
-  protected logout(): void {
-    this.authService.logout();
-    void this.router.navigateByUrl('/login');
-  }
-}
+     }
+   }
+ }

@@ -4,28 +4,39 @@
       <svg width="22" height="22" viewBox="0 0 256 256" fill="var(--theme-fg)" xmlns="http://www.w3.org/2000/svg">
         <path d="M 256 256 L 128 256 L 0 128 L 128 128 Z M 256 128 L 128 128 L 0 0 L 128 0 Z" />
       </svg>
-      <span class="text-lg font-playfair italic">RADAR · Administrador</span>
+      <span class="text-lg font-playfair italic">{{ i18n.t('admin.title') }}</span>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="flex flex-wrap items-center gap-3">
+      <app-language-toggle />
       <app-theme-toggle />
+      <button
+        type="button"
+        (click)="scrollToAudit()"
+        class="inline-flex items-center gap-2 text-sm font-medium text-[#e8702a] hover:bg-[#e8702a]/10 border border-[#e8702a]/40 rounded-full px-4 py-2 transition-colors"
+      >
+        <span>📋 {{ i18n.t('admin.auditNav') }}</span>
+        <span class="bg-[#e8702a] text-white text-xs font-semibold rounded-full px-2 py-0.5 tabular-nums">
+          {{ auditStats().total }}
+        </span>
+      </button>
       <a
         routerLink="/mapa"
         class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
       >
-        Ver mapa
+        {{ i18n.t('admin.viewMap') }}
       </a>
       <a
         routerLink="/admin/nuevo"
         class="text-sm text-fg/80 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
       >
-        + Nuevo administrador
+        {{ i18n.t('admin.newAdmin') }}
       </a>
       <button
         type="button"
         (click)="logout()"
         class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 transition-colors"
       >
-        Cerrar sesión
+        {{ i18n.t('nav.logout') }}
       </button>
     </div>
   </header>
@@ -33,17 +44,17 @@
   @if (errorMessage()) {
     <div class="bg-red-500/10 border border-red-500/30 text-red-700 dark:text-red-300 text-sm rounded-lg p-3 mb-6 flex items-center justify-between gap-3">
       <span>{{ errorMessage() }}</span>
-      <button type="button" (click)="loadReports()" class="underline shrink-0">Reintentar</button>
+      <button type="button" (click)="loadReports()" class="underline shrink-0">{{ i18n.t('map.retry') }}</button>
     </div>
   }
 
   @if (loading()) {
-    <p class="text-fg/60 text-sm">Cargando reportes…</p>
+    <p class="text-fg/60 text-sm">{{ i18n.t('admin.loading') }}</p>
   } @else {
     <!-- Resumen: KPIs -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
       <div class="bg-panel border border-fg/10 rounded-2xl p-4 sm:p-5">
-        <p class="text-fg/60 text-xs uppercase tracking-wide">Total de reportes</p>
+        <p class="text-fg/60 text-xs uppercase tracking-wide">{{ i18n.t('admin.totalReports') }}</p>
         <p class="text-3xl sm:text-4xl font-semibold mt-2 tabular-nums">{{ total() }}</p>
       </div>
       @for (status of statuses; track status) {
@@ -54,7 +65,7 @@
           </p>
           <p class="text-3xl sm:text-4xl font-semibold mt-2 tabular-nums">{{ countByStatus()[status] }}</p>
           @if (status === 'RESUELTO') {
-            <p class="text-fg/60 text-xs mt-1">{{ resolvedPercent() }}% del total</p>
+            <p class="text-fg/60 text-xs mt-1">{{ resolvedPercent() }}{{ i18n.t('admin.ofTotal') }}</p>
           }
         </div>
       }
@@ -63,7 +74,7 @@
     <section class="bg-panel border border-fg/10 rounded-2xl p-5 mb-8" aria-labelledby="backup-title">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 id="backup-title" class="text-lg font-playfair italic">Backups de la base de datos</h2>
+          <h2 id="backup-title" class="text-lg font-playfair italic">{{ i18n.t('admin.backupsTitle') }}</h2>
         </div>
         <button
           type="button"
@@ -71,7 +82,7 @@
           [disabled]="backupLoading()"
           class="text-sm text-fg/70 hover:text-fg border border-fg/20 rounded-full px-4 py-2 disabled:opacity-50"
         >
-          {{ backupLoading() ? 'Actualizando…' : 'Actualizar estado' }}
+          {{ backupLoading() ? i18n.t('admin.refreshing') : i18n.t('admin.refreshStatus') }}
         </button>
       </div>
 
@@ -172,7 +183,7 @@
     <!-- Gráficas -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
       <div class="bg-panel border border-fg/10 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-4">Reportes por categoría</h2>
+        <h2 class="text-sm font-semibold mb-4">{{ i18n.t('admin.byCategory') }}</h2>
         <ul class="flex flex-col gap-3">
           @for (row of byCategory(); track row.value) {
             <li class="flex items-center gap-3 text-sm" [title]="row.label + ': ' + row.count">
@@ -191,7 +202,7 @@
       </div>
 
       <div class="bg-panel border border-fg/10 rounded-2xl p-5">
-        <h2 class="text-sm font-semibold mb-4">Estado de los reportes</h2>
+        <h2 class="text-sm font-semibold mb-4">{{ i18n.t('admin.byStatus') }}</h2>
         @if (total() === 0) {
           <p class="text-fg/60 text-sm">Aún no hay datos para mostrar.</p>
         } @else {
@@ -227,7 +238,7 @@
 
     <!-- Gestión (CRUD) -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-      <h2 class="text-lg font-playfair italic">Gestión de reportes</h2>
+      <h2 class="text-lg font-playfair italic">{{ i18n.t('admin.manageReports') }}</h2>
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
@@ -236,7 +247,7 @@
           class="rounded-full border border-fg/20 px-4 py-2 text-sm font-medium text-fg transition-colors hover:bg-fg/5 disabled:cursor-not-allowed disabled:opacity-50"
           title="Descargar los reportes filtrados en PDF"
         >
-          {{ exporting() === 'pdf' ? 'Generando PDF…' : 'Exportar PDF' }}
+          {{ exporting() === 'pdf' ? 'Generando PDF…' : i18n.t('admin.exportPdf') }}
         </button>
         <button
           type="button"
@@ -245,13 +256,13 @@
           class="rounded-full bg-[#e8702a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#d2611f] disabled:cursor-not-allowed disabled:opacity-50"
           title="Descargar los reportes filtrados en Excel"
         >
-          {{ exporting() === 'excel' ? 'Generando Excel…' : 'Exportar Excel' }}
+          {{ exporting() === 'excel' ? 'Generando Excel…' : i18n.t('admin.exportExcel') }}
         </button>
         <input
           type="search"
           [ngModel]="search()"
           (ngModelChange)="search.set($event)"
-          placeholder="Buscar descripción o autor…"
+          [placeholder]="i18n.t('admin.searchPlaceholder')"
           class="bg-fg/5 border border-fg/20 rounded-full px-4 py-2 text-sm placeholder-fg/40 focus:outline-none focus:border-[#e8702a] w-full sm:w-64"
         />
         <select
@@ -260,7 +271,7 @@
           class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
           aria-label="Filtrar por categoría"
         >
-          <option value="">Todas las categorías</option>
+          <option value="">{{ i18n.t('admin.allCategories') }}</option>
           @for (cat of categories; track cat.value) {
             <option [value]="cat.value">{{ cat.label }}</option>
           }
@@ -271,7 +282,7 @@
           class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
           aria-label="Filtrar por estado"
         >
-          <option value="">Todos los estados</option>
+          <option value="">{{ i18n.t('admin.allStatuses') }}</option>
           @for (status of statuses; track status) {
             <option [value]="status">{{ statusLabels[status] }}</option>
           }
@@ -346,6 +357,189 @@
       </div>
       <p class="text-fg/50 text-xs mt-2">Mostrando {{ filtered().length }} de {{ total() }} reportes</p>
     }
+
+    <!-- Sección de Auditoría: Historial de cambios y reporte de actividad -->
+    <section
+      id="auditoria-section"
+      class="mt-10 bg-panel border border-fg/10 rounded-2xl p-5 sm:p-6"
+      aria-labelledby="audit-title"
+    >
+      <div class="flex flex-wrap items-start justify-between gap-4 mb-5">
+        <div>
+          <h2 id="audit-title" class="text-lg sm:text-xl font-playfair italic flex items-center gap-2">
+            <span>📋</span>
+            <span>{{ i18n.t('admin.auditTitle') }}</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-fg/60 mt-1">
+            {{ i18n.t('admin.auditSubtitle') }}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            (click)="exportAuditPdf()"
+            [disabled]="filteredAuditEntries().length === 0 || auditExporting() !== null"
+            class="rounded-full border border-fg/20 px-4 py-2 text-sm font-medium text-fg transition-colors hover:bg-fg/5 disabled:cursor-not-allowed disabled:opacity-50"
+            title="Descargar reporte oficial de auditoría en PDF"
+          >
+            {{ auditExporting() === 'pdf' ? 'Generando PDF…' : i18n.t('admin.auditExportPdf') }}
+          </button>
+          <button
+            type="button"
+            (click)="exportAuditExcel()"
+            [disabled]="filteredAuditEntries().length === 0 || auditExporting() !== null"
+            class="rounded-full bg-[#e8702a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#d2611f] disabled:cursor-not-allowed disabled:opacity-50"
+            title="Descargar reporte oficial de auditoría en Excel"
+          >
+            {{ auditExporting() === 'excel' ? 'Generando Excel…' : i18n.t('admin.auditExportExcel') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Indicadores rápidos del reporte de auditoría -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div class="rounded-xl border border-fg/10 bg-fg/[0.02] p-3.5">
+          <p class="text-xs text-fg/60 uppercase tracking-wide">{{ i18n.t('admin.auditTotalEvents') }}</p>
+          <p class="text-2xl font-semibold mt-1 tabular-nums">{{ auditStats().total }}</p>
+        </div>
+        <div class="rounded-xl border border-fg/10 bg-fg/[0.02] p-3.5">
+          <p class="text-xs text-fg/60 uppercase tracking-wide">{{ i18n.t('admin.auditStatusChanges') }}</p>
+          <p class="text-2xl font-semibold mt-1 tabular-nums text-blue-500">{{ auditStats().statusChanges }}</p>
+        </div>
+        <div class="rounded-xl border border-fg/10 bg-fg/[0.02] p-3.5">
+          <p class="text-xs text-fg/60 uppercase tracking-wide">{{ i18n.t('admin.auditEditsDeletes') }}</p>
+          <p class="text-2xl font-semibold mt-1 tabular-nums text-amber-500">{{ auditStats().editsAndDeletes }}</p>
+        </div>
+        <div class="rounded-xl border border-fg/10 bg-fg/[0.02] p-3.5">
+          <p class="text-xs text-fg/60 uppercase tracking-wide">{{ i18n.t('admin.auditBackupsExports') }}</p>
+          <p class="text-2xl font-semibold mt-1 tabular-nums text-[#e8702a]">{{ auditStats().backupsAndExports }}</p>
+        </div>
+      </div>
+
+      <!-- Barra de filtros de Auditoría -->
+      <div class="flex flex-wrap items-center gap-2 mb-4">
+        <input
+          type="search"
+          [ngModel]="auditSearch()"
+          (ngModelChange)="auditSearch.set($event)"
+          [placeholder]="i18n.t('admin.auditSearch')"
+          class="bg-fg/5 border border-fg/20 rounded-full px-4 py-2 text-sm placeholder-fg/40 focus:outline-none focus:border-[#e8702a] flex-1 min-w-[220px]"
+        />
+        <select
+          [ngModel]="auditFilterModule()"
+          (ngModelChange)="auditFilterModule.set($event)"
+          class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
+          aria-label="Filtrar auditoría por módulo"
+        >
+          <option value="">{{ i18n.t('admin.auditAllModules') }}</option>
+          @for (mod of auditModules; track mod) {
+            <option [value]="mod">{{ mod }}</option>
+          }
+        </select>
+        <select
+          [ngModel]="auditFilterAction()"
+          (ngModelChange)="auditFilterAction.set($event)"
+          class="bg-panel border border-fg/20 rounded-full px-3 py-2 text-sm focus:outline-none focus:border-[#e8702a]"
+          aria-label="Filtrar auditoría por tipo de acción"
+        >
+          <option value="">{{ i18n.t('admin.auditAllActions') }}</option>
+          @for (act of auditActions; track act) {
+            <option [value]="act">
+              {{ i18n.lang() === 'en' ? auditActionMeta[act].labelEn : auditActionMeta[act].label }}
+            </option>
+          }
+        </select>
+        @if (auditFilterModule() || auditFilterAction() || auditSearch().trim()) {
+          <button
+            type="button"
+            (click)="clearAuditFilters()"
+            class="text-xs text-fg/70 hover:text-fg underline px-2 py-1"
+          >
+            Limpiar filtros
+          </button>
+        }
+      </div>
+
+      @if (filteredAuditEntries().length === 0) {
+        <p class="text-fg/60 text-sm py-4">
+          No hay registros de auditoría que coincidan con los filtros seleccionados.
+        </p>
+      } @else {
+        <div class="overflow-x-auto rounded-xl border border-fg/10">
+          <table class="w-full text-sm">
+            <thead class="bg-fg/5 text-fg/60 text-left">
+              <tr>
+                <th class="px-4 py-3 font-medium whitespace-nowrap">{{ i18n.t('admin.auditColDate') }}</th>
+                <th class="px-4 py-3 font-medium">{{ i18n.t('admin.auditColUser') }}</th>
+                <th class="px-4 py-3 font-medium">{{ i18n.t('admin.auditColModule') }}</th>
+                <th class="px-4 py-3 font-medium">{{ i18n.t('admin.auditColAction') }}</th>
+                <th class="px-4 py-3 font-medium whitespace-nowrap">{{ i18n.t('admin.auditColEntity') }}</th>
+                <th class="px-4 py-3 font-medium">{{ i18n.t('admin.auditColChange') }}</th>
+                <th class="px-4 py-3 font-medium">{{ i18n.t('admin.auditColDetail') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of filteredAuditEntries(); track item.id) {
+                <tr class="border-t border-fg/10 hover:bg-fg/[0.02] transition-colors">
+                  <td class="px-4 py-3 text-xs text-fg/70 whitespace-nowrap tabular-nums">
+                    {{ item.createdAt | date: 'short' }}
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <div class="font-medium text-fg">{{ item.usuario }}</div>
+                    <span class="inline-block text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-fg/10 text-fg/70 mt-0.5">
+                      {{ item.rol }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span class="text-xs font-mono uppercase px-2 py-1 rounded-md bg-fg/5 border border-fg/10">
+                      {{ item.modulo }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 whitespace-nowrap">
+                    <span
+                      class="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full"
+                      [style.color]="auditActionMeta[item.accion]?.color ?? '#e8702a'"
+                      [style.background]="auditActionMeta[item.accion]?.bg ?? 'rgba(232,112,42,0.14)'"
+                    >
+                      <span
+                        class="w-1.5 h-1.5 rounded-full"
+                        [style.background]="auditActionMeta[item.accion]?.color ?? '#e8702a'"
+                      ></span>
+                      {{
+                        i18n.lang() === 'en'
+                          ? (auditActionMeta[item.accion]?.labelEn ?? item.accion)
+                          : (auditActionMeta[item.accion]?.label ?? item.accion)
+                      }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 font-medium whitespace-nowrap">
+                    {{ item.entidad }}
+                  </td>
+                  <td class="px-4 py-3 max-w-[260px]">
+                    <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span class="px-2 py-0.5 rounded bg-fg/5 text-fg/60 line-through truncate max-w-[120px]" [title]="item.valorAnterior">
+                        {{ item.valorAnterior }}
+                      </span>
+                      <span class="text-fg/40">→</span>
+                      <span class="px-2 py-0.5 rounded bg-[#e8702a]/15 text-[#e8702a] font-medium truncate max-w-[140px]" [title]="item.valorNuevo">
+                        {{ item.valorNuevo }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-xs text-fg/80 max-w-[340px]" [title]="item.detalle">
+                    {{ item.detalle }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="text-fg/50 text-xs mt-2">
+          Mostrando {{ filteredAuditEntries().length }} de {{ auditStats().total }} eventos en el reporte de auditoría
+        </p>
+      }
+    </section>
   }
 
   <!-- Modal: editar reporte -->

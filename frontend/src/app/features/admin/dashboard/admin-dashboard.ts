@@ -1,12 +1,24 @@
+// Importaciones de Angular para componentes, valores computados, inyección y signals reactivos
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+// Servicios para autenticación, respaldos (backups), auditoría, reportes e internacionalización (idioma)
+import { AuditService } from '../../../core/services/audit.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { BackupService } from '../../../core/services/backup.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { ReportService } from '../../../core/services/report.service';
+import {
+  AUDIT_ACTION_META,
+  AuditAction,
+  AuditEntry,
+  AuditModule,
+} from '../../../core/models/audit.models';
 import { BackupInfo, BackupStatus } from '../../../core/models/backup.models';
+// Botones de cambio de tema (claro/oscuro) y cambio de idioma (ES/EN)
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
+import { LanguageToggle } from '../../../shared/language-toggle/language-toggle';
 import {
   Report,
   ReportCategory,
@@ -16,27 +28,50 @@ import {
   REPORT_STATUS_LABELS,
 } from '../../../core/models/report.models';
 
+// Panel de administración: KPIs, gráficas, gestión CRUD de reportes, sección de Auditoría, exportación PDF/Excel y backups de BD
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [DatePipe, FormsModule, RouterLink, ThemeToggle],
+  imports: [DatePipe, FormsModule, RouterLink, ThemeToggle, LanguageToggle],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
 export class AdminDashboard implements OnInit {
+  // Inyección de dependencias de servicios y router
+  protected readonly auditService = inject(AuditService);
   private readonly authService = inject(AuthService);
   private readonly backupService = inject(BackupService);
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
+  protected readonly i18n = inject(LanguageService);
 
+  // Catálogos de categorías, estados, colores de estado y metadatos de auditoría
   protected readonly categories = REPORT_CATEGORIES;
   protected readonly statuses: ReportStatus[] = ['PENDIENTE', 'EN_PROGRESO', 'RESUELTO'];
   protected readonly statusLabels = REPORT_STATUS_LABELS;
   protected readonly statusColors = REPORT_STATUS_COLORS;
+  protected readonly auditActionMeta = AUDIT_ACTION_META;
+  protected readonly auditModules: AuditModule[] = [
+    'REPORTES',
+    'BACKUPS',
+    'ADMINISTRADORES',
+    'EXPORTACIONES',
+    'SEGURIDAD',
+  ];
+  protected readonly auditActions: AuditAction[] = [
+    'CREACION',
+    'CAMBIO_ESTADO',
+    'EDICION',
+    'ELIMINACION',
+    'BACKUP',
+    'RESTAURACION',
+    'EXPORTACION',
+  ];
 
   protected readonly reports = signal<Report[]>([]);
   protected readonly loading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly exporting = signal<'pdf' | 'excel' | null>(null);
+  protected readonly auditExporting = signal<'pdf' | 'excel' | null>(null);
   protected readonly backupStatus = signal<BackupStatus | null>(null);
   protected readonly backupIntervalHours = signal(24);
   protected readonly backupScheduleEnabled = signal(false);
@@ -48,10 +83,15 @@ export class AdminDashboard implements OnInit {
   protected readonly restoreDialogOpen = signal(false);
   protected readonly restoreConfirmation = signal('');
 
-  // Filtros de la tabla
+  // Filtros de la tabla de reportes
   protected readonly filterStatus = signal<ReportStatus | ''>('');
   protected readonly filterCategory = signal<ReportCategory | ''>('');
   protected readonly search = signal('');
+
+  // Filtros de la sección de Auditoría (historial de cambios)
+  protected readonly auditFilterModule = signal<AuditModule | ''>('');
+  protected readonly auditFilterAction = signal<AuditAction | ''>('');
+  protected readonly auditSearch = signal('');
 
   // Edición (modal) y borrado (confirmación)
   protected readonly editing = signal<Report | null>(null);
@@ -103,7 +143,40 @@ export class AdminDashboard implements OnInit {
     );
   });
 
+  // --- Auditoría: lista filtrada e indicadores (KPIs) del historial de cambios ---
+  protected readonly auditEntries = this.auditService.entries;
+
+  protected readonly filteredAuditEntries = computed<AuditEntry[]>(() => {
+    const mod = this.auditFilterModule();
+    const act = this.auditFilterAction();
+    const term = this.auditSearch().trim().toLowerCase();
+    return this.auditEntries().filter(
+      (item) =>
+        (!mod || item.modulo === mod) &&
+        (!act || item.accion === act) &&
+        (!term ||
+          item.usuario.toLowerCase().includes(term) ||
+          item.entidad.toLowerCase().includes(term) ||
+          item.detalle.toLowerCase().includes(term) ||
+          item.valorAnterior.toLowerCase().includes(term) ||
+          item.valorNuevo.toLowerCase().includes(term)),
+    );
+  });
+
+  protected readonly auditStats = computed(() => {
+    const all = this.auditEntries();
+    return {
+      total: all.length,
+      statusChanges: all.filter((e) => e.accion === 'CAMBIO_ESTADO').length,
+      editsAndDeletes: all.filter((e) => e.accion === 'EDICION' || e.accion === 'ELIMINACION').length,
+      backupsAndExports: all.filter(
+        (e) => e.accion === 'BACKUP' || e.accion === 'RESTAURACION' || e.accion === 'EXPORTACION',
+      ).length,
+    };
+  });
+
   ngOnInit(): void {
+    this.auditService.loadFromBackend();
     this.loadReports();
     this.loadBackupStatus();
   }
@@ -117,6 +190,7 @@ export class AdminDashboard implements OnInit {
         this.backupIntervalHours.set(status.intervalHours);
         this.backupScheduleEnabled.set(status.scheduleEnabled);
         this.backupLoading.set(false);
+        this.auditService.syncWithSystemState(this.reports(), status);
       },
       error: (error: unknown) => {
         this.backupError.set(this.backupErrorText(error, 'No se pudo cargar el estado de los backups.'));
@@ -132,11 +206,21 @@ export class AdminDashboard implements OnInit {
     this.backupSaving.set(true);
     this.backupError.set(null);
     this.backupMessage.set(null);
-    this.backupService.updateSchedule(this.backupScheduleEnabled(), this.backupIntervalHours()).subscribe({
+    const enabled = this.backupScheduleEnabled();
+    const hours = this.backupIntervalHours();
+    this.backupService.updateSchedule(enabled, hours).subscribe({
       next: (status) => {
         this.backupStatus.set(status);
         this.backupSaving.set(false);
         this.backupMessage.set('La programación de backups quedó guardada.');
+        this.auditService.record({
+          modulo: 'BACKUPS',
+          accion: 'EDICION',
+          entidad: 'Programación Backup',
+          valorAnterior: 'Configuración previa',
+          valorNuevo: enabled ? `Activo cada ${hours} h` : `Desactivado (${hours} h)`,
+          detalle: `Actualización de la frecuencia automática de backups (${enabled ? 'Activado' : 'Desactivado'}, intervalo: ${hours} horas)`,
+        });
       },
       error: (error: unknown) => {
         this.backupError.set(this.backupErrorText(error, 'No se pudo guardar la programación.'));
@@ -153,7 +237,17 @@ export class AdminDashboard implements OnInit {
     this.backupError.set(null);
     this.backupMessage.set(null);
     this.backupService.createBackup().subscribe({
-      next: (backup) => this.onBackupCompleted(backup, 'Backup creado'),
+      next: (backup) => {
+        this.onBackupCompleted(backup, 'Backup creado');
+        this.auditService.record({
+          modulo: 'BACKUPS',
+          accion: 'BACKUP',
+          entidad: 'PostgreSQL Backup',
+          valorAnterior: 'Estado actual BD',
+          valorNuevo: backup.name,
+          detalle: `Creación manual de copia de seguridad de PostgreSQL: ${backup.name}`,
+        });
+      },
       error: (error: unknown) => {
         this.backupError.set(this.backupErrorText(error, 'No se pudo crear el backup.'));
         this.backupBusy.set(false);
@@ -185,6 +279,14 @@ export class AdminDashboard implements OnInit {
         this.restoreDialogOpen.set(false);
         this.restoreConfirmation.set('');
         this.onBackupCompleted(backup, 'Backup restaurado');
+        this.auditService.record({
+          modulo: 'BACKUPS',
+          accion: 'RESTAURACION',
+          entidad: 'PostgreSQL Restore',
+          valorAnterior: 'Datos previos en BD',
+          valorNuevo: backup.name,
+          detalle: `Restauración completa de la base de datos a partir del respaldo: ${backup.name}`,
+        });
         this.loadReports();
       },
       error: (error: unknown) => {
@@ -201,6 +303,7 @@ export class AdminDashboard implements OnInit {
       next: (reports) => {
         this.reports.set(reports);
         this.loading.set(false);
+        this.auditService.syncWithSystemState(reports, this.backupStatus());
       },
       error: () => {
         this.errorMessage.set('No se pudieron cargar los reportes.');
@@ -222,6 +325,18 @@ export class AdminDashboard implements OnInit {
     this.filterStatus.set('');
     this.filterCategory.set('');
     this.search.set('');
+  }
+
+  protected clearAuditFilters(): void {
+    this.auditFilterModule.set('');
+    this.auditFilterAction.set('');
+    this.auditSearch.set('');
+  }
+
+  protected scrollToAudit(): void {
+    if (typeof document !== 'undefined') {
+      document.getElementById('auditoria-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   protected async exportPdf(): Promise<void> {
@@ -263,7 +378,16 @@ export class AdminDashboard implements OnInit {
         margin: { left: 14, right: 14 },
       });
 
-      document.save(`radar-reportes-${this.exportDateStamp()}.pdf`);
+      const fileName = `radar-reportes-${this.exportDateStamp()}.pdf`;
+      document.save(fileName);
+      this.auditService.record({
+        modulo: 'EXPORTACIONES',
+        accion: 'EXPORTACION',
+        entidad: fileName,
+        valorAnterior: `${reports.length} reportes filtrados`,
+        valorNuevo: 'Documento PDF descargado',
+        detalle: `Exportación de reporte general en formato PDF (${reports.length} registros, filtros: ${this.activeFiltersLabel()})`,
+      });
     } catch {
       this.errorMessage.set('No se pudo generar el PDF. Intenta nuevamente.');
     } finally {
@@ -312,14 +436,124 @@ export class AdminDashboard implements OnInit {
       worksheet.getColumn('fecha').numFmt = 'dd/mm/yyyy hh:mm';
 
       const buffer = await workbook.xlsx.writeBuffer();
+      const fileName = `radar-reportes-${this.exportDateStamp()}.xlsx`;
       this.downloadBlob(
         new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-        `radar-reportes-${this.exportDateStamp()}.xlsx`,
+        fileName,
       );
+      this.auditService.record({
+        modulo: 'EXPORTACIONES',
+        accion: 'EXPORTACION',
+        entidad: fileName,
+        valorAnterior: `${reports.length} reportes filtrados`,
+        valorNuevo: 'Hoja de cálculo Excel (.xlsx)',
+        detalle: `Exportación de reporte general en formato Excel (${reports.length} registros, filtros: ${this.activeFiltersLabel()})`,
+      });
     } catch {
       this.errorMessage.set('No se pudo generar el archivo Excel. Intenta nuevamente.');
     } finally {
       this.exporting.set(null);
+    }
+  }
+
+  // --- Exportación del Reporte de Auditoría (PDF y Excel) ---
+  protected async exportAuditPdf(): Promise<void> {
+    const entries = this.filteredAuditEntries();
+    if (entries.length === 0 || this.auditExporting()) {
+      return;
+    }
+
+    this.auditExporting.set('pdf');
+    try {
+      const [{ jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ]);
+      const document = new jsPDF({ orientation: 'landscape' });
+      const generatedAt = new Intl.DateTimeFormat('es-CO', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
+
+      document.setFontSize(16);
+      document.text('RADAR · Reporte Oficial de Auditoría e Historial de Cambios', 14, 16);
+      document.setFontSize(9);
+      document.text(`Generado: ${generatedAt} · Eventos auditados: ${entries.length}`, 14, 23);
+
+      autoTable(document, {
+        startY: 30,
+        head: [['Fecha / Hora', 'Usuario / Actor', 'Rol', 'Módulo', 'Acción', 'Recurso', 'Antes → Después', 'Detalle del cambio']],
+        body: entries.map((item) => [
+          new Intl.DateTimeFormat('es-CO', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(item.createdAt)),
+          item.usuario,
+          item.rol,
+          item.modulo,
+          this.auditActionMeta[item.accion]?.label ?? item.accion,
+          item.entidad,
+          `${item.valorAnterior} -> ${item.valorNuevo}`,
+          item.detalle,
+        ]),
+        styles: { fontSize: 7.5, cellPadding: 2 },
+        headStyles: { fillColor: [232, 112, 42] },
+        margin: { left: 14, right: 14 },
+      });
+
+      document.save(`radar-auditoria-${this.exportDateStamp()}.pdf`);
+    } catch {
+      this.errorMessage.set('No se pudo generar el reporte de auditoría en PDF.');
+    } finally {
+      this.auditExporting.set(null);
+    }
+  }
+
+  protected async exportAuditExcel(): Promise<void> {
+    const entries = this.filteredAuditEntries();
+    if (entries.length === 0 || this.auditExporting()) {
+      return;
+    }
+
+    this.auditExporting.set('excel');
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = 'RADAR Auditoría';
+      workbook.created = new Date();
+
+      const worksheet = workbook.addWorksheet('Auditoría');
+      worksheet.columns = [
+        { header: 'Fecha / Hora', key: 'fecha', width: 22 },
+        { header: 'Usuario', key: 'usuario', width: 28 },
+        { header: 'Rol', key: 'rol', width: 14 },
+        { header: 'Módulo', key: 'modulo', width: 18 },
+        { header: 'Acción', key: 'accion', width: 20 },
+        { header: 'Recurso', key: 'entidad', width: 18 },
+        { header: 'Valor Anterior', key: 'antes', width: 26 },
+        { header: 'Valor Nuevo', key: 'despues', width: 26 },
+        { header: 'Detalle del Cambio', key: 'detalle', width: 52 },
+      ];
+      worksheet.addRows(entries.map((item) => ({
+        fecha: new Date(item.createdAt),
+        usuario: item.usuario,
+        rol: item.rol,
+        modulo: item.modulo,
+        accion: this.auditActionMeta[item.accion]?.label ?? item.accion,
+        entidad: item.entidad,
+        antes: item.valorAnterior,
+        despues: item.valorNuevo,
+        detalle: item.detalle,
+      })));
+      worksheet.views = [{ state: 'frozen', ySplit: 1 }];
+      worksheet.autoFilter = 'A1:I1';
+      worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8702A' } };
+      worksheet.getColumn('fecha').numFmt = 'dd/mm/yyyy hh:mm';
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      this.downloadBlob(
+        new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
+        `radar-auditoria-${this.exportDateStamp()}.xlsx`,
+      );
+    } catch {
+      this.errorMessage.set('No se pudo generar el reporte de auditoría en Excel.');
+    } finally {
+      this.auditExporting.set(null);
     }
   }
 
@@ -328,8 +562,21 @@ export class AdminDashboard implements OnInit {
     if (estado === report.estado) {
       return;
     }
+    const estadoPrevio = this.statusLabels[report.estado];
+    const estadoNuevo = this.statusLabels[estado];
+    const catLabel = this.categoryMeta(report.categoria).label;
     this.reportService.updateEstado(report.id, estado).subscribe({
-      next: (updated) => this.replaceReport(updated),
+      next: (updated) => {
+        this.replaceReport(updated);
+        this.auditService.record({
+          modulo: 'REPORTES',
+          accion: 'CAMBIO_ESTADO',
+          entidad: `Reporte #${report.id}`,
+          valorAnterior: estadoPrevio,
+          valorNuevo: estadoNuevo,
+          detalle: `Cambio de estado en reporte #${report.id} (${catLabel} de ${report.autorNombre}): pasó de "${estadoPrevio}" a "${estadoNuevo}"`,
+        });
+      },
       error: () => this.errorMessage.set('No se pudo actualizar el estado del reporte.'),
     });
   }
@@ -356,11 +603,23 @@ export class AdminDashboard implements OnInit {
       this.editError.set('La descripción es obligatoria.');
       return;
     }
+    const catAnterior = this.categoryMeta(report.categoria).label;
+    const descAnterior = report.descripcion;
+    const catNueva = this.categoryMeta(this.editCategory()).label;
+
     this.saving.set(true);
     this.editError.set(null);
     this.reportService.update(report.id, { categoria: this.editCategory(), descripcion }).subscribe({
       next: (updated) => {
         this.replaceReport(updated);
+        this.auditService.record({
+          modulo: 'REPORTES',
+          accion: 'EDICION',
+          entidad: `Reporte #${report.id}`,
+          valorAnterior: `${catAnterior}: "${descAnterior}"`,
+          valorNuevo: `${catNueva}: "${descripcion}"`,
+          detalle: `Edición administrativa del reporte #${report.id} (autor original: ${report.autorNombre})`,
+        });
         this.saving.set(false);
         this.closeEdit();
       },
@@ -385,10 +644,19 @@ export class AdminDashboard implements OnInit {
     if (!report || this.deleteBusy()) {
       return;
     }
+    const catLabel = this.categoryMeta(report.categoria).label;
     this.deleteBusy.set(true);
     this.reportService.delete(report.id).subscribe({
       next: () => {
         this.reports.update((current) => current.filter((r) => r.id !== report.id));
+        this.auditService.record({
+          modulo: 'REPORTES',
+          accion: 'ELIMINACION',
+          entidad: `Reporte #${report.id}`,
+          valorAnterior: `${catLabel} · "${report.descripcion}"`,
+          valorNuevo: 'Eliminado permanentemente',
+          detalle: `Eliminación definitiva del reporte #${report.id} publicado por ${report.autorNombre}`,
+        });
         this.deleteBusy.set(false);
         this.deleting.set(null);
       },

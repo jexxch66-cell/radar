@@ -15,10 +15,11 @@
       </svg>
       <span class="text-fg text-xl font-playfair italic">RADAR</span>
     </a>
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-3">
+      <app-language-toggle />
       <app-theme-toggle />
       <a routerLink="/bienvenida" class="text-fg/70 text-sm font-medium hover:text-fg transition-colors">
-      ← Volver
+      {{ i18n.t('nav.back') }}
     </a>
     </div>
   </nav>
@@ -27,22 +28,22 @@
   <div class="relative z-10 w-full max-w-[400px] mx-5 my-24">
     <div class="bg-panel/70 backdrop-blur-xl border border-fg/20 rounded-3xl p-8 sm:p-10 shadow-2xl">
       <h1 class="text-fg font-playfair italic text-3xl sm:text-4xl" style="letter-spacing: -0.02em">
-        Bienvenido de nuevo
+        {{ i18n.t('login.title') }}
       </h1>
       <p class="text-fg/60 text-sm mt-2 mb-8">
-        Ingresa para ver y reportar lo que pasa en tu ciudad.
+        {{ i18n.t('login.subtitle') }}
       </p>
       @if (sessionExpired) {
         <div role="alert" class="bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-sm rounded-lg p-3 mb-5">
-          Tu sesión se cerró porque se inició sesión en otro navegador. Vuelve a ingresar para continuar.
+          {{ i18n.t('login.sessionExpired') }}
         </div>
       }
 
       <form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         <div #googleButton class="flex min-h-10 justify-center"></div>
-        <div class="flex items-center gap-3 text-xs text-fg/40"><span class="h-px flex-1 bg-fg/15"></span>o continúa con tu email<span class="h-px flex-1 bg-fg/15"></span></div>
+        <div class="flex items-center gap-3 text-xs text-fg/40"><span class="h-px flex-1 bg-fg/15"></span>{{ i18n.t('login.orEmail') }}<span class="h-px flex-1 bg-fg/15"></span></div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="email">Email</label>
+          <label class="text-fg/80 text-sm font-medium" for="email">{{ i18n.t('login.email') }}</label>
           <input
             id="email"
             type="email"
@@ -60,7 +61,7 @@
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-fg/80 text-sm font-medium" for="password">Contraseña</label>
+          <label class="text-fg/80 text-sm font-medium" for="password">{{ i18n.t('login.password') }}</label>
           <input
             id="password"
             type="password"
@@ -87,7 +88,7 @@
                 [disabled]="submitting()"
                 class="self-start text-xs bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 text-white font-semibold py-1.5 px-3 rounded-lg transition-colors cursor-pointer"
               >
-                Cerrar la otra sesión e ingresar aquí
+                {{ i18n.t('login.forceBtn') }}
               </button>
             }
           </div>
@@ -98,13 +99,13 @@
           [disabled]="submitting()"
           class="mt-1 bg-[#e8702a] hover:bg-[#d2611f] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold px-7 py-3 rounded-full transition-all hover:scale-[1.02] active:scale-95 hover:shadow-lg hover:shadow-[#e8702a]/30"
         >
-          {{ submitting() ? 'Ingresando…' : 'Entrar' }}
+          {{ submitting() ? i18n.t('login.submitting') : i18n.t('login.submit') }}
         </button>
       </form>
 
       <p class="text-fg/60 text-sm text-center mt-6">
-        ¿No tienes cuenta?
-        <a routerLink="/registro" class="text-fg font-medium hover:text-[#e8702a] transition-colors">Regístrate</a>
+        {{ i18n.t('login.noAccount') }}
+        <a routerLink="/registro" class="text-fg font-medium hover:text-[#e8702a] transition-colors">{{ i18n.t('login.registerLink') }}</a>
       </p>
     </div>
   </div>

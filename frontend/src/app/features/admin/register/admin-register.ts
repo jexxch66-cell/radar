@@ -1,9 +1,13 @@
+// Importaciones de Angular para componentes, inyección de dependencias y reactividad con signals
 import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+// Servicios de administración, tema, idioma y modelos de error
 import { AdminService } from '../../../core/services/admin.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
+import { LanguageToggle } from '../../../shared/language-toggle/language-toggle';
 import { ApiErrorResponse } from '../../../core/models/auth.models';
 
 // Valida que password y confirmarPassword coincidan; el error se coloca en confirmarPassword
@@ -17,9 +21,10 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
   return null;
 }
 
+// Componente exclusivo para administradores que permite registrar nuevos usuarios con rol ADMIN
 @Component({
   selector: 'app-admin-register',
-  imports: [ReactiveFormsModule, RouterLink, ThemeToggle],
+  imports: [ReactiveFormsModule, RouterLink, ThemeToggle, LanguageToggle],
   templateUrl: './admin-register.html',
   styleUrl: './admin-register.css',
 })
@@ -27,7 +32,9 @@ export class AdminRegister {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
   private readonly router = inject(Router);
+  protected readonly i18n = inject(LanguageService);
 
+  // Formulario reactivo con validaciones de nombre, email y contraseña
   readonly form = this.fb.nonNullable.group(
     {
       nombre: ['', [Validators.required]],
@@ -38,10 +45,12 @@ export class AdminRegister {
     { validators: passwordsMatchValidator },
   );
 
+  // Signals de estado para mostrar carga, errores o éxito
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
 
+  // Envía la petición POST /api/admin/administradores al backend
   onSubmit(): void {
     if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
