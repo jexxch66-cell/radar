@@ -27,7 +27,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
-    public static final Duration SESSION_INACTIVITY_TIMEOUT = Duration.ofMinutes(2);
+    // Si el usuario está activo (heartbeat cada 25 s), 5 min da margen más que suficiente.
+    // Una vez que el timeout expira, la sesión se considera libre y se puede iniciar otra.
+    public static final Duration SESSION_INACTIVITY_TIMEOUT = Duration.ofMinutes(5);
 
     private final UserRepository userRepository;
     private final AdministradorRepository administradorRepository;
@@ -78,7 +80,9 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
-        var adminMatch = administradorRepository.findByEmail(request.getEmail());
+        String rawEmail = request.getEmail() != null ? request.getEmail().trim() : "";
+        var adminMatch = administradorRepository.findByEmail(rawEmail)
+                .or(() -> administradorRepository.findByEmail(rawEmail.toLowerCase()));
         if (adminMatch.isPresent()) {
             Administrador admin = adminMatch.get();
             if (!request.isForce() && isSessionActive(admin.getActiveSessionId(), admin.getLastActiveAt())) {
@@ -99,7 +103,8 @@ public class AuthService {
                     .build();
         }
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(rawEmail)
+                .or(() -> userRepository.findByEmail(rawEmail.toLowerCase()))
                 .orElseThrow(InvalidCredentialsException::new);
 
         if (!request.isForce() && isSessionActive(user.getActiveSessionId(), user.getLastActiveAt())) {
@@ -173,9 +178,11 @@ public class AuthService {
     }
 
     private boolean isSessionActive(String activeSessionId, Instant lastActiveAt) {
-        if (activeSessionId == null || lastActiveAt == null) {
+        // Sin sessionId o sin timestamp de actividad → no hay sesión en curso
+        if (activeSessionId == null || activeSessionId.trim().isEmpty() || lastActiveAt == null) {
             return false;
         }
+        // Hay sesión sólo si hubo un heartbeat reciente dentro del margen de tolerancia
         return lastActiveAt.isAfter(Instant.now().minus(SESSION_INACTIVITY_TIMEOUT));
     }
 

@@ -14,9 +14,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByEmailIgnoreCase(String email);
+
     boolean existsByEmail(String email);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update User u set u.activeSessionId = :sessionId, u.lastActiveAt = :lastActiveAt where u.email = :email")
     int updateActiveSessionId(@Param("email") String email, @Param("sessionId") String sessionId, @Param("lastActiveAt") Instant lastActiveAt);
@@ -25,12 +27,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
         return updateActiveSessionId(email, sessionId, Instant.now());
     }
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update User u set u.lastActiveAt = :lastActiveAt where u.email = :email and u.activeSessionId = :sessionId")
     int updateLastActiveAt(@Param("email") String email, @Param("sessionId") String sessionId, @Param("lastActiveAt") Instant lastActiveAt);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update User u set u.activeSessionId = null, u.lastActiveAt = null where u.email = :email")
     int clearActiveSession(@Param("email") String email);

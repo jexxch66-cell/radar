@@ -152,6 +152,35 @@ class AuthServiceTest {
     }
 
     @Test
+    void allowsLoginWhenSessionIdExistsButLastActiveAtIsNull() {
+        // Si no hay heartbeat registrado (lastActiveAt nulo), la sesión NO se considera activa.
+        // Esto cubre usuarios pre-existentes en BD cuya columna last_active_at era NULL tras la migración.
+        LoginRequest request = loginRequest();
+        User user = User.builder()
+                .id(7L)
+                .nombre("User")
+                .email(request.getEmail())
+                .role(Role.USER)
+                .activeSessionId("stale-session")
+                .lastActiveAt(null)
+                .build();
+        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
+                .password("encoded").roles("USER").build();
+        when(authenticationManager.authenticate(any())).thenReturn(null);
+        when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
+        when(jwtService.newSessionId()).thenReturn("new-session");
+        when(userRepository.updateActiveSessionId(eq(request.getEmail()), eq("new-session"), any(Instant.class))).thenReturn(1);
+        when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
+        when(jwtService.generateToken(details, "new-session")).thenReturn("new-token");
+
+        var response = service.login(request);
+
+        assertEquals("new-token", response.getToken());
+        verify(userRepository).updateActiveSessionId(eq(request.getEmail()), eq("new-session"), any(Instant.class));
+    }
+
+    @Test
     void allowsLoginWhenForceIsTrueEvenIfSessionIsActive() {
         LoginRequest request = loginRequest();
         request.setForce(true);

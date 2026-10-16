@@ -14,9 +14,11 @@ public interface AdministradorRepository extends JpaRepository<Administrador, Lo
 
     Optional<Administrador> findByEmail(String email);
 
+    Optional<Administrador> findByEmailIgnoreCase(String email);
+
     boolean existsByEmail(String email);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update Administrador a set a.activeSessionId = :sessionId, a.lastActiveAt = :lastActiveAt where a.email = :email")
     int updateActiveSessionId(@Param("email") String email, @Param("sessionId") String sessionId, @Param("lastActiveAt") Instant lastActiveAt);
@@ -25,12 +27,12 @@ public interface AdministradorRepository extends JpaRepository<Administrador, Lo
         return updateActiveSessionId(email, sessionId, Instant.now());
     }
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update Administrador a set a.lastActiveAt = :lastActiveAt where a.email = :email and a.activeSessionId = :sessionId")
     int updateLastActiveAt(@Param("email") String email, @Param("sessionId") String sessionId, @Param("lastActiveAt") Instant lastActiveAt);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update Administrador a set a.activeSessionId = null, a.lastActiveAt = null where a.email = :email")
     int clearActiveSession(@Param("email") String email);
