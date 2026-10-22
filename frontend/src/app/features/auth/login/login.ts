@@ -44,6 +44,7 @@ export class Login implements AfterViewInit {
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly canForceLogin = signal(false);
+  private lastGoogleToken: string | null = null;
   // Indica si el usuario fue redirigido aquí porque su sesión se abrió en otro navegador o expiró
   readonly sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
 
@@ -62,11 +63,12 @@ export class Login implements AfterViewInit {
 
   // Envía las credenciales al backend; si force=true, cierra cualquier otra sesión activa del mismo usuario
   onSubmit(force = false): void {
-    if (this.form.invalid || this.submitting()) {
+    if (this.form.invalid || (this.submitting() && !force)) {
       this.form.markAllAsTouched();
       return;
     }
 
+    this.lastGoogleToken = null;
     this.submitting.set(true);
     this.errorMessage.set(null);
     this.canForceLogin.set(false);
@@ -89,18 +91,26 @@ export class Login implements AfterViewInit {
     });
   }
 
-  // Permite al usuario reclamar su sesión cerrando la que estaba abierta en otro dispositivo
+  // Permite al usuario reclamar su sesión cerrando la que estaba abierta en otro dispositivo (funciona para Email y para Google)
   onForceLogin(): void {
+    if (this.lastGoogleToken) {
+      void this.loginWithGoogle(this.lastGoogleToken, true);
+      return;
+    }
     this.onSubmit(true);
   }
 
   // Autenticación mediante Google OAuth: verifica reCAPTCHA y envía el idToken al backend
   private async loginWithGoogle(idToken: string, force = false): Promise<void> {
+    if (this.submitting() && !force) {
+      return;
+    }
+    this.lastGoogleToken = idToken;
     this.submitting.set(true);
     this.errorMessage.set(null);
     this.canForceLogin.set(false);
     const captchaToken = await this.recaptcha.execute('google_login');
-    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: false, captchaToken, force }).subscribe({
+    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: true, captchaToken, force }).subscribe({
       next: () => {
         this.submitting.set(false);
         void this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');

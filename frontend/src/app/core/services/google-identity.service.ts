@@ -16,6 +16,8 @@ declare global {
 
 @Injectable({ providedIn: 'root' })
 export class GoogleIdentityService {
+  private lastCredentialTime = 0;
+
   renderButton(element: HTMLElement, onCredential: (credential: string) => void): boolean {
     if (!environment.googleClientId) {
       return true;
@@ -26,7 +28,15 @@ export class GoogleIdentityService {
 
     window.google.accounts.id.initialize({
       client_id: environment.googleClientId,
-      callback: (response) => onCredential(response.credential),
+      callback: (response) => {
+        const now = Date.now();
+        // Evita que el SDK de Google dispare dos callbacks en el mismo segundo y sobrescriba el activeSessionId
+        if (now - this.lastCredentialTime < 1500) {
+          return;
+        }
+        this.lastCredentialTime = now;
+        onCredential(response.credential);
+      },
     });
     window.google.accounts.id.renderButton(element, {
       theme: 'outline',

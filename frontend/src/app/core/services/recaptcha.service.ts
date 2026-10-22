@@ -19,16 +19,29 @@ export class RecaptchaService {
       return null;
     }
 
-    await this.loadScript();
-    if (!window.grecaptcha) {
+    try {
+      await Promise.race([
+        this.loadScript(),
+        new Promise<void>((resolve) => setTimeout(resolve, 1200)),
+      ]);
+      if (!window.grecaptcha) {
+        return null;
+      }
+
+      return await Promise.race([
+        new Promise<string | null>((resolve) => {
+          window.grecaptcha?.ready(() => {
+            window.grecaptcha
+              ?.execute(environment.recaptchaSiteKey, { action })
+              .then(resolve)
+              .catch(() => resolve(null));
+          });
+        }),
+        new Promise<string | null>((resolve) => setTimeout(() => resolve(null), 1200)),
+      ]);
+    } catch {
       return null;
     }
-
-    return new Promise((resolve, reject) => {
-      window.grecaptcha?.ready(() => {
-        window.grecaptcha?.execute(environment.recaptchaSiteKey, { action }).then(resolve).catch(reject);
-      });
-    });
   }
 
   private loadScript(): Promise<void> {
@@ -39,13 +52,13 @@ export class RecaptchaService {
       return this.scriptPromise;
     }
 
-    this.scriptPromise = new Promise((resolve, reject) => {
+    this.scriptPromise = new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = `https://www.google.com/recaptcha/api.js?render=${encodeURIComponent(environment.recaptchaSiteKey)}`;
       script.async = true;
       script.defer = true;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error('No se pudo cargar reCAPTCHA'));
+      script.onerror = () => resolve();
       document.head.appendChild(script);
     });
     return this.scriptPromise;

@@ -36,7 +36,7 @@ export class SessionLock {
 
     this.submitting.set(true);
     this.errorMessage.set(null);
-    this.authService.login({ email: user.email, password: this.form.controls.password.value }).subscribe({
+    this.authService.login({ email: user.email, password: this.form.controls.password.value, force: true }).subscribe({
       next: () => {
         this.submitting.set(false);
         this.form.reset();

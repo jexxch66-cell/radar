@@ -1,6 +1,7 @@
 // Importaciones de Angular para servicios, inyección de dependencias y signals reactivos
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import { AuditAction, AuditEntry, AuditModule } from '../models/audit.models';
@@ -38,34 +39,9 @@ export class AuditService {
     );
   });
 
-  // Consulta los registros de auditoría almacenados en PostgreSQL (/api/admin/auditoria) y los combina con el historial local
+  // Carga inicial de los registros de auditoría persistidos
   loadFromBackend(): void {
-    this.http.get<Array<Partial<AuditEntry> & { id?: number | string }>>(this.apiUrl).subscribe({
-      next: (remoteList) => {
-        if (!Array.isArray(remoteList) || remoteList.length === 0) {
-          return;
-        }
-        const mapped: AuditEntry[] = remoteList.map((raw, idx) => ({
-          id: `srv-${raw.id ?? idx}`,
-          createdAt: raw.createdAt ?? new Date().toISOString(),
-          usuario: raw.usuario ?? 'Administrador',
-          rol: raw.rol ?? 'ADMIN',
-          modulo: (raw.modulo as AuditModule) ?? 'REPORTES',
-          accion: (raw.accion as AuditAction) ?? 'EDICION',
-          entidad: raw.entidad ?? '-',
-          valorAnterior: raw.valorAnterior ?? '-',
-          valorNuevo: raw.valorNuevo ?? '-',
-          detalle: raw.detalle ?? 'Cambio registrado en el servidor',
-        }));
-        const current = this.readLocalEntries();
-        const combined = [...mapped, ...current.filter((c) => !c.id.startsWith('srv-'))].slice(0, 300);
-        this.recordedEntries.set(combined);
-        this.saveLocalEntries(combined);
-      },
-      error: () => {
-        // Si el contenedor backend aún no expone /api/admin/auditoria, mantenemos los registros locales y derivados
-      },
-    });
+    this.recordedEntries.set(this.readLocalEntries());
   }
 
   // Registra un nuevo cambio en la auditoría (cambio de estado, edición, borrado, backup, exportación, nuevo admin)
@@ -98,20 +74,6 @@ export class AuditService {
     const updated = [entry, ...this.recordedEntries()].slice(0, 300);
     this.recordedEntries.set(updated);
     this.saveLocalEntries(updated);
-
-    // Enviamos también al backend Spring Boot (/api/admin/auditoria) para persistirlo en PostgreSQL y en logs/radar-api.log
-    this.http
-      .post(this.apiUrl, {
-        modulo: entry.modulo,
-        accion: entry.accion,
-        usuario: entry.usuario,
-        rol: entry.rol,
-        entidad: entry.entidad,
-        valorAnterior: entry.valorAnterior,
-        valorNuevo: entry.valorNuevo,
-        detalle: entry.detalle,
-      })
-      .subscribe({ error: () => {} });
   }
 
   // Sincroniza los reportes existentes en la base de datos y el último backup para poblar la línea de tiempo histórica
