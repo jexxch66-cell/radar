@@ -10,13 +10,38 @@ import { ThemeToggle } from '../../../shared/theme-toggle/theme-toggle';
 import { LanguageToggle } from '../../../shared/language-toggle/language-toggle';
 import { ApiErrorResponse } from '../../../core/models/auth.models';
 
+// Valida la política de seguridad de contraseña: mínimo 8 caracteres, al menos una mayúscula y un número
+function passwordPolicyValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value ?? '');
+  if (!value) {
+    return null;
+  }
+  const errors: ValidationErrors = {};
+  if (value.length < 8) {
+    errors['minlength'] = { requiredLength: 8, actualLength: value.length };
+  }
+  if (!/[A-Z]/.test(value)) {
+    errors['missingUppercase'] = true;
+  }
+  if (!/\d/.test(value)) {
+    errors['missingNumber'] = true;
+  }
+  return Object.keys(errors).length > 0 ? errors : null;
+}
+
 // Valida que password y confirmarPassword coincidan; el error se coloca en confirmarPassword
 function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
-  const confirmar = group.get('confirmarPassword')?.value;
+  const confirmarControl = group.get('confirmarPassword');
+  const confirmar = confirmarControl?.value;
   if (password && confirmar && password !== confirmar) {
-    group.get('confirmarPassword')?.setErrors({ mismatch: true });
+    confirmarControl?.setErrors({ ...(confirmarControl.errors ?? {}), mismatch: true });
     return { mismatch: true };
+  }
+  if (confirmarControl?.hasError('mismatch')) {
+    const rest = { ...(confirmarControl.errors ?? {}) };
+    delete rest['mismatch'];
+    confirmarControl.setErrors(Object.keys(rest).length > 0 ? rest : null);
   }
   return null;
 }
@@ -34,12 +59,12 @@ export class AdminRegister {
   private readonly router = inject(Router);
   protected readonly i18n = inject(LanguageService);
 
-  // Formulario reactivo con validaciones de nombre, email y contraseña
+  // Formulario reactivo con validaciones de nombre, email y política de contraseña
   readonly form = this.fb.nonNullable.group(
     {
       nombre: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8), passwordPolicyValidator]],
       confirmarPassword: ['', [Validators.required]],
     },
     { validators: passwordsMatchValidator },
@@ -49,6 +74,22 @@ export class AdminRegister {
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
+
+  get passwordValue(): string {
+    return this.form.controls.password.value ?? '';
+  }
+
+  get hasMinLength(): boolean {
+    return this.passwordValue.length >= 8;
+  }
+
+  get hasUppercase(): boolean {
+    return /[A-Z]/.test(this.passwordValue);
+  }
+
+  get hasNumber(): boolean {
+    return /\d/.test(this.passwordValue);
+  }
 
   // Envía la petición POST /api/admin/administradores al backend
   onSubmit(): void {
@@ -71,7 +112,8 @@ export class AdminRegister {
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
-        this.errorMessage.set(body?.message ?? 'No se pudo crear el administrador. Intenta nuevamente.');
+        const fieldMsg = body?.fieldErrors ? Object.values(body.fieldErrors)[0] : undefined;
+        this.errorMessage.set(fieldMsg ?? body?.message ?? 'No se pudo crear el administrador. Intenta nuevamente.');
       },
     });
   }

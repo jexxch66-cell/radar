@@ -151,6 +151,17 @@ body {
   text-align: center;
 }
 
+/* Validación nativa diferida (:user-invalid / :user-valid) tras interacción del usuario */
+input.policy-input:user-invalid,
+input.policy-input.user-invalid-fallback {
+  border-color: #ef4444;
+}
+
+input.policy-input:user-valid,
+input.policy-input.user-valid-fallback {
+  border-color: #10b981;
+}
+
 /* Pin de reporte en el mapa: Leaflet inyecta este HTML directo en el DOM,
    fuera del arbol de Angular, por eso vive en el CSS global y no en home.css */
 .report-pin {

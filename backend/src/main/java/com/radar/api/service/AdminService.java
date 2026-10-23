@@ -19,6 +19,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
 
     public AdministradorResponse registrar(RegisterRequest request) {
+        AuthService.validatePasswordPolicy(request.getPassword());
         if (administradorRepository.existsByEmail(request.getEmail()) || userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }

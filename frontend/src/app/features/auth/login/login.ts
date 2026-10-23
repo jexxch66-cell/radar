@@ -1,7 +1,7 @@
 // Importaciones de Angular para componentes, referencias al DOM, ciclo de vida e inyección de dependencias
 import { AfterViewInit, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 // ReactiveFormsModule y FormBuilder para construir y validar el formulario reactivo de inicio de sesión
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 // Router y ActivatedRoute para redireccionar según el rol y leer parámetros de URL (ej. sessionExpired)
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -14,7 +14,26 @@ import { ApiErrorResponse } from '../../../core/models/auth.models';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
 import { RecaptchaService } from '../../../core/services/recaptcha.service';
 
-// Componente de inicio de sesión: soporta email/contraseña, Google Identity y control de sesión única
+// Valida la política de seguridad de contraseña: mínimo 8 caracteres, al menos una mayúscula y un número
+function passwordPolicyValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value ?? '');
+  if (!value) {
+    return null;
+  }
+  const errors: ValidationErrors = {};
+  if (value.length < 8) {
+    errors['minlength'] = { requiredLength: 8, actualLength: value.length };
+  }
+  if (!/[A-Z]/.test(value)) {
+    errors['missingUppercase'] = true;
+  }
+  if (!/\d/.test(value)) {
+    errors['missingNumber'] = true;
+  }
+  return Object.keys(errors).length > 0 ? errors : null;
+}
+
+// Componente de inicio de sesión: soporta email/contraseña, Google Identity y bloqueo estricto de sesión única
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink, ThemeToggle, LanguageToggle],
@@ -34,19 +53,33 @@ export class Login implements AfterViewInit {
   // Referencia al contenedor HTML donde Google Identity renderiza su botón oficial
   @ViewChild('googleButton') private googleButton?: ElementRef<HTMLElement>;
 
-  // Definición del formulario reactivo con validaciones de email válido y contraseña de mínimo 8 caracteres
+  // Definición del formulario reactivo con validaciones de email válido y política de contraseña (8+ caracteres, mayúscula y número)
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]],
+    password: ['', [Validators.required, Validators.minLength(8), passwordPolicyValidator]],
   });
 
-  // Signals reactivos para controlar el estado de carga, mensajes de error y opción de forzar cierre de otra sesión
+  // Signals reactivos para controlar el estado de carga y mensajes de error
   readonly submitting = signal(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly canForceLogin = signal(false);
-  private lastGoogleToken: string | null = null;
-  // Indica si el usuario fue redirigido aquí porque su sesión se abrió en otro navegador o expiró
+  // Indica si el usuario fue redirigido aquí porque su sesión expiró
   readonly sessionExpired = this.route.snapshot.queryParamMap.get('sessionExpired') === 'true';
+
+  get passwordValue(): string {
+    return this.form.controls.password.value ?? '';
+  }
+
+  get hasMinLength(): boolean {
+    return this.passwordValue.length >= 8;
+  }
+
+  get hasUppercase(): boolean {
+    return /[A-Z]/.test(this.passwordValue);
+  }
+
+  get hasNumber(): boolean {
+    return /\d/.test(this.passwordValue);
+  }
 
   ngAfterViewInit(): void {
     // Una vez cargado el HTML, inicializamos el botón de Google
@@ -61,19 +94,17 @@ export class Login implements AfterViewInit {
     window.setTimeout(() => this.renderGoogleButton(), 500);
   }
 
-  // Envía las credenciales al backend; si force=true, cierra cualquier otra sesión activa del mismo usuario
-  onSubmit(force = false): void {
-    if (this.form.invalid || (this.submitting() && !force)) {
+  // Envía las credenciales al backend; bloquea estrictamente si la cuenta ya tiene una sesión activa en cualquier navegador
+  onSubmit(): void {
+    if (this.form.invalid || this.submitting()) {
       this.form.markAllAsTouched();
       return;
     }
 
-    this.lastGoogleToken = null;
     this.submitting.set(true);
     this.errorMessage.set(null);
-    this.canForceLogin.set(false);
 
-    this.authService.login({ ...this.form.getRawValue(), force }).subscribe({
+    this.authService.login({ ...this.form.getRawValue(), force: false }).subscribe({
       next: () => {
         this.submitting.set(false);
         // Redirige a /admin si tiene rol ADMIN, o a /mapa si es ciudadano (USER)
@@ -82,35 +113,21 @@ export class Login implements AfterViewInit {
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
-        // HTTP 409 Conflict significa que ya existe una sesión activa en otro navegador
-        if (err.status === 409) {
-          this.canForceLogin.set(true);
-        }
-        this.errorMessage.set(body?.message ?? 'No se pudo iniciar sesión. Intenta nuevamente.');
+        const fieldMsg = body?.fieldErrors ? Object.values(body.fieldErrors)[0] : undefined;
+        this.errorMessage.set(fieldMsg ?? body?.message ?? 'No se pudo iniciar sesión. Intenta nuevamente.');
       },
     });
   }
 
-  // Permite al usuario reclamar su sesión cerrando la que estaba abierta en otro dispositivo (funciona para Email y para Google)
-  onForceLogin(): void {
-    if (this.lastGoogleToken) {
-      void this.loginWithGoogle(this.lastGoogleToken, true);
+  // Autenticación mediante Google OAuth: verifica reCAPTCHA y bloquea si la cuenta ya tiene una sesión activa
+  private async loginWithGoogle(idToken: string): Promise<void> {
+    if (this.submitting()) {
       return;
     }
-    this.onSubmit(true);
-  }
-
-  // Autenticación mediante Google OAuth: verifica reCAPTCHA y envía el idToken al backend
-  private async loginWithGoogle(idToken: string, force = false): Promise<void> {
-    if (this.submitting() && !force) {
-      return;
-    }
-    this.lastGoogleToken = idToken;
     this.submitting.set(true);
     this.errorMessage.set(null);
-    this.canForceLogin.set(false);
     const captchaToken = await this.recaptcha.execute('google_login');
-    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: true, captchaToken, force }).subscribe({
+    this.authService.loginWithGoogle({ idToken, acceptDataTreatment: true, captchaToken, force: false }).subscribe({
       next: () => {
         this.submitting.set(false);
         void this.router.navigateByUrl(this.authService.isAdmin() ? '/admin' : '/mapa');
@@ -118,9 +135,6 @@ export class Login implements AfterViewInit {
       error: (err: HttpErrorResponse) => {
         this.submitting.set(false);
         const body = err.error as ApiErrorResponse | undefined;
-        if (err.status === 409) {
-          this.canForceLogin.set(true);
-        }
         this.errorMessage.set(body?.message ?? 'No se pudo iniciar sesión con Google.');
       },
     });

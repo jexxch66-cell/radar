@@ -2,6 +2,8 @@ package com.radar.api.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,6 +16,11 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "La contrasena es obligatoria")
+    @Size(min = 8, message = "La contrasena debe tener minimo 8 caracteres")
+    @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*\\d).{8,}$",
+            message = "La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero"
+    )
     private String password;
 
     private boolean force;

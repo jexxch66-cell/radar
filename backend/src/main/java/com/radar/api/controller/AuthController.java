@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -51,7 +52,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // POST /api/auth/heartbeat: señal periódica (cada 25 s) enviada por el frontend para mantener viva la sesión única
+    // POST /api/auth/heartbeat: señal periódica enviada por el frontend para mantener viva la sesión única
     @PostMapping("/heartbeat")
     public ResponseEntity<?> heartbeat(Authentication authentication, HttpServletRequest request) {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
@@ -70,9 +71,13 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    // POST /api/auth/logout: libera inmediatamente el activeSessionId en base de datos al cerrar sesión
+    // POST /api/auth/logout: libera inmediatamente el activeSessionId en base de datos y en memoria al cerrar sesión o pestaña
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(Authentication authentication, HttpServletRequest request) {
+    public ResponseEntity<Void> logout(
+            Authentication authentication,
+            HttpServletRequest request,
+            @RequestParam(required = false) String emailParam
+    ) {
         String email = null;
         if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
             email = authentication.getName();
@@ -85,6 +90,10 @@ public class AuthController {
                 } catch (Exception ignored) {
                 }
             }
+        }
+
+        if (email == null && emailParam != null && !emailParam.isBlank()) {
+            email = emailParam.trim();
         }
 
         if (email != null) {

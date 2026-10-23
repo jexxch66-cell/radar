@@ -5,7 +5,6 @@ import com.radar.api.model.User;
 import com.radar.api.repository.AdministradorRepository;
 import com.radar.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,6 +27,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public boolean isActiveSession(String email, String sessionId) {
+        if (AuthService.isMemorySessionMatching(email, sessionId)) {
+            return true;
+        }
         return userRepository.findByEmail(email)
                 .map(user -> sessionId != null && sessionId.equals(user.getActiveSessionId()))
                 .orElseGet(() -> administradorRepository.findByEmail(email)
