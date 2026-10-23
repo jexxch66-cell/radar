@@ -1,7 +1,7 @@
 // Servicio de autenticación con política de contraseña y bloqueo estricto de sesión única (mismo o diferente navegador)
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, map, of, switchMap, tap, throwError, timeout } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, tap, throwError, timeout } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { AuthResponse, AuthUser, GoogleAuthRequest, LoginRequest, RegisterRequest } from '../models/auth.models';
@@ -299,8 +299,7 @@ export class AuthService {
     this.currentUser.set(user);
   }
 
-  private checkCrossBrowserLock(email: string): Observable<boolean> {
-    const url = `/session-lock?action=check&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+  private checkSingleLockEndpoint(url: string): Observable<boolean> {
     return this.http.get<{ locked?: boolean }>(url).pipe(
       timeout(1200),
       map((res) => Boolean(res?.locked)),
@@ -313,8 +312,15 @@ export class AuthService {
     );
   }
 
-  private claimCrossBrowserLock(email: string): Observable<boolean> {
-    const url = `/session-lock?action=claim&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+  private checkCrossBrowserLock(email: string): Observable<boolean> {
+    const query = `action=check&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+    return forkJoin([
+      this.checkSingleLockEndpoint(`/session-lock?${query}`),
+      this.checkSingleLockEndpoint(`${this.apiUrl}/session-lock?${query}`),
+    ]).pipe(map(([devLocked, apiLocked]) => devLocked || apiLocked));
+  }
+
+  private claimSingleLockEndpoint(url: string): Observable<boolean> {
     return this.http.get<{ ok?: boolean }>(url).pipe(
       timeout(1200),
       map(() => true),
@@ -327,31 +333,37 @@ export class AuthService {
     );
   }
 
+  private claimCrossBrowserLock(email: string): Observable<boolean> {
+    const query = `action=claim&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+    return forkJoin([
+      this.claimSingleLockEndpoint(`/session-lock?${query}`),
+      this.claimSingleLockEndpoint(`${this.apiUrl}/session-lock?${query}`),
+    ]).pipe(map(([devClaimed, apiClaimed]) => devClaimed && apiClaimed));
+  }
+
   private sendCrossBrowserHeartbeat(email: string): void {
-    const url = `/session-lock?action=heartbeat&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
-    this.http
-      .get(url)
-      .pipe(timeout(1200))
-      .subscribe({
-        next: () => {},
-        error: () => {},
-      });
+    const query = `action=heartbeat&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+    this.http.get(`/session-lock?${query}`).pipe(timeout(1200)).subscribe({ next: () => {}, error: () => {} });
+    this.http.get(`${this.apiUrl}/session-lock?${query}`).pipe(timeout(1200)).subscribe({ next: () => {}, error: () => {} });
   }
 
   private releaseCrossBrowserLock(email: string): void {
     const normalized = email.trim().toLowerCase();
-    const lockUrl = `/session-lock?action=release&email=${encodeURIComponent(normalized)}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+    const query = `action=release&email=${encodeURIComponent(normalized)}&tabId=${encodeURIComponent(this.tabSessionId)}`;
+    const lockUrl = `/session-lock?${query}`;
+    const apiLockUrl = `${this.apiUrl}/session-lock?${query}`;
     const backendLogoutUrl = `${this.apiUrl}/logout?emailParam=${encodeURIComponent(normalized)}`;
     try {
       if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
         navigator.sendBeacon(lockUrl);
+        navigator.sendBeacon(apiLockUrl);
         navigator.sendBeacon(backendLogoutUrl);
-        return;
       }
     } catch {
       // Fallback a petición HTTP
     }
     this.http.get(lockUrl).subscribe({ next: () => {}, error: () => {} });
+    this.http.get(apiLockUrl).subscribe({ next: () => {}, error: () => {} });
   }
 
   private decodeGoogleIdToken(idToken: string): { email: string; name: string } {

@@ -25,7 +25,7 @@ export default {
       if (!email) {
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));
-        return true;
+        return req.url || '/session-lock';
       }
 
       const current = activeBrowserSessions.get(email);
@@ -40,12 +40,12 @@ export default {
                 'No se puede iniciar sesión: esta cuenta ya tiene una sesión activa en este u otro navegador. Cierra la otra sesión primero.',
             }),
           );
-          return true;
+          return req.url || '/session-lock';
         }
         activeBrowserSessions.set(email, { email, tabId, lastActiveAt: now });
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));
-        return true;
+        return req.url || '/session-lock';
       }
 
       if (action === 'heartbeat') {
@@ -57,7 +57,7 @@ export default {
         }
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));
-        return true;
+        return req.url || '/session-lock';
       }
 
       if (action === 'release') {
@@ -66,13 +66,13 @@ export default {
         }
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));
-        return true;
+        return req.url || '/session-lock';
       }
 
       const locked = Boolean(current && current.tabId !== tabId && now - current.lastActiveAt < SESSION_TTL_MS);
       res.statusCode = locked ? 409 : 200;
       res.end(JSON.stringify({ locked }));
-      return true;
+      return req.url || '/session-lock';
     },
   },
 };

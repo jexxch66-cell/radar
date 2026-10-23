@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +51,32 @@ public class AuthController {
         AuthResponse response = authService.loginWithGoogle(
                 request.getIdToken(), request.isAcceptDataTreatment(), request.getCaptchaToken(), request.isForce());
         return ResponseEntity.ok(response);
+    }
+
+    // GET y POST /api/auth/session-lock: candado en memoria del servidor para impedir doble sesión entre navegadores distintos
+    @GetMapping("/session-lock")
+    public ResponseEntity<Map<String, Object>> sessionLockGet(
+            @RequestParam(defaultValue = "check") String action,
+            @RequestParam(defaultValue = "") String email,
+            @RequestParam(defaultValue = "") String tabId
+    ) {
+        boolean allowed = authService.handleSessionLockAction(action, email, tabId);
+        if (!allowed) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "locked", true,
+                    "message", "No se puede iniciar sesión: esta cuenta ya tiene una sesión activa en este u otro navegador."
+            ));
+        }
+        return ResponseEntity.ok(Map.of("ok", true, "locked", false));
+    }
+
+    @PostMapping("/session-lock")
+    public ResponseEntity<Map<String, Object>> sessionLockPost(
+            @RequestParam(defaultValue = "check") String action,
+            @RequestParam(defaultValue = "") String email,
+            @RequestParam(defaultValue = "") String tabId
+    ) {
+        return sessionLockGet(action, email, tabId);
     }
 
     // POST /api/auth/heartbeat: señal periódica enviada por el frontend para mantener viva la sesión única

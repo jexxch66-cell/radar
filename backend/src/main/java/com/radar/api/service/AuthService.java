@@ -36,7 +36,7 @@ public class AuthService {
 
     // Si el usuario está activo (heartbeat periódico), el timeout mantiene bloqueado cualquier intento de doble sesión.
     // Una vez que el usuario cierra sesión o el timeout expira, la sesión se libera.
-    public static final Duration SESSION_INACTIVITY_TIMEOUT = Duration.ofSeconds(45);
+    public static final Duration SESSION_INACTIVITY_TIMEOUT = Duration.ofSeconds(30);
 
     private static final Pattern PASSWORD_POLICY_PATTERN = Pattern.compile("^(?=.*[A-Z])(?=.*\\d).{8,}$");
 
@@ -70,6 +70,49 @@ public class AuthService {
         }
         ActiveSessionRecord record = ACTIVE_SESSIONS.get(email.trim().toLowerCase());
         return record != null && sessionId.equals(record.sessionId());
+    }
+
+    // Gestión atómica de candado de sesión entre navegadores sin depender de base de datos
+    public boolean handleSessionLockAction(String action, String email, String tabId) {
+        if (email == null || email.isBlank()) {
+            return true;
+        }
+        String normalized = email.trim().toLowerCase();
+        String safeTabId = tabId != null ? tabId.trim() : "";
+        Object lock = EMAIL_LOCKS.computeIfAbsent(normalized, k -> new Object());
+
+        synchronized (lock) {
+            Instant now = Instant.now();
+            ActiveSessionRecord current = ACTIVE_SESSIONS.get(normalized);
+            boolean currentActive = current != null && isSessionActive(current.sessionId(), current.lastActiveAt());
+            if (!currentActive && current != null) {
+                ACTIVE_SESSIONS.remove(normalized);
+                current = null;
+            }
+
+            switch (action != null ? action : "check") {
+                case "claim":
+                    if (current != null && !current.sessionId().equals(safeTabId)) {
+                        return false;
+                    }
+                    ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                    return true;
+                case "heartbeat":
+                    if (current != null && current.sessionId().equals(safeTabId)) {
+                        ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                    } else if (current == null && !safeTabId.isEmpty()) {
+                        ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                    }
+                    return true;
+                case "release":
+                    if (current == null || safeTabId.isEmpty() || current.sessionId().equals(safeTabId)) {
+                        ACTIVE_SESSIONS.remove(normalized);
+                    }
+                    return true;
+                default:
+                    return current == null || current.sessionId().equals(safeTabId);
+            }
+        }
     }
 
     // Registra un nuevo ciudadano verificando reCAPTCHA, política de contraseña, unicidad de email y cifrando con BCrypt
