@@ -62,7 +62,7 @@ jobs:
 
       - name: Publicar reportes de pruebas y cobertura
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-reportes
           path: |
@@ -86,7 +86,7 @@ jobs:
 
       - name: Publicar reporte de defectos conocidos
         if: always() && steps.known_defects.outcome != 'skipped'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: backend-defectos-conocidos
           path: backend/target/surefire-reports/
@@ -122,7 +122,7 @@ jobs:
 
       - name: Publicar build
         if: success()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: frontend/dist/
