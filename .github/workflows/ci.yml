@@ -26,10 +26,10 @@ jobs:
         working-directory: backend
     steps:
       - name: Obtener el codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configurar JDK 21 (java.version del pom.xml)
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
@@ -62,7 +62,7 @@ jobs:
 
       - name: Publicar reportes de pruebas y cobertura
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-reportes
           path: |
@@ -86,10 +86,12 @@ jobs:
 
       - name: Publicar reporte de defectos conocidos
         if: always() && steps.known_defects.outcome != 'skipped'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: backend-defectos-conocidos
           path: backend/target/surefire-reports/
+          # Sin defectos abiertos no se generan reportes: no es un error
+          if-no-files-found: ignore
           retention-days: 14
 
   frontend:
@@ -100,10 +102,10 @@ jobs:
         working-directory: frontend
     steps:
       - name: Obtener el codigo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "24"
           cache: npm
@@ -120,7 +122,7 @@ jobs:
 
       - name: Publicar build
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: frontend-dist
           path: frontend/dist/
