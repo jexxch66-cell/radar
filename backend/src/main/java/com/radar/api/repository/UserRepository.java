@@ -18,6 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
+    // Unicidad sin distinguir mayusculas: evita cuentas duplicadas "ana@x.com" / "ANA@x.com" (DEF-02)
+    boolean existsByEmailIgnoreCase(String email);
+
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update User u set u.activeSessionId = :sessionId, u.lastActiveAt = :lastActiveAt where u.email = :email")

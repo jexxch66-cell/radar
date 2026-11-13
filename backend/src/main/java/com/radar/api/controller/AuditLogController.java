@@ -1,6 +1,7 @@
 package com.radar.api.controller;
 
 import com.radar.api.model.AuditLog;
+import com.radar.api.repository.AdministradorRepository;
 import com.radar.api.service.AuditLogService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 public class AuditLogController {
 
     private final AuditLogService auditLogService;
+    private final AdministradorRepository administradorRepository;
 
     // GET /api/admin/auditoria -> Obtiene el historial de cambios para el reporte de auditoría
     @GetMapping
@@ -37,15 +39,18 @@ public class AuditLogController {
             @RequestBody CreateAuditLogRequest request,
             Authentication authentication
     ) {
-        String usuario = request.getUsuario() != null && !request.getUsuario().isBlank()
-                ? request.getUsuario()
-                : (authentication != null ? authentication.getName() : "Administrador");
+        // El autor y el rol se toman SIEMPRE de la identidad autenticada; los campos "usuario" y "rol" del cuerpo
+        // se ignoran para impedir registrar eventos a nombre de otra persona (DEF-07)
+        String email = authentication.getName();
+        String usuario = administradorRepository.findByEmailIgnoreCase(email)
+                .map(admin -> admin.getNombre() + " (" + admin.getEmail() + ")")
+                .orElse(email);
 
         AuditLog creado = auditLogService.registrarEvento(
                 request.getModulo(),
                 request.getAccion(),
                 usuario,
-                request.getRol() != null ? request.getRol() : "ADMIN",
+                "ADMIN",
                 request.getEntidad(),
                 request.getValorAnterior(),
                 request.getValorNuevo(),
@@ -55,6 +60,7 @@ public class AuditLogController {
     }
 
     // DTO interno para recibir eventos de auditoría desde el frontend
+    // "usuario" y "rol" se conservan por compatibilidad con el frontend, pero el servidor no los usa
     @Data
     public static class CreateAuditLogRequest {
         private String modulo;

@@ -18,6 +18,9 @@ public interface AdministradorRepository extends JpaRepository<Administrador, Lo
 
     boolean existsByEmail(String email);
 
+    // Permite verificar que un correo no pertenezca ya a un administrador (DEF-01)
+    boolean existsByEmailIgnoreCase(String email);
+
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update Administrador a set a.activeSessionId = :sessionId, a.lastActiveAt = :lastActiveAt where a.email = :email")

@@ -37,6 +37,7 @@ public class AdminSeeder implements CommandLineRunner {
                 .build();
         administradorRepository.save(admin);
 
-        log.info("Administrador creado -> email: {} / password: {}", defaultEmail, defaultPassword);
+        // Nunca se escribe la contrasena en el log (DEF-08)
+        log.info("Administrador por defecto creado -> email: {}", defaultEmail);
     }
 }

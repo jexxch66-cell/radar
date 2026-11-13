@@ -19,10 +19,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final AdministradorRepository administradorRepository;
 
     @Override
+    // Se consulta primero la tabla de administradores, igual que AuthService.login: si en la base ya existiera un
+    // ciudadano con el correo de un administrador (datos previos a la correccion de DEF-01), prevalece el administrador
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(email)
+        return administradorRepository.findByEmail(email)
                 .map(this::toUserDetails)
-                .or(() -> administradorRepository.findByEmail(email).map(this::toUserDetails))
+                .or(() -> userRepository.findByEmail(email).map(this::toUserDetails))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
     }
 
@@ -30,10 +32,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (AuthService.isMemorySessionMatching(email, sessionId)) {
             return true;
         }
-        return userRepository.findByEmail(email)
-                .map(user -> sessionId != null && sessionId.equals(user.getActiveSessionId()))
-                .orElseGet(() -> administradorRepository.findByEmail(email)
-                        .map(admin -> sessionId != null && sessionId.equals(admin.getActiveSessionId()))
+        return administradorRepository.findByEmail(email)
+                .map(admin -> sessionId != null && sessionId.equals(admin.getActiveSessionId()))
+                .orElseGet(() -> userRepository.findByEmail(email)
+                        .map(user -> sessionId != null && sessionId.equals(user.getActiveSessionId()))
                         .orElse(false));
     }
 

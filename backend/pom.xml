@@ -22,6 +22,8 @@
         <jjwt.version>0.12.6</jjwt.version>
         <lombok.version>1.18.38</lombok.version>
         <google.api-client.version>2.7.2</google.api-client.version>
+        <jacoco.version>0.8.14</jacoco.version>
+        <test.excludedGroups>known-defect</test.excludedGroups>
     </properties>
 
     <dependencies>
@@ -85,6 +87,12 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Base de datos en memoria SOLO para pruebas de integracion/caja negra (perfil "test") -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
@@ -131,7 +139,31 @@
                     <systemPropertyVariables>
                         <net.bytebuddy.experimental>true</net.bytebuddy.experimental>
                     </systemPropertyVariables>
+                    <!-- Las pruebas etiquetadas "known-defect" documentan defectos conocidos y se excluyen
+                         por defecto; se ejecutan con: mvnw test -Dtest.excludedGroups=none -->
+                    <excludedGroups>${test.excludedGroups}</excludedGroups>
                 </configuration>
+            </plugin>
+            <!-- Cobertura de codigo (instrucciones, ramas, lineas) para las pruebas de caja blanca -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

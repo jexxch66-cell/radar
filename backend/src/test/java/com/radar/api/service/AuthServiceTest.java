@@ -41,14 +41,22 @@ class AuthServiceTest {
     @Mock RecaptchaService recaptchaService;
     @InjectMocks AuthService service;
 
+    // AuthService guarda las sesiones activas en un mapa ESTATICO; se limpia para aislar cada prueba
+    @org.junit.jupiter.api.BeforeEach
+    @org.junit.jupiter.api.AfterEach
+    void clearInMemorySessions() {
+        service.logout("user@example.com");
+        clearInvocations(userRepository, administradorRepository);
+    }
+
     @Test
     void registersUserAndReturnsToken() {
         RegisterRequest request = registerRequest();
         User savedUser = User.builder().id(7L).nombre("User").email(request.getEmail()).role(Role.USER).build();
         UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
                 .password("encoded").roles("USER").build();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode("password")).thenReturn("encoded");
+        when(userRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("Password1")).thenReturn("encoded");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(savedUser.getId());
@@ -70,7 +78,7 @@ class AuthServiceTest {
     @Test
     void rejectsDuplicateRegistration() {
         RegisterRequest request = registerRequest();
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(true);
 
         assertThrows(EmailAlreadyExistsException.class, () -> service.register(request));
         verify(userRepository, never()).save(any(User.class));
@@ -181,45 +189,32 @@ class AuthServiceTest {
     }
 
     @Test
-    void allowsLoginWhenForceIsTrueEvenIfSessionIsActive() {
+    void blocksLoginEvenWithForceWhenSessionIsActive() {
+        // Especificacion vigente (commit 8f9348c): bloqueo estricto, el flag force ya no permite desplazar la sesion
         LoginRequest request = loginRequest();
         request.setForce(true);
-        User user = User.builder()
-                .id(7L)
-                .nombre("User")
-                .email(request.getEmail())
-                .role(Role.USER)
-                .activeSessionId("existing-session")
-                .lastActiveAt(Instant.now())
-                .build();
-        UserDetails details = org.springframework.security.core.userdetails.User.withUsername(request.getEmail())
-                .password("encoded").roles("USER").build();
+        User user = User.builder().id(7L).nombre("User").email(request.getEmail()).role(Role.USER)
+                .activeSessionId("existing-session").lastActiveAt(Instant.now()).build();
         when(authenticationManager.authenticate(any())).thenReturn(null);
         when(administradorRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-        when(jwtService.newSessionId()).thenReturn("forced-session");
-        when(userRepository.updateActiveSessionId(eq(request.getEmail()), eq("forced-session"), any(Instant.class))).thenReturn(1);
-        when(userDetailsService.loadUserByUsername(request.getEmail())).thenReturn(details);
-        when(jwtService.generateToken(details, "forced-session")).thenReturn("forced-token");
 
-        var response = service.login(request);
-
-        assertEquals("forced-token", response.getToken());
-        verify(userRepository).updateActiveSessionId(eq(request.getEmail()), eq("forced-session"), any(Instant.class));
+        assertThrows(ConcurrentSessionException.class, () -> service.login(request));
+        verify(userRepository, never()).updateActiveSessionId(any(), any(), any());
     }
 
     private RegisterRequest registerRequest() {
         RegisterRequest request = new RegisterRequest();
         request.setNombre("User");
         request.setEmail("user@example.com");
-        request.setPassword("password");
+        request.setPassword("Password1");
         return request;
     }
 
     private LoginRequest loginRequest() {
         LoginRequest request = new LoginRequest();
         request.setEmail("user@example.com");
-        request.setPassword("password");
+        request.setPassword("Password1");
         return request;
     }
 }

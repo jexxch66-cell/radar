@@ -31,8 +31,10 @@ public class ReportController {
 
     private final ReportService reportService;
 
-    // POST /api/reportes: cualquier usuario autenticado puede crear un reporte; el autor se toma del token JWT
+    // POST /api/reportes: solo los ciudadanos (rol USER) crean reportes; el autor se toma del token JWT.
+    // Un administrador no es un ciudadano (no tiene fila en "users"), por eso recibe 403 en vez de un 500 (DEF-05)
     @PostMapping
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReportResponse> create(@Valid @RequestBody CreateReportRequest request,
                                                   Authentication authentication) {
         ReportResponse response = reportService.create(request, authentication.getName());
