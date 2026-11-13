@@ -8,6 +8,8 @@ import { defineConfig } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  // El recorrido grabado en video tiene su propia configuracion (playwright.video.config.ts)
+  testIgnore: '**/*.video.spec.ts',
   fullyParallel: false,
   workers: 1,
   retries: 0,

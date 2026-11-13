@@ -45,6 +45,17 @@ E2E_API_REWRITE=http://localhost:8081 npx playwright test
 
 `E2E_API_REWRITE` redirige en el navegador las llamadas que el frontend hace a `localhost:8080` hacia el backend de pruebas. `E2E_SHOTS_DIR` cambia la carpeta de capturas.
 
+## Video del recorrido completo
+
+Con el stack levantado, graba un recorrido narrado de 12 escenas (ciudadano, administrador, sesion unica y seguridad ante fallos del servidor). Cada escena se verifica con aserciones:
+
+```bash
+npx playwright install ffmpeg      # una sola vez: componente de grabacion de Playwright
+npx playwright test -c playwright.video.config.ts
+```
+
+El video (WebM 1280x720) queda en `test-results-video/`. La version entregada en MP4 esta en `docs/evidencias/02-e2e/video/RADAR_recorrido_E2E.mp4`.
+
 ## Otros scripts
 
 - `npm run validate:workflow`: validación estática de `.github/workflows/ci.yml`.
