@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RecaptchaService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.service</a> &gt; <span class="el_source">RecaptchaService.java</span></div><h1>RecaptchaService.java</h1><pre class="source lang-java linenums">package com.radar.api.service;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+@Service
+public class RecaptchaService {
+
+    private final boolean enabled;
+    private final String secretKey;
+<span class="fc" id="L12">    private final RestClient restClient = RestClient.create(&quot;https://www.google.com&quot;);</span>
+
+    public RecaptchaService(
+            @Value(&quot;${recaptcha.enabled:false}&quot;) boolean enabled,
+<span class="fc" id="L16">            @Value(&quot;${recaptcha.secret-key:}&quot;) String secretKey) {</span>
+<span class="fc" id="L17">        this.enabled = enabled;</span>
+<span class="fc" id="L18">        this.secretKey = secretKey;</span>
+<span class="fc" id="L19">    }</span>
+
+    public void verify(String token) {
+<span class="fc bfc" id="L22" title="All 2 branches covered.">        if (!enabled) {</span>
+<span class="fc" id="L23">            return;</span>
+        }
+<span class="pc bpc" id="L25" title="1 of 6 branches missed.">        if (token == null || token.isBlank() || secretKey.isBlank()) {</span>
+<span class="fc" id="L26">            throw new IllegalArgumentException(&quot;Verificación CAPTCHA requerida&quot;);</span>
+        }
+
+<span class="nc" id="L29">        CaptchaResponse response = restClient.post()</span>
+<span class="nc" id="L30">                .uri(uriBuilder -&gt; uriBuilder.path(&quot;/recaptcha/api/siteverify&quot;)</span>
+<span class="nc" id="L31">                        .queryParam(&quot;secret&quot;, secretKey)</span>
+<span class="nc" id="L32">                        .queryParam(&quot;response&quot;, token)</span>
+<span class="nc" id="L33">                        .build())</span>
+<span class="nc" id="L34">                .retrieve()</span>
+<span class="nc" id="L35">                .body(CaptchaResponse.class);</span>
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        if (response == null || !response.success()) {</span>
+<span class="nc" id="L37">            throw new IllegalArgumentException(&quot;Verificación CAPTCHA inválida&quot;);</span>
+        }
+<span class="nc" id="L39">    }</span>
+
+<span class="nc" id="L41">    private record CaptchaResponse(boolean success) {}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,12 @@
+# Busqueda de integracion con OpenRouter u otros proveedores de LLM en e9e1021 + correcciones
+# Fecha: 2026-11-13T15:11:03-05:00
+
+patron 'openrouter': 0 archivos
+patron 'anthropic': 0 archivos
+patron 'openai': 0 archivos
+patron 'chat/completions': 0 archivos
+patron 'api/v1/responses': 0 archivos
+dependencias de IA en pom.xml: 0
+dependencias de IA en package.json: 0
+
+Conclusion: RADAR no integra OpenRouter; los casos OR-01..OR-08 quedan como propuesta.

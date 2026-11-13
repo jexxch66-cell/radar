@@ -1,0 +1,11 @@
+# Simulacion local del job 'backend' del workflow (./mvnw -B verify, build por defecto)
+# Fecha: 2026-11-13T15:08:17-05:00
+
+[INFO] --- jacoco:0.8.14:prepare-agent (prepare-agent) @ api ---
+[INFO] Tests run: 165, Failures: 0, Errors: 0, Skipped: 0
+[INFO] --- jacoco:0.8.14:report (report) @ api ---
+[INFO] BUILD SUCCESS
+
+$ ./mvnw -B surefire:test -Dtest.excludedGroups=none -Dgroups=known-defect (paso informativo)
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

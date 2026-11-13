@@ -1,0 +1,11 @@
+﻿# CN-39 y CN-40 ejecutadas contra el codigo ORIGINAL de e9e1021 (worktree temporal), antes de las correcciones
+# Fecha: 2026-11-13T12:55:19.6174475-05:00
+
+[ERROR]   BlackBoxApiTest.ownerCanClaimLockAfterLogin:459 Status expected:<200> but was:<409>
+[ERROR]   BlackBoxApiTest.staleTokenCannotLogOutNewSession:473 Status expected:<200> but was:<401>
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0
+
+CN-40a   POST   /api/auth/logout                           -> HTTP 200 | 
+CN-40b   POST   /api/auth/logout                           -> HTTP 200 | 
+CN-40c   GET    /api/reportes                              -> HTTP 401 | {"timestamp":"2026-11-13T17:55:18.079594Z","status":401,"message":"No autenti
+CN-39    GET    /api/auth/session-lock                     -> HTTP 409 | {"message":"No se puede iniciar sesión: esta cuenta ya tiene una sesión activ

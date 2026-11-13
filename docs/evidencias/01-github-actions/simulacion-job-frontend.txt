@@ -1,0 +1,18 @@
+# Simulacion local del job 'frontend' del workflow sobre la rama qa/auditoria-pruebas-y-correcciones (e9e1021 + correcciones)
+# Fecha: 2026-11-13T15:03:14-05:00 | Node v24.21.0 | npm 11.19.0
+
+$ npm ci
+
+added 610 packages in 4m
+exit=0
+
+$ npx ng test --watch=false
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+exit=0
+
+$ npx ng build
+                    | Initial total          | 421.62 kB |               103.96 kB
+Application bundle generation complete. [20.859 seconds] - 2026-11-13T20:08:03.291Z
+Output location: C:\Users\user\vsprojects\radar\frontend\dist\frontend
+exit=0

@@ -1,0 +1,22 @@
+E2E-A04  POST   /api/admin/administradores                 -> HTTP 201 | {"id":5,"nombre":"Segundo Admin","email":"e2e.admin2.1206106974842600.84@radar.test","createdAt":"2026-11-13T17:39:24.274787Z"}
+E2E-A04  POST   /api/auth/login                            -> HTTP 200 | {"token":"<JWT-redactado>","id":5,"nombre":"Segundo Admin","email":"e2e.admin2.1206106974842600.84@radar.test","role":"ADMIN","tipo":"Bearer"}
+E2E-A03  POST   /api/auth/login                            -> HTTP 200 | {"token":"<JWT-redactado>","id":82,"nombre":"Sesion","email":"e2e.sesion.1206107134744200.85@radar.test","role":"USER","tipo":"Bearer"}
+E2E-A03  POST   /api/auth/heartbeat                        -> HTTP 200 | 
+E2E-A03  POST   /api/auth/login                            -> HTTP 409 | {"timestamp":"2026-11-13T17:39:24.580441500Z","status":409,"message":"Ya existe una sesión activa para este usuario en otro navegador o pestaña. Cierra la sesión activa antes de iniciar una nueva.","fieldErrors":null}
+E2E-A03  POST   /api/auth/logout                           -> HTTP 200 | 
+E2E-A03  POST   /api/auth/login                            -> HTTP 200 | {"token":"<JWT-redactado>","id":82,"nombre":"Sesion","email":"e2e.sesion.1206107134744200.85@radar.test","role":"USER","tipo":"Bearer"}
+E2E-A03  GET    /api/reportes                              -> HTTP 401 | {"timestamp":"2026-11-13T17:39:24.667937900Z","status":401,"message":"No autenticado","fieldErrors":null}
+E2E-A03  GET    /api/reportes                              -> HTTP 200 | [{"id":8,"categoria":"ZONA_OSCURA","descripcion":"Poste sin luz","latitud":4.6,"longitud":-74.1,"estado":"EN_PROGRESO","autorId":81,"autorNombre":"Ciudadano Prueba","createdAt":"2026-11-13T17:39:24.003130Z"},{"id":7,"cat...
+E2E-A02  PATCH  /api/reportes/9/estado                     -> HTTP 200 | {"id":9,"categoria":"ESCOMBROS","descripcion":"Escombros en anden","latitud":4.6,"longitud":-74.08,"estado":"RESUELTO","autorId":83,"autorNombre":"Ciudadano Prueba","createdAt":"2026-11-13T17:39:24.857968Z"}
+E2E-A02  PUT    /api/reportes/9                            -> HTTP 200 | {"id":9,"categoria":"BASURA","descripcion":"Recategorizado por el administrador","latitud":4.6,"longitud":-74.08,"estado":"RESUELTO","autorId":83,"autorNombre":"Ciudadano Prueba","createdAt":"2026-11-13T17:39:24.857968Z"...
+E2E-A02  GET    /api/reportes/9                            -> HTTP 200 | {"id":9,"categoria":"BASURA","descripcion":"Recategorizado por el administrador","latitud":4.6,"longitud":-74.08,"estado":"RESUELTO","autorId":83,"autorNombre":"Ciudadano Prueba","createdAt":"2026-11-13T17:39:24.857968Z"...
+E2E-A02  GET    /api/admin/auditoria                       -> HTTP 200 | [{"id":13,"modulo":"REPORTES","accion":"EDICION","usuario":"Administrador","rol":"ADMIN","entidad":"Reporte #9","valorAnterior":"ESCOMBROS: Escombros en anden","valorNuevo":"BASURA: Recategorizado por el administrador","...
+E2E-A02  DELETE /api/reportes/9                            -> HTTP 204 | 
+E2E-A02  GET    /api/reportes/9                            -> HTTP 404 | {"timestamp":"2026-11-13T17:39:24.984309400Z","status":404,"message":"No existe un reporte con id: 9","fieldErrors":null}
+E2E-A01  POST   /api/auth/register                         -> HTTP 201 | {"token":"<JWT-redactado>","id":84,"nombre":"Ciudadana E2E","email":"e2e.ciudadano.1206107770556300.87@radar.test","role":"USER","tipo":"Bearer"}
+E2E-A01  POST   /api/auth/login                            -> HTTP 200 | {"token":"<JWT-redactado>","id":84,"nombre":"Ciudadana E2E","email":"e2e.ciudadano.1206107770556300.87@radar.test","role":"USER","tipo":"Bearer"}
+E2E-A01  POST   /api/reportes                              -> HTTP 201 | {"id":10,"categoria":"BACHE","descripcion":"Hueco en la calle 26","latitud":4.65,"longitud":-74.09,"estado":"PENDIENTE","autorId":84,"autorNombre":"Ciudadana E2E","createdAt":"2026-11-13T17:39:25.144784Z"}
+E2E-A01  GET    /api/reportes                              -> HTTP 200 | [{"id":10,"categoria":"BACHE","descripcion":"Hueco en la calle 26","latitud":4.65,"longitud":-74.09,"estado":"PENDIENTE","autorId":84,"autorNombre":"Ciudadana E2E","createdAt":"2026-11-13T17:39:25.144784Z"},{"id":8,"cate...
+E2E-A01  POST   /api/auth/heartbeat                        -> HTTP 200 | 
+E2E-A01  POST   /api/auth/logout                           -> HTTP 200 | 
+E2E-A01  GET    /api/reportes                              -> HTTP 401 | {"timestamp":"2026-11-13T17:39:25.172851400Z","status":401,"message":"No autenticado","fieldErrors":null}

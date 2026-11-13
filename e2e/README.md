@@ -49,4 +49,5 @@ E2E_API_REWRITE=http://localhost:8081 npx playwright test
 
 - `npm run validate:workflow`: validación estática de `.github/workflows/ci.yml`.
 - `npm run report:pdf`: genera `docs/INFORME_PRUEBAS_RADAR.pdf` a partir de `docs/INFORME_PRUEBAS_RADAR.md`.
-- `npm run report:docx`: genera `docs/INFORME_PRUEBAS_RADAR_v2.docx` (APA 7) a partir de `docs/INFORME_PRUEBAS_RADAR_v2.md`. Al abrirlo, Word ofrece actualizar la tabla de contenido.
+- `npm run report:docx`: genera `docs/INFORME_PRUEBAS_RADAR.docx` (APA 7) a partir de `docs/INFORME_PRUEBAS_RADAR.md`; `scripts/update-docx-word.ps1` actualiza su tabla de contenido con Word y puede exportar el PDF.
+- `scripts/verificar-defectos-api.sh`: verifica por HTTP los defectos DEF-01..DEF-15 contra un backend real.

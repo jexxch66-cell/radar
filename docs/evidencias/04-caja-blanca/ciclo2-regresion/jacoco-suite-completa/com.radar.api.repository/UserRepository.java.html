@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UserRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.repository</a> &gt; <span class="el_source">UserRepository.java</span></div><h1>UserRepository.java</h1><pre class="source lang-java linenums">package com.radar.api.repository;
+
+import com.radar.api.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.Instant;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+
+    Optional&lt;User&gt; findByEmail(String email);
+
+    Optional&lt;User&gt; findByEmailIgnoreCase(String email);
+
+    boolean existsByEmail(String email);
+
+    // Unicidad sin distinguir mayusculas: evita cuentas duplicadas &quot;ana@x.com&quot; / &quot;ANA@x.com&quot; (DEF-02)
+    boolean existsByEmailIgnoreCase(String email);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update User u set u.activeSessionId = :sessionId, u.lastActiveAt = :lastActiveAt where u.email = :email&quot;)
+    int updateActiveSessionId(@Param(&quot;email&quot;) String email, @Param(&quot;sessionId&quot;) String sessionId, @Param(&quot;lastActiveAt&quot;) Instant lastActiveAt);
+
+    default int updateActiveSessionId(String email, String sessionId) {
+<span class="nc" id="L30">        return updateActiveSessionId(email, sessionId, Instant.now());</span>
+    }
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update User u set u.lastActiveAt = :lastActiveAt where u.email = :email and u.activeSessionId = :sessionId&quot;)
+    int updateLastActiveAt(@Param(&quot;email&quot;) String email, @Param(&quot;sessionId&quot;) String sessionId, @Param(&quot;lastActiveAt&quot;) Instant lastActiveAt);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update User u set u.activeSessionId = null, u.lastActiveAt = null where u.email = :email&quot;)
+    int clearActiveSession(@Param(&quot;email&quot;) String email);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

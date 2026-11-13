@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.service</a> &gt; <span class="el_source">ReportService.java</span></div><h1>ReportService.java</h1><pre class="source lang-java linenums">package com.radar.api.service;
+
+import com.radar.api.dto.request.CreateReportRequest;
+import com.radar.api.dto.request.UpdateReportRequest;
+import com.radar.api.dto.request.UpdateReportStatusRequest;
+import com.radar.api.dto.response.ReportResponse;
+import com.radar.api.exception.ReportNotFoundException;
+import com.radar.api.model.Report;
+import com.radar.api.model.User;
+import com.radar.api.repository.ReportRepository;
+import com.radar.api.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+// Servicio de negocio para la gestión de reportes ciudadanos (creación, consulta, cambio de estado, edición y borrado)
+<span class="fc" id="L20">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class ReportService {
+
+    // Repositorios de base de datos para reportes y usuarios, y servicio de auditoría
+    private final ReportRepository reportRepository;
+    private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
+
+    // Crea y guarda un nuevo reporte urbano asociándolo al ciudadano autenticado
+    public ReportResponse create(CreateReportRequest request, String autorEmail) {
+<span class="fc" id="L32">        User autor = userRepository.findByEmail(autorEmail)</span>
+<span class="fc" id="L33">                .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;Usuario no encontrado: &quot; + autorEmail));</span>
+
+<span class="fc" id="L35">        Report report = Report.builder()</span>
+<span class="fc" id="L36">                .categoria(request.getCategoria())</span>
+<span class="fc" id="L37">                .descripcion(request.getDescripcion())</span>
+<span class="fc" id="L38">                .latitud(request.getLatitud())</span>
+<span class="fc" id="L39">                .longitud(request.getLongitud())</span>
+<span class="fc" id="L40">                .autor(autor)</span>
+<span class="fc" id="L41">                .build();</span>
+
+<span class="fc" id="L43">        reportRepository.save(report);</span>
+<span class="fc" id="L44">        log.info(&quot;Reporte creado: id={}, categoria={}, autor={}&quot;, report.getId(), report.getCategoria(), autorEmail);</span>
+<span class="fc" id="L45">        auditLogService.registrarEvento(</span>
+                &quot;REPORTES&quot;,
+                &quot;CREACION&quot;,
+<span class="fc" id="L48">                autor.getNombre() + &quot; (&quot; + autorEmail + &quot;)&quot;,</span>
+<span class="fc" id="L49">                autor.getRole().name(),</span>
+<span class="fc" id="L50">                &quot;Reporte #&quot; + report.getId(),</span>
+                &quot;-&quot;,
+<span class="fc" id="L52">                report.getCategoria().name() + &quot; · &quot; + report.getEstado().name(),</span>
+<span class="fc" id="L53">                &quot;Creación de reporte urbano: &quot; + report.getDescripcion()</span>
+        );
+<span class="fc" id="L55">        return toResponse(report);</span>
+    }
+
+    // Lista todos los reportes del más reciente al más antiguo para mostrarlos en el mapa y el panel admin
+    public List&lt;ReportResponse&gt; findAll() {
+<span class="fc" id="L60">        return reportRepository.findAllByOrderByCreatedAtDesc().stream()</span>
+<span class="fc" id="L61">                .map(this::toResponse)</span>
+<span class="fc" id="L62">                .toList();</span>
+    }
+
+    // Busca un reporte específico por su clave primaria (ID)
+    public ReportResponse findById(Long id) {
+<span class="fc" id="L67">        return toResponse(getOrThrow(id));</span>
+    }
+
+    // Actualiza el estado del reporte (PENDIENTE -&gt; EN_PROGRESO -&gt; RESUELTO) desde el panel de administración
+    public ReportResponse updateStatus(Long id, UpdateReportStatusRequest request) {
+<span class="fc" id="L72">        Report report = getOrThrow(id);</span>
+<span class="fc" id="L73">        String estadoAnterior = report.getEstado().name();</span>
+<span class="fc" id="L74">        report.setEstado(request.getEstado());</span>
+<span class="fc" id="L75">        reportRepository.save(report);</span>
+<span class="fc" id="L76">        log.info(&quot;Estado de reporte actualizado: id={}, nuevoEstado={}&quot;, id, request.getEstado());</span>
+<span class="fc" id="L77">        auditLogService.registrarEvento(</span>
+                &quot;REPORTES&quot;,
+                &quot;CAMBIO_ESTADO&quot;,
+                &quot;Administrador&quot;,
+                &quot;ADMIN&quot;,
+                &quot;Reporte #&quot; + id,
+                estadoAnterior,
+<span class="fc" id="L84">                request.getEstado().name(),</span>
+<span class="fc" id="L85">                &quot;Cambio de estado del reporte #&quot; + id + &quot; de &quot; + estadoAnterior + &quot; a &quot; + request.getEstado().name()</span>
+        );
+<span class="fc" id="L87">        return toResponse(report);</span>
+    }
+
+    // Modifica la categoría y descripción de un reporte existente (acción exclusiva de ADMIN)
+    public ReportResponse update(Long id, UpdateReportRequest request) {
+<span class="fc" id="L92">        Report report = getOrThrow(id);</span>
+<span class="fc" id="L93">        String anterior = report.getCategoria().name() + &quot;: &quot; + report.getDescripcion();</span>
+<span class="fc" id="L94">        report.setCategoria(request.getCategoria());</span>
+<span class="fc" id="L95">        report.setDescripcion(request.getDescripcion());</span>
+<span class="fc" id="L96">        reportRepository.save(report);</span>
+<span class="fc" id="L97">        log.info(&quot;Reporte editado por administrador: id={}, categoria={}&quot;, id, request.getCategoria());</span>
+<span class="fc" id="L98">        auditLogService.registrarEvento(</span>
+                &quot;REPORTES&quot;,
+                &quot;EDICION&quot;,
+                &quot;Administrador&quot;,
+                &quot;ADMIN&quot;,
+                &quot;Reporte #&quot; + id,
+                anterior,
+<span class="fc" id="L105">                request.getCategoria().name() + &quot;: &quot; + request.getDescripcion(),</span>
+                &quot;Edición de categoría/descripción del reporte #&quot; + id
+        );
+<span class="fc" id="L108">        return toResponse(report);</span>
+    }
+
+    // Elimina físicamente un reporte de PostgreSQL verificando primero que exista
+    public void delete(Long id) {
+<span class="fc" id="L113">        Report report = reportRepository.findByIdWithAutor(id)</span>
+<span class="fc" id="L114">                .orElseThrow(() -&gt; new ReportNotFoundException(id));</span>
+<span class="fc" id="L115">        String resumen = report.getCategoria().name() + &quot; (&quot; + report.getDescripcion() + &quot;)&quot;;</span>
+<span class="fc" id="L116">        reportRepository.deleteById(id);</span>
+<span class="fc" id="L117">        log.info(&quot;Reporte eliminado por administrador: id={}&quot;, id);</span>
+<span class="fc" id="L118">        auditLogService.registrarEvento(</span>
+                &quot;REPORTES&quot;,
+                &quot;ELIMINACION&quot;,
+                &quot;Administrador&quot;,
+                &quot;ADMIN&quot;,
+                &quot;Reporte #&quot; + id,
+                resumen,
+                &quot;ELIMINADO&quot;,
+<span class="fc" id="L126">                &quot;Eliminación definitiva del reporte #&quot; + id + &quot; de &quot; + report.getAutor().getNombre()</span>
+        );
+<span class="fc" id="L128">    }</span>
+
+    // Método auxiliar que busca el reporte junto con su autor o lanza excepción 404 (ReportNotFoundException)
+    private Report getOrThrow(Long id) {
+<span class="fc" id="L132">        return reportRepository.findByIdWithAutor(id)</span>
+<span class="fc" id="L133">                .orElseThrow(() -&gt; new ReportNotFoundException(id));</span>
+    }
+
+    // Convierte la entidad JPA Report en el DTO ReportResponse que se envía como JSON al frontend
+    private ReportResponse toResponse(Report report) {
+<span class="fc" id="L138">        return ReportResponse.builder()</span>
+<span class="fc" id="L139">                .id(report.getId())</span>
+<span class="fc" id="L140">                .categoria(report.getCategoria())</span>
+<span class="fc" id="L141">                .descripcion(report.getDescripcion())</span>
+<span class="fc" id="L142">                .latitud(report.getLatitud())</span>
+<span class="fc" id="L143">                .longitud(report.getLongitud())</span>
+<span class="fc" id="L144">                .estado(report.getEstado())</span>
+<span class="fc" id="L145">                .autorId(report.getAutor().getId())</span>
+<span class="fc" id="L146">                .autorNombre(report.getAutor().getNombre())</span>
+<span class="fc" id="L147">                .createdAt(report.getCreatedAt())</span>
+<span class="fc" id="L148">                .build();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

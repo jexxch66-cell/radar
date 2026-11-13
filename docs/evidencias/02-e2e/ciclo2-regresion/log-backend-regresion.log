@@ -1,0 +1,175 @@
+2026-11-13T12:57:08.505-05:00  INFO 9800 --- [radar-api] [main] com.radar.api.ApiApplication             : Starting ApiApplication using Java 25.0.4.1 with PID 9800 (C:\Users\user\vsprojects\radar\backend\target\classes started by user in C:\Users\user\vsprojects\radar\backend)
+2026-11-13T12:57:08.509-05:00  INFO 9800 --- [radar-api] [main] com.radar.api.ApiApplication             : No active profile set, falling back to 1 default profile: "default"
+2026-11-13T12:57:09.585-05:00  INFO 9800 --- [radar-api] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-13T12:57:09.795-05:00  INFO 9800 --- [radar-api] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 200 ms. Found 5 JPA repository interfaces.
+2026-11-13T12:57:10.758-05:00  INFO 9800 --- [radar-api] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-11-13T12:57:10.776-05:00  INFO 9800 --- [radar-api] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-13T12:57:10.776-05:00  INFO 9800 --- [radar-api] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.46]
+2026-11-13T12:57:10.886-05:00  INFO 9800 --- [radar-api] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-11-13T12:57:10.887-05:00  INFO 9800 --- [radar-api] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2303 ms
+2026-11-13T12:57:11.069-05:00  INFO 9800 --- [radar-api] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-13T12:57:11.144-05:00  INFO 9800 --- [radar-api] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.29.Final
+2026-11-13T12:57:11.183-05:00  INFO 9800 --- [radar-api] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-13T12:57:11.573-05:00  INFO 9800 --- [radar-api] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-13T12:57:11.632-05:00  INFO 9800 --- [radar-api] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-13T12:57:11.837-05:00  INFO 9800 --- [radar-api] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1d806de6
+2026-11-13T12:57:11.840-05:00  INFO 9800 --- [radar-api] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-13T12:57:11.921-05:00  INFO 9800 --- [radar-api] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.15
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-13T12:57:12.952-05:00  INFO 9800 --- [radar-api] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-13T12:57:13.102-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:57:13.102-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukb30tmqkasj8a7pab2bowag73l" of relation "administradores" does not exist, skipping
+2026-11-13T12:57:13.113-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:57:13.114-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
+2026-11-13T12:57:13.125-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:57:13.125-05:00  WARN 9800 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uksp4u85eojl905i5bqmtxxskgy" of relation "users" does not exist, skipping
+2026-11-13T12:57:13.141-05:00  INFO 9800 --- [radar-api] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-13T12:57:13.407-05:00  INFO 9800 --- [radar-api] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-13T12:57:14.169-05:00  INFO 9800 --- [radar-api] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-11-13T12:57:14.169-05:00  WARN 9800 --- [radar-api] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-11-13T12:57:15.337-05:00  INFO 9800 --- [radar-api] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-11-13T12:57:15.346-05:00  INFO 9800 --- [radar-api] [main] com.radar.api.ApiApplication             : Started ApiApplication in 7.586 seconds (process running for 8.169)
+2026-11-13T12:57:15.559-05:00  INFO 9800 --- [radar-api] [main] com.radar.api.config.AdminSeeder         : Administrador por defecto creado -> email: admin.e2e@radar.test
+2026-11-13T12:57:17.348-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-13T12:57:17.349-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-13T12:57:17.350-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-11-13T12:57:33.997-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Intento de login fallido (credenciales inválidas) para email=nadie.e2e@radar.test
+2026-11-13T12:57:48.532-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.registro.17945926549211@radar.test, id=1
+2026-11-13T12:57:49.583-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.registro.17945926549211@radar.test
+2026-11-13T12:57:57.734-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.registro.17945926549211@radar.test
+2026-11-13T12:57:58.034-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.reporte.17945926779042@radar.test, id=2
+2026-11-13T12:57:58.183-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17945926779042@radar.test
+2026-11-13T12:57:58.223-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.reporte.17945926779042@radar.test
+2026-11-13T12:58:11.634-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17945926779042@radar.test
+2026-11-13T12:58:19.280-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.ReportService      : Reporte creado: id=1, categoria=BACHE, autor=e2e.reporte.17945926779042@radar.test
+2026-11-13T12:58:19.296-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CREACION, usuario=Ciudadano e2e.reporte (e2e.reporte.17945926779042@radar.test) (USER), entidad=Reporte #1, antes='-', despues='BACHE · PENDIENTE', detalle='Creación de reporte urbano: Moderado. E2E: hueco profundo frente al paradero'
+2026-11-13T12:58:20.695-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.reporte.17945926779042@radar.test
+2026-11-13T12:58:21.068-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.vecino.17945927009083@radar.test, id=3
+2026-11-13T12:58:21.252-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.vecino.17945927009083@radar.test
+2026-11-13T12:58:21.299-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.ReportService      : Reporte creado: id=2, categoria=ZONA_OSCURA, autor=e2e.vecino.17945927009083@radar.test
+2026-11-13T12:58:21.304-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CREACION, usuario=Ciudadano e2e.vecino (e2e.vecino.17945927009083@radar.test) (USER), entidad=Reporte #2, antes='-', despues='ZONA_OSCURA · PENDIENTE', detalle='Creación de reporte urbano: E2E admin 1794592701265'
+2026-11-13T12:58:22.771-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T12:58:23.476-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.ReportService      : Estado de reporte actualizado: id=2, nuevoEstado=EN_PROGRESO
+2026-11-13T12:58:23.480-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CAMBIO_ESTADO, usuario=Administrador (ADMIN), entidad=Reporte #2, antes='PENDIENTE', despues='EN_PROGRESO', detalle='Cambio de estado del reporte #2 de PENDIENTE a EN_PROGRESO'
+2026-11-13T12:58:23.676-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.vecino.17945927009083@radar.test
+2026-11-13T12:58:23.801-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T12:58:23.812-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T12:58:24.100-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.sesion.17945927040024@radar.test, id=4
+2026-11-13T12:58:24.217-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:24.251-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:25.741-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:28.218-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:29.151-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:29.837-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17945927040024@radar.test
+2026-11-13T12:58:30.935-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.logout.17945927108275@radar.test, id=5
+2026-11-13T12:58:31.051-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17945927108275@radar.test
+2026-11-13T12:58:31.079-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.logout.17945927108275@radar.test
+2026-11-13T12:58:32.483-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17945927108275@radar.test
+2026-11-13T12:58:33.281-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.logout.17945927108275@radar.test
+2026-11-13T12:58:40.496-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.almacen.17945927191846@radar.test, id=6
+2026-11-13T12:59:09.888-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.fallo.17945927497761@radar.test, id=7
+2026-11-13T12:59:10.006-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17945927497761@radar.test
+2026-11-13T12:59:10.035-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.fallo.17945927497761@radar.test
+2026-11-13T12:59:11.646-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17945927497761@radar.test
+2026-11-13T12:59:12.911-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.fallo.17945927497761@radar.test
+2026-11-13T12:59:14.589-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T12:59:15.280-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T12:59:15.296-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T12:59:50.433-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.fallo.17945927902761@radar.test, id=8
+2026-11-13T12:59:50.586-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17945927902761@radar.test
+2026-11-13T12:59:50.626-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.fallo.17945927902761@radar.test
+2026-11-13T12:59:52.356-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17945927902761@radar.test
+2026-11-13T13:00:09.744-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T14:59:56.896-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Intento de login fallido (credenciales inválidas) para email=nadie.e2e@radar.test
+2026-11-13T14:59:58.897-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.registro.17945999975451@radar.test, id=9
+2026-11-13T14:59:59.736-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.registro.17945999975451@radar.test
+2026-11-13T15:00:01.640-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.registro.17945999975451@radar.test
+2026-11-13T15:00:01.932-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.reporte.17946000018022@radar.test, id=10
+2026-11-13T15:00:02.061-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17946000018022@radar.test
+2026-11-13T15:00:02.094-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.reporte.17946000018022@radar.test
+2026-11-13T15:00:03.298-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17946000018022@radar.test
+2026-11-13T15:00:05.139-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.ReportService      : Reporte creado: id=3, categoria=BACHE, autor=e2e.reporte.17946000018022@radar.test
+2026-11-13T15:00:05.151-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CREACION, usuario=Ciudadano e2e.reporte (e2e.reporte.17946000018022@radar.test) (USER), entidad=Reporte #3, antes='-', despues='BACHE · PENDIENTE', detalle='Creación de reporte urbano: Moderado. E2E: hueco profundo frente al paradero'
+2026-11-13T15:00:06.580-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.reporte.17946000018022@radar.test
+2026-11-13T15:00:06.924-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.vecino.17946000067583@radar.test, id=11
+2026-11-13T15:00:07.051-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.vecino.17946000067583@radar.test
+2026-11-13T15:00:07.079-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.ReportService      : Reporte creado: id=4, categoria=ZONA_OSCURA, autor=e2e.vecino.17946000067583@radar.test
+2026-11-13T15:00:07.086-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CREACION, usuario=Ciudadano e2e.vecino (e2e.vecino.17946000067583@radar.test) (USER), entidad=Reporte #4, antes='-', despues='ZONA_OSCURA · PENDIENTE', detalle='Creación de reporte urbano: E2E admin 1794600007058'
+2026-11-13T15:00:08.127-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T15:00:08.693-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.ReportService      : Estado de reporte actualizado: id=4, nuevoEstado=EN_PROGRESO
+2026-11-13T15:00:08.706-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CAMBIO_ESTADO, usuario=Administrador (ADMIN), entidad=Reporte #4, antes='PENDIENTE', despues='EN_PROGRESO', detalle='Cambio de estado del reporte #4 de PENDIENTE a EN_PROGRESO'
+2026-11-13T15:00:08.974-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.vecino.17946000067583@radar.test
+2026-11-13T15:00:09.252-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T15:00:09.256-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T15:00:09.533-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.sesion.17946000093934@radar.test, id=12
+2026-11-13T15:00:09.698-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:09.736-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:13.828-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:28.810-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:29.956-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:30.684-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:30.707-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17946000093934@radar.test
+2026-11-13T15:00:33.264-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.logout.17946000330385@radar.test, id=13
+2026-11-13T15:00:33.458-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17946000330385@radar.test
+2026-11-13T15:00:33.498-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.logout.17946000330385@radar.test
+2026-11-13T15:00:47.185-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17946000330385@radar.test
+2026-11-13T15:00:48.005-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.logout.17946000330385@radar.test
+2026-11-13T15:01:06.991-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.fallo.17946000667986@radar.test, id=14
+2026-11-13T15:01:07.200-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17946000667986@radar.test
+2026-11-13T15:01:07.245-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.fallo.17946000667986@radar.test
+2026-11-13T15:01:20.603-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.fallo.17946000667986@radar.test
+2026-11-13T15:01:22.319-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.fallo.17946000667986@radar.test
+2026-11-13T15:01:24.283-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T15:01:25.092-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T15:01:25.099-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T15:01:27.133-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.almacen.17946000856267@radar.test, id=15
+2026-11-13T15:02:07.716-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T15:02:08.361-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Intento de registro con email ya existente: adminv.179460012718927@radar.test
+2026-11-13T15:02:09.022-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=adminv.179460012718927@radar.test
+2026-11-13T15:02:09.271-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=adminv.179460012718927@radar.test
+2026-11-13T15:02:09.510-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=caso.179460012718927@radar.test, id=16
+2026-11-13T15:02:09.706-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Intento de registro con email ya existente: caso.179460012718927@radar.test
+2026-11-13T15:02:10.129-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=mixto.179460012718927@radar.test, id=17
+2026-11-13T15:02:10.703-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=token.179460012718927@radar.test, id=18
+2026-11-13T15:02:11.212-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=token.179460012718927@radar.test
+2026-11-13T15:02:11.470-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=caso.179460012718927@radar.test
+2026-11-13T15:02:14.237-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=ELIMINACION, usuario=Administrador (admin.e2e@radar.test) (ADMIN), entidad=null, antes='null', despues='null', detalle='x'
+2026-11-13T15:02:15.037-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=caso.179460012718927@radar.test
+2026-11-13T15:02:15.286-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=caso.179460012718927@radar.test
+2026-11-13T15:02:16.384-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=caso.179460012718927@radar.test
+2026-11-13T15:02:16.672-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=victima.179460012718927@radar.test, id=19
+2026-11-13T15:02:16.870-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=victima.179460012718927@radar.test
+2026-11-13T15:02:17.353-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=victima.179460012718927@radar.test
+2026-11-13T15:02:17.663-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=victima.179460012718927@radar.test
+2026-11-13T15:02:17.939-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=nuevo.179460012718927@radar.test, id=20
+2026-11-13T15:02:18.211-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=nuevo.179460012718927@radar.test
+2026-11-13T15:02:18.502-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=nuevo.179460012718927@radar.test
+2026-11-13T15:02:18.666-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test
+2026-11-13T15:02:31.005-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T15:02:31.522-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Intento de registro con email ya existente: adminv.179460015013690@radar.test
+2026-11-13T15:02:31.906-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=adminv.179460015013690@radar.test
+2026-11-13T15:02:32.168-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=adminv.179460015013690@radar.test
+2026-11-13T15:02:32.460-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=caso.179460015013690@radar.test, id=21
+2026-11-13T15:02:32.689-05:00  WARN 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Intento de registro con email ya existente: caso.179460015013690@radar.test
+2026-11-13T15:02:33.198-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=mixto.179460015013690@radar.test, id=22
+2026-11-13T15:02:33.652-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=token.179460015013690@radar.test, id=23
+2026-11-13T15:02:34.126-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=token.179460015013690@radar.test
+2026-11-13T15:02:34.417-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=caso.179460015013690@radar.test
+2026-11-13T15:02:36.387-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=ELIMINACION, usuario=Administrador (admin.e2e@radar.test) (ADMIN), entidad=null, antes='null', despues='null', detalle='x'
+2026-11-13T15:02:37.348-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=caso.179460015013690@radar.test
+2026-11-13T15:02:37.655-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=caso.179460015013690@radar.test
+2026-11-13T15:02:38.702-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=caso.179460015013690@radar.test
+2026-11-13T15:02:39.044-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=victima.179460015013690@radar.test, id=24
+2026-11-13T15:02:39.231-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=victima.179460015013690@radar.test
+2026-11-13T15:02:39.693-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=victima.179460015013690@radar.test
+2026-11-13T15:02:39.972-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=victima.179460015013690@radar.test
+2026-11-13T15:02:40.238-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=nuevo.179460015013690@radar.test, id=25
+2026-11-13T15:02:40.519-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=nuevo.179460015013690@radar.test
+2026-11-13T15:02:40.849-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=nuevo.179460015013690@radar.test
+2026-11-13T15:02:40.967-05:00  INFO 9800 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.e2e@radar.test

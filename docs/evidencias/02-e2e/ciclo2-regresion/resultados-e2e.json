@@ -1,0 +1,610 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\user\\vsprojects\\radar\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/user/vsprojects/radar/e2e/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "./reports/resultados-e2e.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "./reports/html",
+          "open": "never"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/user/vsprojects/radar/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/user/vsprojects/radar/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "radar.e2e.spec.ts",
+      "file": "radar.e2e.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "E2E-01 Visitante: la portada carga y la ruta raiz redirige a /bienvenida",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3344,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T19:59:49.650Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-01-Visitante-56680--raiz-redirige-a-bienvenida\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-af99b6076b21849f6f98",
+          "file": "radar.e2e.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "E2E-02 Visitante: una ruta protegida (/mapa) redirige a /login",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1158,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T19:59:53.355Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-02-Visitante-a4894-egida-mapa-redirige-a-login\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-89b9dac3ed193fcb78f0",
+          "file": "radar.e2e.spec.ts",
+          "line": 87,
+          "column": 5
+        },
+        {
+          "title": "E2E-03 Visitante: ruta inexistente muestra la pagina 404 del frontend",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1154,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T19:59:54.534Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-03-Visitante-12c7d--la-pagina-404-del-frontend\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-3e5141bcb29bc6df1c92",
+          "file": "radar.e2e.spec.ts",
+          "line": 94,
+          "column": 5
+        },
+        {
+          "title": "E2E-04 Login con credenciales invalidas muestra el mensaje de error del backend",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1673,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T19:59:55.714Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-04-Login-con-c5682-ensaje-de-error-del-backend\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-0922a4d955d6c03b6682",
+          "file": "radar.e2e.spec.ts",
+          "line": 100,
+          "column": 5
+        },
+        {
+          "title": "E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4203,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T19:59:57.407Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-7e6172f2a5bcfd7b02b2",
+          "file": "radar.e2e.spec.ts",
+          "line": 107,
+          "column": 5
+        },
+        {
+          "title": "E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4931,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:00:01.636Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6c3c04faed1174f67896",
+          "file": "radar.e2e.spec.ts",
+          "line": 134,
+          "column": 5
+        },
+        {
+          "title": "E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2742,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:00:06.596Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6e91cfa09f634fe28e43",
+          "file": "radar.e2e.spec.ts",
+          "line": 159,
+          "column": 5
+        },
+        {
+          "title": "E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22716,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:00:09.363Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\test-finished-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\test-finished-2.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-3995b1c3b63c253193dd",
+          "file": "radar.e2e.spec.ts",
+          "line": 192,
+          "column": 5
+        },
+        {
+          "title": "E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 16467,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:00:32.610Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6a653181caea9436eb7b",
+          "file": "radar.e2e.spec.ts",
+          "line": 229,
+          "column": 5
+        },
+        {
+          "title": "E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 17392,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:00:49.118Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-0af7c41644f5a5db72f8",
+          "file": "radar.e2e.spec.ts",
+          "line": 242,
+          "column": 5
+        },
+        {
+          "title": "E2E-12 Integridad: si el servidor falla al crear un reporte, se informa el error y no se simula la publicacion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 15990,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:01:06.555Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-12-Integrida-75383-no-se-simula-la-publicacion\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-578f731911ac62d5f105",
+          "file": "radar.e2e.spec.ts",
+          "line": 253,
+          "column": 5
+        },
+        {
+          "title": "E2E-13 Integridad: si el servidor falla al crear un backup, el panel muestra el error y no un backup inexistente",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2764,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:01:22.577Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-13-Integrida-eee36--y-no-un-backup-inexistente\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-ae0f8707e359fb97f7c8",
+          "file": "radar.e2e.spec.ts",
+          "line": 275,
+          "column": 5
+        },
+        {
+          "title": "E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1999,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T20:01:25.373Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-8405deeac549b715ff18",
+          "file": "radar.e2e.spec.ts",
+          "line": 293,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-13T19:59:47.172Z",
+    "duration": 100833.675,
+    "expected": 13,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

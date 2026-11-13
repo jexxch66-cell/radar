@@ -1,0 +1,41 @@
+# Validacion estatica de .github/workflows/ci.yml
+# Fecha: 2026-11-13T15:08:16-05:00 | Comando: node e2e/scripts/validate-workflow.mjs
+
+OK   YAML sintacticamente valido
+OK   Tiene nombre  [CI RADAR]
+OK   Se activa en push
+OK   Se activa en pull_request
+OK   Permisos minimos (contents: read)
+OK   job backend: runs-on definido  [ubuntu-latest]
+OK   job backend: tiene steps  [9 pasos]
+OK   job backend: accion con version fija (actions/checkout@v4)
+OK   job backend: paso con nombre  [Obtener el codigo]
+OK   job backend: accion con version fija (actions/setup-java@v4)
+OK   job backend: paso con nombre  [Configurar JDK 21 (java.version del pom.xml)]
+OK   job backend: paso con nombre  [Permisos del Maven Wrapper]
+OK   job backend: paso con nombre  [Compilar, ejecutar pruebas y generar cobertura (mvn verify)]
+OK   job backend: paso con nombre  [Resumen en la ejecucion]
+OK   job backend: accion con version fija (actions/upload-artifact@v4)
+OK   job backend: paso con nombre  [Publicar reportes de pruebas y cobertura]
+OK   job backend: paso con nombre  [Pruebas de defectos conocidos (informativo, no bloquea)]
+OK   job backend: paso con nombre  [Resumen de defectos conocidos]
+OK   job backend: accion con version fija (actions/upload-artifact@v4)
+OK   job backend: paso con nombre  [Publicar reporte de defectos conocidos]
+OK   job frontend: runs-on definido  [ubuntu-latest]
+OK   job frontend: tiene steps  [6 pasos]
+OK   job frontend: accion con version fija (actions/checkout@v4)
+OK   job frontend: paso con nombre  [Obtener el codigo]
+OK   job frontend: accion con version fija (actions/setup-node@v4)
+OK   job frontend: paso con nombre  [Configurar Node.js]
+OK   job frontend: paso con nombre  [Instalar dependencias (npm ci)]
+OK   job frontend: paso con nombre  [Pruebas unitarias (Vitest)]
+OK   job frontend: paso con nombre  [Build de produccion]
+OK   job frontend: accion con version fija (actions/upload-artifact@v4)
+OK   job frontend: paso con nombre  [Publicar build]
+OK   backend/mvnw existe
+OK   frontend/package-lock.json existe (npm ci + cache)
+OK   frontend: script "test" definido
+OK   frontend: script "build" definido
+
+35/35 verificaciones superadas
+exit=0

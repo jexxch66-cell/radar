@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.controller</a> &gt; <span class="el_source">ReportController.java</span></div><h1>ReportController.java</h1><pre class="source lang-java linenums">package com.radar.api.controller;
+
+import com.radar.api.dto.request.CreateReportRequest;
+import com.radar.api.dto.request.UpdateReportRequest;
+import com.radar.api.dto.request.UpdateReportStatusRequest;
+import com.radar.api.dto.response.ReportResponse;
+import com.radar.api.service.ReportService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+// Controlador REST para gestionar reportes urbanos bajo el endpoint /api/reportes
+@RestController
+@RequestMapping(&quot;/api/reportes&quot;)
+@RequiredArgsConstructor
+public class ReportController {
+
+    private final ReportService reportService;
+
+    // POST /api/reportes: solo los ciudadanos (rol USER) crean reportes; el autor se toma del token JWT.
+    // Un administrador no es un ciudadano (no tiene fila en &quot;users&quot;), por eso recibe 403 en vez de un 500 (DEF-05)
+    @PostMapping
+    @PreAuthorize(&quot;hasRole('USER')&quot;)
+    public ResponseEntity&lt;ReportResponse&gt; create(@Valid @RequestBody CreateReportRequest request,
+                                                  Authentication authentication) {
+<span class="fc" id="L40">        ReportResponse response = reportService.create(request, authentication.getName());</span>
+<span class="fc" id="L41">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    // GET /api/reportes: devuelve la lista completa de reportes para pintarlos en el mapa o en la tabla admin
+    @GetMapping
+    public ResponseEntity&lt;List&lt;ReportResponse&gt;&gt; findAll() {
+<span class="fc" id="L47">        return ResponseEntity.ok(reportService.findAll());</span>
+    }
+
+    // GET /api/reportes/{id}: obtiene el detalle de un reporte específico por su ID
+    @GetMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;ReportResponse&gt; findById(@PathVariable Long id) {
+<span class="fc" id="L53">        return ResponseEntity.ok(reportService.findById(id));</span>
+    }
+
+    // PUT /api/reportes/{id}: edita categoría y descripción de un reporte (restringido a rol ADMIN)
+    @PutMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;ReportResponse&gt; update(@PathVariable Long id,
+                                                   @Valid @RequestBody UpdateReportRequest request) {
+<span class="fc" id="L61">        return ResponseEntity.ok(reportService.update(id, request));</span>
+    }
+
+    // DELETE /api/reportes/{id}: elimina un reporte de la base de datos (restringido a rol ADMIN)
+    @DeleteMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable Long id) {
+<span class="fc" id="L68">        reportService.delete(id);</span>
+<span class="fc" id="L69">        return ResponseEntity.noContent().build();</span>
+    }
+
+    // PATCH /api/reportes/{id}/estado: cambia el estado (PENDIENTE, EN_PROGRESO, RESUELTO) (restringido a rol ADMIN)
+    @PatchMapping(&quot;/{id}/estado&quot;)
+    @PreAuthorize(&quot;hasRole('ADMIN')&quot;)
+    public ResponseEntity&lt;ReportResponse&gt; updateStatus(@PathVariable Long id,
+                                                         @Valid @RequestBody UpdateReportStatusRequest request) {
+<span class="fc" id="L77">        return ResponseEntity.ok(reportService.updateStatus(id, request));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

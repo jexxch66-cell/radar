@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BackupStorageConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.config</a> &gt; <span class="el_source">BackupStorageConfig.java</span></div><h1>BackupStorageConfig.java</h1><pre class="source lang-java linenums">package com.radar.api.config;
+
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+
+@Configuration
+<span class="fc" id="L14">public class BackupStorageConfig {</span>
+
+    @Bean
+    @Conditional(AzureStorageConfigured.class)
+    public BlobServiceClient backupBlobServiceClient(
+            @Value(&quot;${app.backup.azure-connection-string}&quot;) String connectionString) {
+<span class="nc" id="L20">        return new BlobServiceClientBuilder()</span>
+<span class="nc" id="L21">                .connectionString(connectionString)</span>
+<span class="nc" id="L22">                .buildClient();</span>
+    }
+
+<span class="fc" id="L25">    public static class AzureStorageConfigured implements Condition {</span>
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+<span class="fc" id="L29">            String connectionString = context.getEnvironment().getProperty(&quot;app.backup.azure-connection-string&quot;);</span>
+<span class="pc bpc" id="L30" title="2 of 4 branches missed.">            return connectionString != null &amp;&amp; !connectionString.isBlank();</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

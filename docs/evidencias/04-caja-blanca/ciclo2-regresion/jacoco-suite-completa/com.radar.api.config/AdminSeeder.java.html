@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdminSeeder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.config</a> &gt; <span class="el_source">AdminSeeder.java</span></div><h1>AdminSeeder.java</h1><pre class="source lang-java linenums">package com.radar.api.config;
+
+import com.radar.api.model.Administrador;
+import com.radar.api.repository.AdministradorRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+// Crea el administrador por defecto en el primer arranque si la tabla administradores esta vacia
+@Component
+@RequiredArgsConstructor
+<span class="fc" id="L15">@Slf4j</span>
+public class AdminSeeder implements CommandLineRunner {
+
+    private final AdministradorRepository administradorRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Value(&quot;${app.admin.default-email}&quot;)
+    private String defaultEmail;
+
+    @Value(&quot;${app.admin.default-password}&quot;)
+    private String defaultPassword;
+
+    @Override
+    public void run(String... args) {
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">        if (administradorRepository.count() &gt; 0) {</span>
+<span class="nc" id="L30">            return;</span>
+        }
+
+<span class="fc" id="L33">        Administrador admin = Administrador.builder()</span>
+<span class="fc" id="L34">                .nombre(&quot;Administrador&quot;)</span>
+<span class="fc" id="L35">                .email(defaultEmail)</span>
+<span class="fc" id="L36">                .password(passwordEncoder.encode(defaultPassword))</span>
+<span class="fc" id="L37">                .build();</span>
+<span class="fc" id="L38">        administradorRepository.save(admin);</span>
+
+        // Nunca se escribe la contrasena en el log (DEF-08)
+<span class="fc" id="L41">        log.info(&quot;Administrador por defecto creado -&gt; email: {}&quot;, defaultEmail);</span>
+<span class="fc" id="L42">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

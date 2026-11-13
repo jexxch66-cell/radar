@@ -1,6 +1,6 @@
 // Genera un .docx con formato APA 7 a partir de un Markdown del informe.
 // Uso: node scripts/build-report-docx.mjs [entrada.md] [salida.docx]
-// Por defecto: docs/INFORME_PRUEBAS_RADAR_v2.md -> docs/INFORME_PRUEBAS_RADAR_v2.docx
+// Por defecto: docs/INFORME_PRUEBAS_RADAR.md -> docs/INFORME_PRUEBAS_RADAR.docx
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,8 +12,8 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const docsDir = resolve(root, 'docs');
-const input = resolve(root, process.argv[2] ?? 'docs/INFORME_PRUEBAS_RADAR_v2.md');
-const output = resolve(root, process.argv[3] ?? 'docs/INFORME_PRUEBAS_RADAR_v2.docx');
+const input = resolve(root, process.argv[2] ?? 'docs/INFORME_PRUEBAS_RADAR.md');
+const output = resolve(root, process.argv[3] ?? 'docs/INFORME_PRUEBAS_RADAR.docx');
 
 const FONT = 'Times New Roman';
 const MONO = 'Consolas';
@@ -281,7 +281,7 @@ const heading = (id, name, extra) => ({
 const doc = new Document({
   creator: 'Equipo RADAR',
   title: 'Informe técnico de auditoría, pruebas de software y corrección de defectos - RADAR',
-  description: 'Informe de pruebas con correcciones y verificación de regresión (APA 7)',
+  description: 'Informe de auditoría, pruebas y corrección de defectos de RADAR (APA 7)',
   features: { updateFields: true },
   styles: {
     default: {
