@@ -1,9 +1,12 @@
 // Servicio para la gestión de respaldos (Backups) de PostgreSQL con respuesta rápida garantizada
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap, timeout } from 'rxjs';
+import { Observable, catchError, of, tap, throwError, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BackupInfo, BackupStatus } from '../models/backup.models';
+
+// Con el modo presentacion se espera poco y se muestran datos simulados; en uso real se espera al servidor
+const REQUEST_TIMEOUT_MS = environment.offlineDemo ? 1500 : 15_000;
 
 const LOCAL_BACKUP_STATUS_KEY = 'radar_backup_status_v1';
 
@@ -14,17 +17,20 @@ export class BackupService {
 
   getStatus(): Observable<BackupStatus> {
     return this.http.get<BackupStatus>(this.apiUrl).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((status) => this.saveLocalStatus(status)),
-      catchError(() => of(this.readLocalStatus())),
+      catchError((err: unknown) => (environment.offlineDemo ? of(this.readLocalStatus()) : throwError(() => err))),
     );
   }
 
   updateSchedule(enabled: boolean, intervalHours: number): Observable<BackupStatus> {
     return this.http.put<BackupStatus>(`${this.apiUrl}/schedule`, { enabled, intervalHours }).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((status) => this.saveLocalStatus(status)),
-      catchError(() => {
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const current = this.readLocalStatus();
         const next: BackupStatus = {
           ...current,
@@ -42,8 +48,11 @@ export class BackupService {
 
   createBackup(): Observable<BackupInfo> {
     return this.http.post<BackupInfo>(this.apiUrl, {}).pipe(
-      timeout(2000),
-      catchError(() => {
+      timeout(REQUEST_TIMEOUT_MS),
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const now = new Date();
         const stamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
         const backup: BackupInfo = {
@@ -65,8 +74,11 @@ export class BackupService {
 
   restoreLatest(confirmation: string): Observable<BackupInfo> {
     return this.http.post<BackupInfo>(`${this.apiUrl}/restore-latest`, { confirmation }).pipe(
-      timeout(2000),
-      catchError(() => {
+      timeout(REQUEST_TIMEOUT_MS),
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const current = this.readLocalStatus();
         const now = new Date().toISOString();
         return of({

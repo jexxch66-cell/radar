@@ -2,11 +2,14 @@
 import { Injectable, inject } from '@angular/core';
 // HttpClient se encarga de las llamadas REST al backend
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap, timeout } from 'rxjs';
+import { Observable, catchError, of, tap, throwError, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 // Modelos TypeScript para reportes urbanos (creación, edición, estados y respuesta)
 import { CreateReportRequest, Report, ReportStatus, UpdateReportRequest } from '../models/report.models';
+
+// Con el modo presentacion se espera poco y se muestran datos simulados; en uso real se espera al servidor
+const REQUEST_TIMEOUT_MS = environment.offlineDemo ? 1500 : 15_000;
 
 const LOCAL_REPORTS_KEY = 'radar_reports_cache_v1';
 
@@ -80,21 +83,24 @@ export class ReportService {
   // Obtiene todos los reportes ordenados del más reciente al más antiguo (GET /api/reportes)
   getAll(): Observable<Report[]> {
     return this.http.get<Report[]>(this.apiUrl).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((list) => this.saveLocalReports(list)),
-      catchError(() => of(this.readLocalReports())),
+      catchError((err: unknown) => (environment.offlineDemo ? of(this.readLocalReports()) : throwError(() => err))),
     );
   }
 
   // Crea un nuevo reporte ciudadano con categoría, descripción y coordenadas GPS (POST /api/reportes)
   create(request: CreateReportRequest): Observable<Report> {
     return this.http.post<Report>(this.apiUrl, request).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((created) => {
         const list = [created, ...this.readLocalReports().filter((r) => r.id !== created.id)];
         this.saveLocalReports(list);
       }),
-      catchError(() => {
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const user = this.authService.currentUser();
         const current = this.readLocalReports();
         const nextId = current.reduce((max, r) => Math.max(max, r.id), 100) + 1;
@@ -118,9 +124,12 @@ export class ReportService {
   // Actualiza categoría y descripción de un reporte existente — solo ADMIN (PUT /api/reportes/{id})
   update(id: number, request: UpdateReportRequest): Observable<Report> {
     return this.http.put<Report>(`${this.apiUrl}/${id}`, request).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((updated) => this.replaceInLocal(updated)),
-      catchError(() => {
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const list = this.readLocalReports();
         const target = list.find((r) => r.id === id);
         const updated: Report = target
@@ -145,12 +154,15 @@ export class ReportService {
   // Elimina un reporte por su ID — solo ADMIN (DELETE /api/reportes/{id})
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap(() => {
         const filtered = this.readLocalReports().filter((r) => r.id !== id);
         this.saveLocalReports(filtered);
       }),
-      catchError(() => {
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const filtered = this.readLocalReports().filter((r) => r.id !== id);
         this.saveLocalReports(filtered);
         return of(void 0);
@@ -161,9 +173,12 @@ export class ReportService {
   // Cambia únicamente el estado del reporte (PENDIENTE, EN_PROGRESO, RESUELTO) — solo ADMIN (PATCH /api/reportes/{id}/estado)
   updateEstado(id: number, estado: ReportStatus): Observable<Report> {
     return this.http.patch<Report>(`${this.apiUrl}/${id}/estado`, { estado }).pipe(
-      timeout(1500),
+      timeout(REQUEST_TIMEOUT_MS),
       tap((updated) => this.replaceInLocal(updated)),
-      catchError(() => {
+      catchError((err: unknown) => {
+        if (!environment.offlineDemo) {
+          return throwError(() => err);
+        }
         const list = this.readLocalReports();
         const target = list.find((r) => r.id === id);
         const updated: Report = target
