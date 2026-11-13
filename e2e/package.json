@@ -1,0 +1,17 @@
+{
+  "name": "radar-e2e",
+  "private": true,
+  "description": "Pruebas E2E (Playwright) de RADAR y utilidades de documentacion del plan de pruebas",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "validate:workflow": "node scripts/validate-workflow.mjs",
+    "report:pdf": "node scripts/build-report-pdf.mjs",
+    "report:docx": "node scripts/build-report-docx.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "marked": "16.4.1",
+    "yaml": "2.8.1",
+    "docx": "9.14.0"
+  }
+}
