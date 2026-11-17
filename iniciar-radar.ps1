@@ -33,7 +33,7 @@ try {
     # 2. Base de datos
     Write-Host 'Levantando PostgreSQL (radar-db)...' -ForegroundColor Cyan
     Push-Location $root
-    & docker compose up -d
+    & docker compose -f docker-compose.yml up -d
     Pop-Location
     Wait-Until { Test-Port 5433 } 60 'PostgreSQL en el puerto 5433'
     Write-Host 'Base de datos lista.' -ForegroundColor Green
@@ -43,7 +43,7 @@ try {
         Write-Host 'El backend ya esta corriendo en 8080.' -ForegroundColor Yellow
     } else {
         Write-Host 'Iniciando backend (ventana nueva)...' -ForegroundColor Cyan
-        Start-Process cmd.exe -ArgumentList '/k', 'title RADAR backend && mvn spring-boot:run' -WorkingDirectory (Join-Path $root 'backend')
+        Start-Process cmd.exe -ArgumentList '/k', 'title RADAR backend && mvnw.cmd spring-boot:run' -WorkingDirectory (Join-Path $root 'backend')
     }
 
     # 4. Frontend
