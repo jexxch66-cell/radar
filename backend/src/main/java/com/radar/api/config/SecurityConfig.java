@@ -21,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -55,6 +56,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 // Habilita CORS para permitir que el frontend en localhost:4200 o Vercel consuma la API
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Cabeceras de seguridad. Spring ya envía X-Content-Type-Options, X-Frame-Options y Cache-Control;
+                // se añaden una CSP restrictiva (la API solo devuelve JSON: no carga ni ejecuta nada ni puede
+                // incrustarse en otra página) y una Referrer-Policy que no filtra rutas a otros orígenes
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"))
+                        .referrerPolicy(referrer -> referrer.policy(
+                                ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                )
                 // Política STATELESS: el servidor no guarda sesiones en memoria RAM; cada petición se valida por su JWT
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // Reglas de autorización por ruta: login/register/health son públicas; el resto exige estar autenticado

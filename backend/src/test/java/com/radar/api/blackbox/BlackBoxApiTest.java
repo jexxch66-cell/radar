@@ -480,4 +480,16 @@ class BlackBoxApiTest extends ApiTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.locked").value(false));
     }
+
+    @Test
+    @DisplayName("CN-41 Las respuestas de la API incluyen las cabeceras de seguridad (CSP, Referrer-Policy, nosniff, X-Frame-Options)")
+    void securityHeadersArePresent() throws Exception {
+        call("CN-41", get("/api/health"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Security-Policy", containsString("default-src 'none'")))
+                .andExpect(header().string("Content-Security-Policy", containsString("frame-ancestors 'none'")))
+                .andExpect(header().string("Referrer-Policy", "strict-origin-when-cross-origin"))
+                .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                .andExpect(header().string("X-Frame-Options", "DENY"));
+    }
 }
