@@ -73,8 +73,22 @@ async function apiLogout(request: APIRequestContext, token: string) {
 /** Token de la pestana: el frontend lo guarda en sessionStorage bajo 'radar_token'. */
 const tabToken = (page: Page) => page.evaluate(() => sessionStorage.getItem('radar_token'));
 
-test.beforeEach(async ({ context }) => {
+// Violaciones de la Content-Security-Policy detectadas por el navegador durante cada escenario
+let cspViolations: string[] = [];
+
+test.beforeEach(async ({ context, page }) => {
   await blockGoogle(context);
+  cspViolations = [];
+  page.on('console', (msg) => {
+    if (msg.type() === 'error' && /Content Security Policy/i.test(msg.text())) {
+      cspViolations.push(msg.text());
+    }
+  });
+});
+
+// La CSP del servidor no debe bloquear ningun recurso legitimo de la aplicacion
+test.afterEach(async () => {
+  expect(cspViolations, 'violaciones de la Content-Security-Policy').toEqual([]);
 });
 
 test('E2E-01 Visitante: la portada carga y la ruta raiz redirige a /bienvenida', async ({ page }) => {
