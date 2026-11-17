@@ -40,7 +40,7 @@ api,com.radar.api.dto.request,UpdateReportStatusRequest,0,3,0,0,0,1,0,1,0,1
 api,com.radar.api.dto.request,RestoreBackupRequest,0,6,0,0,0,1,0,1,0,1
 api,com.radar.api.dto.request,CreateReportRequest,0,3,0,0,0,1,0,1,0,1
 api,com.radar.api.config,BackupStorageConfig.AzureStorageConfigured,2,15,2,2,0,3,2,2,0,2
-api,com.radar.api.config,SecurityConfig,1,168,1,1,0,38,1,13,0,13
+api,com.radar.api.config,SecurityConfig,1,187,1,1,0,41,1,16,0,16
 api,com.radar.api.config,BackupStorageConfig,7,3,0,0,3,1,1,1,1,1
 api,com.radar.api.config,JwtAuthenticationFilter,0,79,2,10,0,20,2,5,0,1
 api,com.radar.api.config,AdminSeeder,1,35,1,1,1,10,1,2,0,2

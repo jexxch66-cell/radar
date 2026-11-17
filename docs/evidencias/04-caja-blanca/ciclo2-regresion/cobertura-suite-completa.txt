@@ -1,6 +1,6 @@
-# Cobertura JaCoCo - CICLO 2 - suite completa, build limpio
-# Fecha: 2026-11-13T12:56:31-05:00
-[INFO] Tests run: 165, Failures: 0, Errors: 0, Skipped: 0
+# Cobertura JaCoCo - CICLO 2 - suite completa (166 pruebas, incluye CN-41 de cabeceras de seguridad), build limpio
+# Fecha: 2026-11-17T18:25:51-05:00
+[INFO] Tests run: 166, Failures: 0, Errors: 0, Skipped: 0
 
 service.JwtService                               instr 100.0% | ramas  87.5% | lineas 100.0% | metodos 100.0%
 service.AuditLogService                          instr 100.0% | ramas 100.0% | lineas 100.0% | metodos 100.0%
@@ -22,9 +22,9 @@ exception.InvalidCredentialsException            instr 100.0% | ramas    n/a | l
 exception.GlobalExceptionHandler                 instr  83.0% | ramas  75.0% | lineas  81.0% | metodos  82.4%
 exception.EmailAlreadyExistsException            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
 exception.ConcurrentSessionException             instr  50.0% | ramas    n/a | lineas  50.0% | metodos  50.0%
-config.SecurityConfig                            instr  99.4% | ramas  50.0% | lineas 100.0% | metodos 100.0%
+config.SecurityConfig                            instr  99.5% | ramas  50.0% | lineas 100.0% | metodos 100.0%
 config.BackupStorageConfig                       instr  30.0% | ramas    n/a | lineas  25.0% | metodos  50.0%
 config.JwtAuthenticationFilter                   instr 100.0% | ramas  83.3% | lineas 100.0% | metodos 100.0%
 config.AdminSeeder                               instr  97.2% | ramas  50.0% | lineas  90.9% | metodos 100.0%
 
-TOTAL                                            instr 66.0% (2717/4118) | ramas 56.6% (179/316) | lineas 67.6% (610/902) | metodos 76.2%
+TOTAL                                            instr 66.1% (2736/4137) | ramas 56.6% (179/316) | lineas 67.7% (613/905) | metodos 76.5%
