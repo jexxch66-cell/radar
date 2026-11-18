@@ -1,0 +1,19 @@
+# Ejecucion E2E (Playwright, Google Chrome) tras DEF-16: cabeceras de seguridad + regla 404 de archivos sensibles
+# Fecha: 2026-11-17 | Stack: frontend radar-frontend-1 :4200, backend corregido :8080, PostgreSQL desechable :5440
+# Cada escenario falla ademas si el navegador registra una violacion de la Content-Security-Policy.
+# Salida de consola de: npx playwright test
+  ok  1 E2E-01 Visitante: la portada carga y la ruta raiz redirige a /bienvenida (3.1s)
+  ok  2 E2E-02 Visitante: una ruta protegida (/mapa) redirige a /login (1.1s)
+  ok  3 E2E-03 Visitante: ruta inexistente muestra la pagina 404 del frontend (1.0s)
+  ok  4 E2E-04 Login con credenciales invalidas muestra el mensaje de error del backend (2.3s)
+  ok  5 E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa (5.2s)
+  ok  6 E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado (5.0s)
+  ok  7 E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado (3.2s)
+  ok  8 E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion (7.1s)
+  ok  9 E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa (3.0s)
+  ok 10 E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas (6.1s)
+  ok 11 E2E-12 Integridad: si el servidor falla al crear un reporte, se informa el error y no se simula la publicacion (3.1s)
+  ok 12 E2E-13 Integridad: si el servidor falla al crear un backup, el panel muestra el error y no un backup inexistente (2.1s)
+  ok 13 E2E-14 Seguridad: archivos ocultos y de servidor responden 404; las rutas de la aplicacion siguen funcionando (1.6s)
+  ok 14 E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador (1.5s)
+  14 passed (48.9s)

@@ -24,7 +24,7 @@
 
 # Resumen
 
-Este informe documenta la auditoría técnica, el proceso de pruebas y la corrección de defectos de RADAR, una plataforma web para el reporte ciudadano de problemas de infraestructura urbana construida con Spring Boot 3.5.6 (Java 21), Angular 21 y PostgreSQL 16. El trabajo se realizó sobre el último commit de la rama principal (`e9e1021`) y se organizó en dos ciclos. En el ciclo de detección se reparó la suite de pruebas original, que fallaba en 14 de sus 26 pruebas, y se ejecutaron 126 casos de caja blanca, caja negra y extremo a extremo (E2E): 98 fueron aprobados y 28 fallaron. Los fallos revelaron 14 defectos reales en el código vigente, y la herramienta SST 2.0 del product owner señaló uno más: la ausencia de cabeceras de seguridad HTTP. Los dos más graves eran que, en la versión de `main`, **ningún usuario podía iniciar sesión desde la interfaz**, y que, si el servidor no respondía, el frontend **concedía acceso, incluso de administrador, con credenciales inventadas** y guardaba las contraseñas en texto plano en el navegador. Los 15 defectos se corrigieron en el backend y el frontend sin alterar la arquitectura. En el ciclo de regresión se ejecutaron 139 casos y todos fueron aprobados, al igual que la verificación de los defectos por HTTP contra PostgreSQL real. El workflow de integración continua creado en GitHub Actions se ejecutó en los servidores de GitHub y terminó con éxito. Con SST 2.0, los hallazgos de severidad media y baja pasaron de 6 a 0; solo quedan indicadores informativos que se verificaron como falsos positivos. Los 8 casos pendientes corresponden a una propuesta de pruebas para OpenRouter, que RADAR no integra. La cobertura de ramas del backend alcanzó el 56,6 %.
+Este informe documenta la auditoría técnica, el proceso de pruebas y la corrección de defectos de RADAR, una plataforma web para el reporte ciudadano de problemas de infraestructura urbana construida con Spring Boot 3.5.6 (Java 21), Angular 21 y PostgreSQL 16. El trabajo se realizó sobre el último commit de la rama principal (`e9e1021`) y se organizó en dos ciclos. En el ciclo de detección se reparó la suite de pruebas original, que fallaba en 14 de sus 26 pruebas, y se ejecutaron 126 casos de caja blanca, caja negra y extremo a extremo (E2E): 98 fueron aprobados y 28 fallaron. Los fallos revelaron 14 defectos reales en el código vigente, y la herramienta SST 2.0 del product owner señaló uno más: la ausencia de cabeceras de seguridad HTTP y respuestas HTTP 200 ante rutas de archivos sensibles. Los dos más graves eran que, en la versión de `main`, **ningún usuario podía iniciar sesión desde la interfaz**, y que, si el servidor no respondía, el frontend **concedía acceso, incluso de administrador, con credenciales inventadas** y guardaba las contraseñas en texto plano en el navegador. Los 15 defectos se corrigieron en el backend y el frontend sin alterar la arquitectura. En el ciclo de regresión se ejecutaron 140 casos y todos fueron aprobados, al igual que la verificación de los defectos por HTTP contra PostgreSQL real. El workflow de integración continua creado en GitHub Actions se ejecutó en los servidores de GitHub y terminó con éxito. Con SST 2.0, los hallazgos de severidad media y baja pasaron de 6 a 0 y los informativos de 10 a 6; los que quedan corresponden a rutas de navegación de la aplicación, cuya protección real está en la API. Los 8 casos pendientes corresponden a una propuesta de pruebas para OpenRouter, que RADAR no integra. La cobertura de ramas del backend alcanzó el 56,6 %.
 
 *Palabras clave:* pruebas de software, corrección de defectos, pruebas de regresión, integración continua, GitHub Actions, pruebas de extremo a extremo, caja blanca, caja negra, seguridad de aplicaciones.
 
@@ -189,7 +189,7 @@ url: https://github.com/jexxch66-cell/radar/actions/runs/43500669028</pre>
 
 # Pruebas E2E
 
-Se implementaron 13 escenarios con navegador real y 4 flujos encadenados a nivel de API. Los escenarios cubren a los tres actores (visitante, ciudadano y administrador) y las reglas vigentes: política de contraseñas, sesión única estricta y seguridad e integridad ante fallos del servidor.
+Se implementaron 14 escenarios con navegador real y 4 flujos encadenados a nivel de API. Los escenarios cubren a los tres actores (visitante, ciudadano y administrador) y las reglas vigentes: política de contraseñas, sesión única estricta y seguridad e integridad ante fallos del servidor.
 
 **Tabla 6**
 
@@ -207,9 +207,10 @@ Se implementaron 13 escenarios con navegador real y 4 flujos encadenados a nivel
 | E2E-11 | La contraseña no queda en el navegador | **Fallida**: queda en texto plano (DEF-12) | Aprobada |
 | E2E-12 | Error del servidor al crear un reporte | **Fallida**: simula la publicación (DEF-14) | Aprobada |
 | E2E-13 | Error del servidor al crear un backup | **Fallida**: muestra un backup inexistente (DEF-14) | Aprobada |
+| E2E-14 | Archivos ocultos y de servidor responden 404; las rutas de la app siguen disponibles | — (añadida con DEF-16) | Aprobada |
 | E2E-API-01 a 04 | Ciclo del ciudadano, gestión con auditoría, sesión estricta, alta de administrador | Aprobadas | Aprobadas |
 
-*Nota.* Ciclo 1: 8 aprobadas y 9 fallidas. Ciclo 2: 17/17 aprobadas. Evidencias en `docs/evidencias/02-e2e/`.
+*Nota.* Ciclo 1: 8 aprobadas y 9 fallidas. Ciclo 2: 18/18 aprobadas; E2E-14 se añadió como regresión de DEF-16. Además, cada escenario falla si el navegador registra una violación de la Content-Security-Policy. Evidencias en `docs/evidencias/02-e2e/`.
 
 <figure>
 <img src="evidencias/02-e2e/ciclo1-deteccion/capturas/E2E-07-fallo.png" alt="Login rechazado en la versión de main">
@@ -358,7 +359,7 @@ Las correcciones siguen la recomendación de OWASP de usar un manejador global q
 | DEF-07 (media) | Autor de auditoría suplantable | El autor se toma de la identidad autenticada | CN-32 |
 | DEF-09 (media) | El token del registro era inutilizable | Se guarda el identificador de sesión sin marcarla "en uso" | CN-35, CB-REG-03 |
 | DEF-15 (media) | Un token antiguo cerraba la sesión vigente | El logout valida que el token sea el de la sesión activa | CN-40 |
-| DEF-16 (media) | Faltaban cabeceras de seguridad HTTP: en el frontend, `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options` y `Referrer-Policy`; en la API, `Content-Security-Policy` y `Referrer-Policy` | CSP restrictiva para la API; CSP ajustada a los recursos reales del frontend (sin scripts en línea: el script del tema pasa a `theme-init.js`) y demás cabeceras | CN-41, SST 2.0, control de CSP en la suite E2E |
+| DEF-16 (media) | Faltaban cabeceras de seguridad HTTP (en el frontend, `Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options` y `Referrer-Policy`; en la API, `Content-Security-Policy` y `Referrer-Policy`), y el servidor del frontend respondía HTTP 200 a rutas de archivos ocultos o de servidor (`/.env`, `/.git/HEAD`, `*.php`, `*.bak`) | CSP restrictiva para la API; CSP ajustada a los recursos reales del frontend (sin scripts en línea: el script del tema pasa a `theme-init.js`) y demás cabeceras; regla genérica que responde 404 a archivos ocultos y extensiones de servidor o de respaldo | CN-41, E2E-14, SST 2.0, control de CSP en la suite E2E |
 | DEF-08 (baja) | La contraseña del administrador inicial aparecía en el log | Se elimina del mensaje | Log de regresión |
 | DEF-06 | Primer login bloqueado tras el registro | Ya resuelto por el equipo en `e9e1021`; se conserva y verifica | E2E-05, verificación HTTP |
 
@@ -394,12 +395,12 @@ El product owner entregó **SST 2.0 (Software Security Tester)**, una herramient
 
 | Objetivo | Antes | Después | Hallazgos restantes |
 |---|---|---|---|
-| Frontend `http://localhost:4200/` | 14: 2 medios, 2 bajos y 10 informativos | 10 informativos | Falsos positivos (ver nota) |
+| Frontend `http://localhost:4200/` | 14: 2 medios, 2 bajos y 10 informativos | 6 informativos | Rutas de navegación de la SPA (ver nota) |
 | API `http://localhost:8080/` | 2: 1 medio y 1 bajo | 0 | — |
 
-*Nota.* Los 10 indicadores informativos señalan rutas como `/.env`, `/.git/HEAD` o `/admin/` que responden HTTP 200. Se verificó que el servidor de Angular devuelve la propia página de la aplicación para cualquier ruta, para permitir la navegación directa: esos archivos no existen y el acceso a datos está protegido por la API, que responde 401/403 (CN-12 y CN-15). Evidencia en `docs/evidencias/07-sst/`.
+*Nota.* Inicialmente, 4 indicadores señalaban archivos sensibles (`/.env`, `/.git/HEAD`, `/phpinfo.php`, `/config.php.bak`) porque el servidor de Angular devolvía la página de la aplicación, con HTTP 200, para cualquier ruta. Esos archivos no existían, pero se añadió una regla genérica que responde 404 a archivos ocultos y a extensiones de servidor o de respaldo, y el módulo pasó a PASS. Los 6 indicadores restantes (`/admin/`, `/dashboard/`, `/usuarios/`, `/users/`, `/api/` y `/private/`) son rutas de navegación de la SPA: devuelven la página de la aplicación, que muestra el login o su propia página 404, y no exponen datos, porque la API responde 401/403 sin sesión o sin el rol adecuado (CN-12 y CN-15). Se mantienen para no romper la navegación directa y deben revisarse manualmente, como indica la propia herramienta. Evidencia en `docs/evidencias/07-sst/`.
 
-Durante la corrección se verificó que la nueva `Content-Security-Policy` no bloquea recursos legítimos de tres formas: la suite E2E falla ante cualquier violación de CSP (13/13 aprobadas, 0 violaciones); se comprobó por separado, sin bloquear Google, que cargan Google Identity, reCAPTCHA, las fuentes y las teselas del mapa; y esa comprobación detectó que una petición interna de reCAPTCHA quedaba bloqueada, por lo que se añadió `https://www.google.com/recaptcha/` a `connect-src` antes de dar la corrección por terminada.
+Durante la corrección se verificó que la nueva `Content-Security-Policy` no bloquea recursos legítimos de tres formas: la suite E2E falla ante cualquier violación de CSP (14/14 aprobadas, 0 violaciones); se comprobó por separado, sin bloquear Google, que cargan Google Identity, reCAPTCHA, las fuentes y las teselas del mapa; y esa comprobación detectó que una petición interna de reCAPTCHA quedaba bloqueada, por lo que se añadió `https://www.google.com/recaptcha/` a `connect-src` antes de dar la corrección por terminada.
 
 **Importante:** SST solo revela problemas si el proyecto está en ejecución. Con el proyecto detenido, la herramienta marca varios módulos como PASS sin haber revisado ninguna ruta.
 
@@ -423,13 +424,13 @@ Durante la corrección se verificó que la nueva `Content-Security-Policy` no bl
 | Categoría | Diseñadas | Ejecutadas | Aprobadas | Fallidas | Bloqueadas | Pendientes | % aprobadas sobre ejecutadas |
 |---|---|---|---|---|---|---|---|
 | GitHub Actions | 5 | 5 | 5 | 0 | 0 | 0 | 100,0 % |
-| E2E (navegador + API) | 17 | 17 | 17 | 0 | 0 | 0 | 100,0 % |
+| E2E (navegador + API) | 18 | 18 | 18 | 0 | 0 | 0 | 100,0 % |
 | OpenRouter | 8 | 0 | 0 | 0 | 0 | 8 | n/a |
 | Caja blanca | 74 | 74 | 74 | 0 | 0 | 0 | 100,0 % |
 | Caja negra | 43 | 43 | 43 | 0 | 0 | 0 | 100,0 % |
-| **Total** | **147** | **139** | **139** | **0** | **0** | **8** | **100,0 %** |
+| **Total** | **148** | **140** | **140** | **0** | **0** | **8** | **100,0 %** |
 
-*Nota.* El conteo es por caso; los casos parametrizados cuentan una vez. Se ejecutó el 94,6 % de los casos diseñados (139/147); los pendientes son la propuesta para OpenRouter. En ejecuciones automatizadas: 166 pruebas JUnit, 13 escenarios Playwright y 23 verificaciones HTTP sobre PostgreSQL, además de la verificación con SST 2.0.
+*Nota.* El conteo es por caso; los casos parametrizados cuentan una vez. Se ejecutó el 94,6 % de los casos diseñados (140/148); los pendientes son la propuesta para OpenRouter. En ejecuciones automatizadas: 166 pruebas JUnit, 14 escenarios Playwright y 23 verificaciones HTTP sobre PostgreSQL, además de la verificación con SST 2.0.
 
 # Análisis de resultados
 
@@ -461,7 +462,7 @@ Durante la corrección se verificó que la nueva `Content-Security-Policy` no bl
 
 1. La auditoría encontró 15 defectos reales en el código vigente (uno de ellos, con la herramienta SST 2.0 del product owner). Dos eran críticos: la imposibilidad de iniciar sesión y el acceso con credenciales inventadas. Ninguno era detectable con la suite original.
 2. Los 15 defectos se corrigieron sin cambiar la arquitectura, respetando las reglas de sesión estricta y de política de contraseñas definidas por el equipo.
-3. Tras las correcciones, los 139 casos ejecutados se aprobaron: 166 pruebas JUnit, 13 escenarios con navegador, 23 verificaciones HTTP sobre PostgreSQL y 3 ejecuciones reales del CI en GitHub. Cada corrección quedó cubierta por al menos una prueba que falla con el código original.
+3. Tras las correcciones, los 140 casos ejecutados se aprobaron: 166 pruebas JUnit, 14 escenarios con navegador, 23 verificaciones HTTP sobre PostgreSQL y 3 ejecuciones reales del CI en GitHub. Cada corrección quedó cubierta por al menos una prueba que falla con el código original.
 4. La integración continua quedó operativa: valida backend y frontend en cada `push` y *pull request* y evitará regresiones como las detectadas.
 
 # Recomendaciones
@@ -516,12 +517,12 @@ VMware Tanzu. (s.f.). *Testing Spring Boot applications*. Spring Boot Reference 
 | `00-linea-base/` | Suite original sobre `e9e1021` |
 | `01-github-actions/` | Validación estática, simulación local de los jobs y ejecuciones reales en GitHub |
 | `02-e2e/ciclo1-deteccion/` | Playwright sobre `e9e1021`, capturas de fallos, verificación de DEF-14 con el frontend original y log redactado |
-| `02-e2e/ciclo2-regresion/` | Playwright 13/13, capturas, resultados JSON, flujos de API y log del backend corregido |
+| `02-e2e/ciclo2-regresion/` | Playwright 13/13 (14/14 tras DEF-16, ver `07-sst/`), capturas, resultados JSON, flujos de API y log del backend corregido |
 | `03-openrouter/` | Constancia de la búsqueda de integración |
 | `04-caja-blanca/` | Cobertura JaCoCo de ambos ciclos (texto y HTML) |
 | `05-caja-negra/` | Ejecuciones completas, respuestas HTTP, CN-39/40 contra `e9e1021` y verificación en PostgreSQL |
 | `06-entorno/` | Estado final de contenedores y puertos |
-| `07-sst/` | Informes HTML y JSON de SST 2.0 sobre el frontend y la API tras corregir DEF-16 |
+| `07-sst/` | Informes HTML y JSON de SST 2.0 sobre el frontend y la API tras corregir DEF-16, y ejecución E2E 14/14 |
 
 *Nota.* Las evidencias no contienen credenciales reales: los tokens están redactados y las cuentas son de prueba en bases desechables.
 

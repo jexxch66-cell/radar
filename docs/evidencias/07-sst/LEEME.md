@@ -5,18 +5,21 @@ Informes generados con los módulos y las funciones de exportación de SST 2.0 (
 
 | Archivo | Objetivo | Hallazgos |
 |---|---|---|
-| `ensayo-sst-frontend-4200.html` / `.json` | `http://localhost:4200/` | 10 informativos (falsos positivos) |
+| `ensayo-sst-frontend-4200.html` / `.json` | `http://localhost:4200/` | 6 informativos (rutas de navegación de la SPA) |
 | `ensayo-sst-backend-8080.html` / `.json` | `http://localhost:8080/` | 0 |
 
 Antes de corregir DEF-16, SST reportó 14 hallazgos en el frontend (2 medios, 2 bajos y 10 informativos) y 2 en
 la API (1 medio y 1 bajo).
 
-## Sobre los 10 indicadores informativos del frontend
+## Sobre los indicadores informativos del frontend
 
-SST señala rutas como `/.env`, `/.git/HEAD`, `/phpinfo.php`, `/config.php.bak` o `/admin/` porque responden
-HTTP 200. El servidor de Angular devuelve la propia página de la aplicación (`<title>RADAR</title>`) para
-cualquier ruta, como corresponde a una aplicación de página única: esos archivos no existen y los datos están
-protegidos por la API, que responde 401/403 sin sesión o sin el rol adecuado (pruebas CN-12 y CN-15).
+Al principio SST señalaba 10 rutas que respondían HTTP 200. Cuatro eran archivos sensibles (`/.env`, `/.git/HEAD`,
+`/phpinfo.php`, `/config.php.bak`): no existían, pero ahora el servidor responde 404 a cualquier archivo oculto o con
+extensión de servidor o de respaldo, y el módulo "Archivos expuestos" pasó a PASS. Las seis restantes (`/admin/`,
+`/dashboard/`, `/usuarios/`, `/users/`, `/api/`, `/private/`) son rutas de navegación: el servidor de Angular
+devuelve la propia página de la aplicación (`<title>RADAR</title>`), que muestra el login o su página 404, como
+corresponde a una aplicación de página única. No exponen datos: la API responde 401/403 sin sesión o sin el rol
+adecuado (pruebas CN-12 y CN-15). Se mantienen para no romper la navegación directa y se revisan manualmente.
 
 ## Cómo reproducir
 

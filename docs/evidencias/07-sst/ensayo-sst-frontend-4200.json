@@ -2,8 +2,8 @@
   "tool": "SST",
   "version": "2.0.0",
   "target": "http://localhost:4200/",
-  "started_at": "2026-11-17T18:23:42-05:00",
-  "finished_at": "2026-11-17T18:23:42-05:00",
+  "started_at": "2026-11-17T19:09:23-05:00",
+  "finished_at": "2026-11-17T19:09:24-05:00",
   "cancelled": false,
   "results": [
     {
@@ -13,7 +13,7 @@
     },
     {
       "module": "Archivos expuestos",
-      "status": "REVIEW",
+      "status": "PASS",
       "detail": "5 rutas revisadas. Los resultados HTTP 200 requieren interpretación."
     },
     {
@@ -53,50 +53,6 @@
     }
   ],
   "findings": [
-    {
-      "title": "Ruta candidata responde HTTP 200",
-      "severity": "Informativa",
-      "endpoint": "http://localhost:4200/.env",
-      "status": "MANUAL_REVIEW",
-      "confidence": "Baja",
-      "evidence": "HTTP 200 sin una firma conocida. Podría ser una página genérica.",
-      "remediation": "Revisa manualmente el contenido. No clasifiques la ruta como vulnerable solo por el código HTTP.",
-      "cwe": "",
-      "module": "Archivos expuestos"
-    },
-    {
-      "title": "Ruta candidata responde HTTP 200",
-      "severity": "Informativa",
-      "endpoint": "http://localhost:4200/.git/HEAD",
-      "status": "MANUAL_REVIEW",
-      "confidence": "Baja",
-      "evidence": "HTTP 200 sin una firma conocida. Podría ser una página genérica.",
-      "remediation": "Revisa manualmente el contenido. No clasifiques la ruta como vulnerable solo por el código HTTP.",
-      "cwe": "",
-      "module": "Archivos expuestos"
-    },
-    {
-      "title": "Ruta candidata responde HTTP 200",
-      "severity": "Informativa",
-      "endpoint": "http://localhost:4200/phpinfo.php",
-      "status": "MANUAL_REVIEW",
-      "confidence": "Baja",
-      "evidence": "HTTP 200 sin una firma conocida. Podría ser una página genérica.",
-      "remediation": "Revisa manualmente el contenido. No clasifiques la ruta como vulnerable solo por el código HTTP.",
-      "cwe": "",
-      "module": "Archivos expuestos"
-    },
-    {
-      "title": "Ruta candidata responde HTTP 200",
-      "severity": "Informativa",
-      "endpoint": "http://localhost:4200/config.php.bak",
-      "status": "MANUAL_REVIEW",
-      "confidence": "Baja",
-      "evidence": "HTTP 200 sin una firma conocida. Podría ser una página genérica.",
-      "remediation": "Revisa manualmente el contenido. No clasifiques la ruta como vulnerable solo por el código HTTP.",
-      "cwe": "",
-      "module": "Archivos expuestos"
-    },
     {
       "title": "Ruta candidata accesible sin sesión",
       "severity": "Informativa",
