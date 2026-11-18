@@ -304,6 +304,18 @@ test('E2E-13 Integridad: si el servidor falla al crear un backup, el panel muest
   await page.getByRole('button', { name: /Cerrar sesión/ }).first().click();
 });
 
+test('E2E-14 Seguridad: archivos ocultos y de servidor responden 404; las rutas de la aplicacion siguen funcionando', async ({ page, request }) => {
+  for (const path of ['/.env', '/.git/HEAD', '/phpinfo.php', '/config.php.bak', '/backup.sql']) {
+    expect((await request.get(path)).status(), `${path} no debe servirse`).toBe(404);
+  }
+  for (const path of ['/', '/login', '/registro', '/admin', '/theme-init.js', '/manifest.webmanifest']) {
+    expect((await request.get(path)).status(), `${path} debe seguir disponible`).toBe(200);
+  }
+  // La pagina 404 propia de Angular sigue mostrandose para rutas de navegacion inexistentes
+  await page.goto('/ruta-que-no-existe');
+  await expect(page.getByText(/404|no encontr/i).first()).toBeVisible();
+});
+
 test('E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador', async ({ page }) => {
   const email = unique('e2e.almacen');
   const password = 'SecretoLocal123';
