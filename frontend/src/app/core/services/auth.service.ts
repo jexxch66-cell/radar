@@ -8,7 +8,10 @@ import { AuthResponse, AuthUser, GoogleAuthRequest, LoginRequest, RegisterReques
 
 const TOKEN_KEY = 'radar_token';
 const USER_KEY = 'radar_user';
-const LOCAL_USERS_KEY = 'radar_local_users_v1';
+// Clave usada por versiones anteriores para guardar usuarios y CONTRASENAS en texto plano (DEF-12); solo se purga
+const LEGACY_LOCAL_USERS_KEY = 'radar_local_users_v1';
+// Tiempo maximo de espera de las llamadas de autenticacion (el backend en Render puede tardar en "despertar")
+const AUTH_TIMEOUT_MS = 15_000;
 const ACTIVE_SESSION_LOCK_KEY = 'radar_active_session_lock_v2';
 const TAB_OWNER_KEY = 'radar_tab_owner_id';
 const AUTH_CHANNEL_NAME = 'radar_auth_channel';
@@ -39,6 +42,8 @@ export class AuthService {
     try {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      // Elimina las contrasenas en texto plano que versiones anteriores dejaron en el navegador (DEF-12)
+      localStorage.removeItem(LEGACY_LOCAL_USERS_KEY);
     } catch {
       // Ignorar errores de acceso a almacenamiento
     }
@@ -63,23 +68,10 @@ export class AuthService {
       );
     }
 
+    // Si el servidor no responde se informa el error: nunca se simula un registro local (DEF-12)
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, request).pipe(
-      timeout(2500),
-      catchError((err: unknown) => {
-        if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
-          return throwError(() => err);
-        }
-        const fallback = this.buildLocalAuthResponse(
-          request.nombre,
-          request.email,
-          request.email.toLowerCase().includes('admin') ? 'ADMIN' : 'USER',
-        );
-        this.saveLocalUser(request.email, request.nombre, request.password, fallback.role);
-        return of(fallback);
-      }),
-      tap((response) => {
-        this.saveLocalUser(request.email, request.nombre, request.password, response.role);
-      }),
+      timeout(AUTH_TIMEOUT_MS),
+      catchError((err: unknown) => throwError(() => this.toClientError(err))),
     );
   }
 
@@ -111,36 +103,15 @@ export class AuthService {
           return throwError(() => this.buildConcurrentError());
         }
 
+        // Solo el backend autentica: si no responde se informa el error y NUNCA se concede una sesion local
+        // simulada (antes cualquier credencial entraba, y con rol ADMIN si el correo contenia "admin": DEF-12)
         return this.http.post<AuthResponse>(`${this.apiUrl}/login`, { ...request, force: false }).pipe(
-          timeout(2500),
-          catchError((err: unknown) => {
-            // Si el backend respondió 409 (sesión activa en otro navegador/pestaña) o 401/400, propagamos el error
-            if (err instanceof HttpErrorResponse && (err.status === 409 || err.status === 401 || err.status === 400)) {
-              return throwError(() => err);
-            }
-
-            if (this.hasConcurrentLocalSession(emailLower)) {
-              return throwError(() => this.buildConcurrentError());
-            }
-
-            const isSeedAdmin = emailLower === 'admin@radar.com' && request.password === 'Admin123!';
-            if (isSeedAdmin) {
-              return of(this.buildLocalAuthResponse('Administrador RADAR', 'admin@radar.com', 'ADMIN'));
-            }
-
-            const localMatch = this.findLocalUser(emailLower, request.password);
-            if (localMatch) {
-              return of(this.buildLocalAuthResponse(localMatch.nombre, localMatch.email, localMatch.role));
-            }
-
-            const role = emailLower.includes('admin') ? 'ADMIN' : 'USER';
-            const nombre = role === 'ADMIN' ? 'Administrador RADAR' : emailLower.split('@')[0];
-            return of(this.buildLocalAuthResponse(nombre, request.email.trim(), role));
-          }),
+          timeout(AUTH_TIMEOUT_MS),
+          catchError((err: unknown) => throwError(() => this.toClientError(err))),
         );
       }),
       switchMap((response) =>
-        this.claimCrossBrowserLock(response.email).pipe(
+        this.claimCrossBrowserLock(response.email, response.token).pipe(
           map((claimed) => {
             if (!claimed) {
               throw this.buildConcurrentError();
@@ -168,23 +139,14 @@ export class AuthService {
           return throwError(() => this.buildConcurrentError());
         }
 
+        // El token de Google lo valida el backend; si no responde, no se crea una sesion local con datos sin verificar
         return this.http.post<AuthResponse>(`${this.apiUrl}/google`, { ...request, force: false }).pipe(
-          timeout(2500),
-          catchError((err: unknown) => {
-            if (err instanceof HttpErrorResponse && err.status === 409) {
-              return throwError(() => err);
-            }
-
-            if (this.hasConcurrentLocalSession(emailLower)) {
-              return throwError(() => this.buildConcurrentError());
-            }
-
-            return of(this.buildLocalAuthResponse(googleProfile.name, googleProfile.email, 'USER'));
-          }),
+          timeout(AUTH_TIMEOUT_MS),
+          catchError((err: unknown) => throwError(() => this.toClientError(err))),
         );
       }),
       switchMap((response) =>
-        this.claimCrossBrowserLock(response.email).pipe(
+        this.claimCrossBrowserLock(response.email, response.token).pipe(
           map((claimed) => {
             if (!claimed) {
               throw this.buildConcurrentError();
@@ -220,8 +182,9 @@ export class AuthService {
     if (notifyBackend && currentEmail) {
       this.releaseCrossBrowserLock(currentEmail);
       if (token && !token.endsWith('.local-signature')) {
+        // El backend identifica al titular por el token (cabecera Authorization), no por un correo arbitrario (DEF-10)
         this.http
-          .post(`${this.apiUrl}/logout?emailParam=${encodeURIComponent(currentEmail)}`, {})
+          .post(`${this.apiUrl}/logout`, {})
           .pipe(timeout(1500))
           .subscribe({
             next: () => {},
@@ -268,6 +231,18 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.currentUser()?.role === 'ADMIN';
+  }
+
+  // Errores 4xx del backend se propagan tal cual; cualquier otro fallo (sin conexion, 5xx, tiempo agotado) se informa
+  private toClientError(err: unknown): HttpErrorResponse {
+    if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
+      return err;
+    }
+    return new HttpErrorResponse({
+      status: 0,
+      statusText: 'Server Unavailable',
+      error: { message: 'No se pudo conectar con el servidor. Verifica tu conexión e intenta nuevamente en unos segundos.' },
+    });
   }
 
   private buildConcurrentError(): HttpErrorResponse {
@@ -320,8 +295,9 @@ export class AuthService {
     ]).pipe(map(([devLocked, apiLocked]) => devLocked || apiLocked));
   }
 
-  private claimSingleLockEndpoint(url: string): Observable<boolean> {
-    return this.http.get<{ ok?: boolean }>(url).pipe(
+  private claimSingleLockEndpoint(url: string, token?: string): Observable<boolean> {
+    const options = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+    return this.http.get<{ ok?: boolean }>(url, options).pipe(
       timeout(1200),
       map(() => true),
       catchError((err: unknown) => {
@@ -333,11 +309,12 @@ export class AuthService {
     );
   }
 
-  private claimCrossBrowserLock(email: string): Observable<boolean> {
+  // El backend solo permite reclamar el candado de la propia cuenta autenticada (DEF-11): se envia el token recien emitido
+  private claimCrossBrowserLock(email: string, token: string): Observable<boolean> {
     const query = `action=claim&email=${encodeURIComponent(email.trim().toLowerCase())}&tabId=${encodeURIComponent(this.tabSessionId)}`;
     return forkJoin([
       this.claimSingleLockEndpoint(`/session-lock?${query}`),
-      this.claimSingleLockEndpoint(`${this.apiUrl}/session-lock?${query}`),
+      this.claimSingleLockEndpoint(`${this.apiUrl}/session-lock?${query}`, token),
     ]).pipe(map(([devClaimed, apiClaimed]) => devClaimed && apiClaimed));
   }
 
@@ -352,12 +329,16 @@ export class AuthService {
     const query = `action=release&email=${encodeURIComponent(normalized)}&tabId=${encodeURIComponent(this.tabSessionId)}`;
     const lockUrl = `/session-lock?${query}`;
     const apiLockUrl = `${this.apiUrl}/session-lock?${query}`;
-    const backendLogoutUrl = `${this.apiUrl}/logout?emailParam=${encodeURIComponent(normalized)}`;
+    // sendBeacon no admite cabeceras: el cierre de sesion al cerrar la pestana envia el token de la propia sesion
+    const token = this.getToken();
+    const backendLogoutUrl = token ? `${this.apiUrl}/logout?token=${encodeURIComponent(token)}` : null;
     try {
       if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
         navigator.sendBeacon(lockUrl);
         navigator.sendBeacon(apiLockUrl);
-        navigator.sendBeacon(backendLogoutUrl);
+        if (backendLogoutUrl) {
+          navigator.sendBeacon(backendLogoutUrl);
+        }
       }
     } catch {
       // Fallback a petición HTTP
@@ -377,11 +358,11 @@ export class AuthService {
           .join(''),
       );
       const decoded = JSON.parse(jsonPayload) as { email?: string; name?: string; given_name?: string };
-      const email = decoded.email ?? 'usuario.google@gmail.com';
+      const email = decoded.email ?? '';
       const name = decoded.name ?? decoded.given_name ?? email.split('@')[0];
       return { email, name };
     } catch {
-      return { email: 'jexxch66@gmail.com', name: 'Usuario Google' };
+      return { email: '', name: 'Usuario Google' };
     }
   }
 
@@ -488,58 +469,6 @@ export class AuthService {
       return `radar_tab::${Date.now()}`;
     } catch {
       return `radar_tab::${Date.now()}`;
-    }
-  }
-
-  private buildLocalAuthResponse(
-    nombre: string,
-    email: string,
-    role: 'ADMIN' | 'USER',
-  ): AuthResponse {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const exp = Math.floor(Date.now() / 1000) + 86400;
-    const payload = btoa(JSON.stringify({ sub: email, role, exp }));
-    const token = `${header}.${payload}.local-signature`;
-    return {
-      id: role === 'ADMIN' ? 1 : Math.floor(Math.random() * 900) + 10,
-      nombre,
-      email,
-      role,
-      token,
-      tipo: 'Bearer',
-    };
-  }
-
-  saveLocalUser(
-    email: string,
-    nombre: string,
-    password: string,
-    role: 'ADMIN' | 'USER',
-  ): void {
-    try {
-      const raw = localStorage.getItem(LOCAL_USERS_KEY);
-      const list = raw ? (JSON.parse(raw) as Array<{ email: string; nombre: string; password: string; role: 'ADMIN' | 'USER' }>) : [];
-      const filtered = list.filter((u) => u.email.toLowerCase() !== email.toLowerCase());
-      filtered.push({ email, nombre, password, role });
-      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(filtered));
-    } catch {
-      // Ignorar errores de almacenamiento
-    }
-  }
-
-  private findLocalUser(
-    emailLower: string,
-    password: string,
-  ): { email: string; nombre: string; password: string; role: 'ADMIN' | 'USER' } | undefined {
-    try {
-      const raw = localStorage.getItem(LOCAL_USERS_KEY);
-      if (!raw) {
-        return undefined;
-      }
-      const list = JSON.parse(raw) as Array<{ email: string; nombre: string; password: string; role: 'ADMIN' | 'USER' }>;
-      return list.find((u) => u.email.toLowerCase() === emailLower && u.password === password);
-    } catch {
-      return undefined;
     }
   }
 

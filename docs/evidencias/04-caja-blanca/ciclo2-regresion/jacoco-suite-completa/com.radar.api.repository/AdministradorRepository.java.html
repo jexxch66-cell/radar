@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AdministradorRepository.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.repository</a> &gt; <span class="el_source">AdministradorRepository.java</span></div><h1>AdministradorRepository.java</h1><pre class="source lang-java linenums">package com.radar.api.repository;
+
+import com.radar.api.model.Administrador;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.Instant;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+public interface AdministradorRepository extends JpaRepository&lt;Administrador, Long&gt; {
+
+    Optional&lt;Administrador&gt; findByEmail(String email);
+
+    Optional&lt;Administrador&gt; findByEmailIgnoreCase(String email);
+
+    boolean existsByEmail(String email);
+
+    // Permite verificar que un correo no pertenezca ya a un administrador (DEF-01)
+    boolean existsByEmailIgnoreCase(String email);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update Administrador a set a.activeSessionId = :sessionId, a.lastActiveAt = :lastActiveAt where a.email = :email&quot;)
+    int updateActiveSessionId(@Param(&quot;email&quot;) String email, @Param(&quot;sessionId&quot;) String sessionId, @Param(&quot;lastActiveAt&quot;) Instant lastActiveAt);
+
+    default int updateActiveSessionId(String email, String sessionId) {
+<span class="nc" id="L30">        return updateActiveSessionId(email, sessionId, Instant.now());</span>
+    }
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update Administrador a set a.lastActiveAt = :lastActiveAt where a.email = :email and a.activeSessionId = :sessionId&quot;)
+    int updateLastActiveAt(@Param(&quot;email&quot;) String email, @Param(&quot;sessionId&quot;) String sessionId, @Param(&quot;lastActiveAt&quot;) Instant lastActiveAt);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(&quot;update Administrador a set a.activeSessionId = null, a.lastActiveAt = null where a.email = :email&quot;)
+    int clearActiveSession(@Param(&quot;email&quot;) String email);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

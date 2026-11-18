@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,8 +41,13 @@ public class AuthService {
 
     private static final Pattern PASSWORD_POLICY_PATTERN = Pattern.compile("^(?=.*[A-Z])(?=.*\\d).{8,}$");
 
-    // Registro atómico en memoria de sesiones activas para bloquear doble sesión entre navegadores de forma inmediata
+    // Registro atómico en memoria de sesiones AUTENTICADAS (clave: email, valor: sessionId del JWT) para bloquear
+    // doble sesión entre navegadores de forma inmediata
     private static final Map<String, ActiveSessionRecord> ACTIVE_SESSIONS = new ConcurrentHashMap<>();
+    // Candado de pestañas del frontend (clave: email, valor: tabId). Se mantiene SEPARADO de ACTIVE_SESSIONS:
+    // mezclar tabId y sessionId en el mismo mapa hacía que el "claim" posterior al login fallara siempre (DEF-13)
+    // y permitía que un tercero bloqueara el login ajeno reclamando el candado (DEF-11)
+    private static final Map<String, ActiveSessionRecord> BROWSER_LOCKS = new ConcurrentHashMap<>();
     private static final Map<String, Object> EMAIL_LOCKS = new ConcurrentHashMap<>();
 
     public record ActiveSessionRecord(String sessionId, Instant lastActiveAt) {}
@@ -83,10 +89,10 @@ public class AuthService {
 
         synchronized (lock) {
             Instant now = Instant.now();
-            ActiveSessionRecord current = ACTIVE_SESSIONS.get(normalized);
+            ActiveSessionRecord current = BROWSER_LOCKS.get(normalized);
             boolean currentActive = current != null && isSessionActive(current.sessionId(), current.lastActiveAt());
             if (!currentActive && current != null) {
-                ACTIVE_SESSIONS.remove(normalized);
+                BROWSER_LOCKS.remove(normalized);
                 current = null;
             }
 
@@ -95,18 +101,18 @@ public class AuthService {
                     if (current != null && !current.sessionId().equals(safeTabId)) {
                         return false;
                     }
-                    ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                    BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));
                     return true;
                 case "heartbeat":
                     if (current != null && current.sessionId().equals(safeTabId)) {
-                        ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                        BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));
                     } else if (current == null && !safeTabId.isEmpty()) {
-                        ACTIVE_SESSIONS.put(normalized, new ActiveSessionRecord(safeTabId, now));
+                        BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));
                     }
                     return true;
                 case "release":
                     if (current == null || safeTabId.isEmpty() || current.sessionId().equals(safeTabId)) {
-                        ACTIVE_SESSIONS.remove(normalized);
+                        BROWSER_LOCKS.remove(normalized);
                     }
                     return true;
                 default:
@@ -119,21 +125,25 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         validatePasswordPolicy(request.getPassword());
         recaptchaService.verify(request.getCaptchaToken());
-        if (userRepository.existsByEmail(request.getEmail())) {
-            log.warn("Intento de registro con email ya existente: {}", request.getEmail());
-            throw new EmailAlreadyExistsException(request.getEmail());
+        // El correo se normaliza y debe ser único entre ciudadanos Y administradores, sin distinguir mayúsculas
+        // (DEF-01: un ciudadano podía registrarse con el correo de un administrador; DEF-02: duplicados por mayúsculas)
+        String email = normalizeEmail(request.getEmail());
+        if (emailInUse(email)) {
+            log.warn("Intento de registro con email ya existente: {}", email);
+            throw new EmailAlreadyExistsException(email);
         }
 
         String sessionId = jwtService.newSessionId();
         Instant now = Instant.now();
-        // Al registrarse aún no se abre sesión activa (el usuario es dirigido a /login para iniciar sesión)
+        // Al registrarse no se abre una sesión "en uso" (lastActiveAt nulo y sin registro en memoria), de modo que el
+        // primer login no se bloquea; pero se guarda el sessionId para que el token devuelto sea válido (DEF-09)
         User user = User.builder()
                 .nombre(request.getNombre())
-                .email(request.getEmail())
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .privacyConsentAt(now)
                 .role(Role.USER)
-                .activeSessionId(null)
+                .activeSessionId(sessionId)
                 .lastActiveAt(null)
                 .build();
         userRepository.save(user);
@@ -239,9 +249,14 @@ public class AuthService {
                 if (!acceptDataTreatment) {
                     throw new IllegalArgumentException("Debes aceptar el tratamiento de datos personales");
                 }
+                // Una cuenta de Google no puede crear un ciudadano con el correo de un administrador (DEF-01)
+                if (administradorRepository.existsByEmailIgnoreCase(normalizedEmail)) {
+                    log.warn("Intento de crear cuenta Google con email de administrador: {}", normalizedEmail);
+                    throw new EmailAlreadyExistsException(normalizedEmail);
+                }
                 User created = User.builder()
                         .nombre(profile.name())
-                        .email(profile.email())
+                        .email(normalizedEmail)
                         .password(passwordEncoder.encode(UUID.randomUUID().toString() + "A1"))
                         .googleSubject(profile.subject())
                         .privacyConsentAt(Instant.now())
@@ -291,7 +306,9 @@ public class AuthService {
     // Limpia el activeSessionId en memoria y base de datos cuando el usuario cierra sesión explícitamente
     public void logout(String email) {
         if (email != null) {
-            ACTIVE_SESSIONS.remove(email.trim().toLowerCase());
+            String normalized = email.trim().toLowerCase();
+            ACTIVE_SESSIONS.remove(normalized);
+            BROWSER_LOCKS.remove(normalized);
         }
         try {
             userRepository.clearActiveSession(email);
@@ -316,6 +333,16 @@ public class AuthService {
         }
         // Hay sesión sólo si hubo un heartbeat reciente dentro del margen de tolerancia
         return lastActiveAt.isAfter(Instant.now().minus(SESSION_INACTIVITY_TIMEOUT));
+    }
+
+    // Normaliza el correo (sin espacios, en minúsculas) para almacenarlo y compararlo siempre igual
+    public static String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    // Un correo está en uso si ya pertenece a un ciudadano o a un administrador (sin distinguir mayúsculas)
+    private boolean emailInUse(String email) {
+        return userRepository.existsByEmailIgnoreCase(email) || administradorRepository.existsByEmailIgnoreCase(email);
     }
 
     private void requireSessionUpdated(int updatedAccounts) {

@@ -1,0 +1,768 @@
+{
+  "config": {
+    "configFile": "C:\\Users\\user\\vsprojects\\radar\\e2e\\playwright.config.ts",
+    "rootDir": "C:/Users/user/vsprojects/radar/e2e/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "./reports/resultados-e2e.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "./reports/html",
+          "open": "never"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "C:/Users/user/vsprojects/radar/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/user/vsprojects/radar/e2e/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "radar.e2e.spec.ts",
+      "file": "radar.e2e.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "E2E-01 Visitante: la portada carga y la ruta raiz redirige a /bienvenida",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2917,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:30.770Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-01-Visitante-56680--raiz-redirige-a-bienvenida\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-af99b6076b21849f6f98",
+          "file": "radar.e2e.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "E2E-02 Visitante: una ruta protegida (/mapa) redirige a /login",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1194,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:33.990Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-02-Visitante-a4894-egida-mapa-redirige-a-login\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-89b9dac3ed193fcb78f0",
+          "file": "radar.e2e.spec.ts",
+          "line": 87,
+          "column": 5
+        },
+        {
+          "title": "E2E-03 Visitante: ruta inexistente muestra la pagina 404 del frontend",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1011,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:35.206Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-03-Visitante-12c7d--la-pagina-404-del-frontend\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-3e5141bcb29bc6df1c92",
+          "file": "radar.e2e.spec.ts",
+          "line": 94,
+          "column": 5
+        },
+        {
+          "title": "E2E-04 Login con credenciales invalidas muestra el mensaje de error del backend",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2277,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:36.235Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-04-Login-con-c5682-ensaje-de-error-del-backend\\test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-0922a4d955d6c03b6682",
+          "file": "radar.e2e.spec.ts",
+          "line": 100,
+          "column": 5
+        },
+        {
+          "title": "E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 12656,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:128:22",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 22,
+                      "line": 128
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 126 |\u001b[39m   ])\u001b[33m;\u001b[39m\n \u001b[90m 127 |\u001b[39m   expect(loginResponse\u001b[33m.\u001b[39mstatus()\u001b[33m,\u001b[39m \u001b[32m'el primer login tras registrarse no deberia ser bloqueado'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[35m200\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 128 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/mapa/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 129 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Reportar aquí/\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible()\u001b[33m;\u001b[39m\n \u001b[90m 130 |\u001b[39m   \u001b[36mawait\u001b[39m waitForMapTiles(page)\u001b[33m;\u001b[39m\n \u001b[90m 131 |\u001b[39m   \u001b[36mawait\u001b[39m shot(page\u001b[33m,\u001b[39m \u001b[32m'E2E-05b-mapa-tras-primer-login'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 22,
+                        "line": 128
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n\n  126 |   ]);\n  127 |   expect(loginResponse.status(), 'el primer login tras registrarse no deberia ser bloqueado').toBe(200);\n> 128 |   await expect(page).toHaveURL(/\\/mapa/);\n      |                      ^\n  129 |   await expect(page.getByRole('button', { name: /Reportar aquí/ })).toBeVisible();\n  130 |   await waitForMapTiles(page);\n  131 |   await shot(page, 'E2E-05b-mapa-tras-primer-login');\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:128:22"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:38.533Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 22,
+                    "line": 128
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-7e6172f2a5bcfd7b02b2",
+          "file": "radar.e2e.spec.ts",
+          "line": 107,
+          "column": 5
+        },
+        {
+          "title": "E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 12422,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:139:22",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 22,
+                      "line": 139
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 137 |\u001b[39m\n \u001b[90m 138 |\u001b[39m   \u001b[36mawait\u001b[39m uiLogin(page\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39memail\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39mpassword)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 139 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/mapa/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 140 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Reportar aquí/\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 141 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Publicar reporte aquí/\u001b[39m })\u001b[33m.\u001b[39mwaitFor()\u001b[33m;\u001b[39m\n \u001b[90m 142 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'textarea'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'E2E: hueco profundo frente al paradero'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 22,
+                        "line": 139
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n\n  137 |\n  138 |   await uiLogin(page, citizen.email, citizen.password);\n> 139 |   await expect(page).toHaveURL(/\\/mapa/);\n      |                      ^\n  140 |   await page.getByRole('button', { name: /Reportar aquí/ }).click();\n  141 |   await page.getByRole('button', { name: /Publicar reporte aquí/ }).waitFor();\n  142 |   await page.locator('textarea').fill('E2E: hueco profundo frente al paradero');\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:139:22"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:42:52.432Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 22,
+                    "line": 139
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6c3c04faed1174f67896",
+          "file": "radar.e2e.spec.ts",
+          "line": 134,
+          "column": 5
+        },
+        {
+          "title": "E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 13927,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/admin/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/admin/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:170:22",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 22,
+                      "line": 170
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 168 |\u001b[39m\n \u001b[90m 169 |\u001b[39m   \u001b[36mawait\u001b[39m uiLogin(page\u001b[33m,\u001b[39m \u001b[33mADMIN_EMAIL\u001b[39m\u001b[33m,\u001b[39m \u001b[33mADMIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 170 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/admin/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 171 |\u001b[39m   \u001b[90m// La descripcion tambien aparece en la tabla de auditoria: se ubica la fila por su selector de estado\u001b[39m\n \u001b[90m 172 |\u001b[39m   \u001b[36mconst\u001b[39m row \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'tr'\u001b[39m\u001b[33m,\u001b[39m { has\u001b[33m:\u001b[39m page\u001b[33m.\u001b[39mgetByLabel(\u001b[32m`Estado del reporte ${reportId}`\u001b[39m) })\u001b[33m;\u001b[39m\n \u001b[90m 173 |\u001b[39m   \u001b[36mawait\u001b[39m expect(row)\u001b[33m.\u001b[39mtoContainText(marker)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 22,
+                        "line": 170
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/admin/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n\n  168 |\n  169 |   await uiLogin(page, ADMIN_EMAIL, ADMIN_PASSWORD);\n> 170 |   await expect(page).toHaveURL(/\\/admin/);\n      |                      ^\n  171 |   // La descripcion tambien aparece en la tabla de auditoria: se ubica la fila por su selector de estado\n  172 |   const row = page.locator('tr', { has: page.getByLabel(`Estado del reporte ${reportId}`) });\n  173 |   await expect(row).toContainText(marker);\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:170:22"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:43:06.361Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 22,
+                    "line": 170
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6e91cfa09f634fe28e43",
+          "file": "radar.e2e.spec.ts",
+          "line": 159,
+          "column": 5
+        },
+        {
+          "title": "E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 12277,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:204:19",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 19,
+                      "line": 204
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 202 |\u001b[39m\n \u001b[90m 203 |\u001b[39m   \u001b[36mawait\u001b[39m uiLogin(a\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39memail\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39mpassword)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 204 |\u001b[39m   \u001b[36mawait\u001b[39m expect(a)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/mapa/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                   \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 205 |\u001b[39m   \u001b[36mconst\u001b[39m tokenA \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m tabToken(a)\u001b[33m;\u001b[39m\n \u001b[90m 206 |\u001b[39m   expect(tokenA\u001b[33m,\u001b[39m \u001b[32m'el navegador A debe tener un token del backend'\u001b[39m)\u001b[33m.\u001b[39mtoMatch(\u001b[35m/^eyJ/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 207 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 19,
+                        "line": 204
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n\n  202 |\n  203 |   await uiLogin(a, citizen.email, citizen.password);\n> 204 |   await expect(a).toHaveURL(/\\/mapa/);\n      |                   ^\n  205 |   const tokenA = await tabToken(a);\n  206 |   expect(tokenA, 'el navegador A debe tener un token del backend').toMatch(/^eyJ/);\n  207 |\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:204:19"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:43:21.750Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\test-failed-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\test-failed-2.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 19,
+                    "line": 204
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-3995b1c3b63c253193dd",
+          "file": "radar.e2e.spec.ts",
+          "line": 192,
+          "column": 5
+        },
+        {
+          "title": "E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 11986,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:234:22",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 22,
+                      "line": 234
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 232 |\u001b[39m\n \u001b[90m 233 |\u001b[39m   \u001b[36mawait\u001b[39m uiLogin(page\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39memail\u001b[33m,\u001b[39m citizen\u001b[33m.\u001b[39mpassword)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 234 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/mapa/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 235 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[35m/Cerrar sesión/\u001b[39m })\u001b[33m.\u001b[39mfirst()\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m 236 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/login/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 237 |\u001b[39m   \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/mapa'\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 22,
+                        "line": 234
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: \u001b[32m/\\/mapa/\u001b[39m\nReceived string:  \u001b[31m\"http://localhost:4200/login\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/login\"\u001b[22m\n\n\n  232 |\n  233 |   await uiLogin(page, citizen.email, citizen.password);\n> 234 |   await expect(page).toHaveURL(/\\/mapa/);\n      |                      ^\n  235 |   await page.getByRole('button', { name: /Cerrar sesión/ }).first().click();\n  236 |   await expect(page).toHaveURL(/\\/login/);\n  237 |   await page.goto('/mapa');\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:234:22"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:43:35.813Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 22,
+                    "line": 234
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-6a653181caea9436eb7b",
+          "file": "radar.e2e.spec.ts",
+          "line": 229,
+          "column": 5
+        },
+        {
+          "title": "E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 16096,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).not.\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: not \u001b[32m/\\/(admin|mapa)/\u001b[39m\nReceived string: \u001b[31m\"http://localhost:4200\u001b[7m/admin\u001b[27m\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/admin\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).not.\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: not \u001b[32m/\\/(admin|mapa)/\u001b[39m\nReceived string: \u001b[31m\"http://localhost:4200\u001b[7m/admin\u001b[27m\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/admin\"\u001b[22m\n\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:249:26",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 26,
+                      "line": 249
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 247 |\u001b[39m   \u001b[36mawait\u001b[39m shot(page\u001b[33m,\u001b[39m \u001b[32m'E2E-10-login-con-backend-caido'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 248 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 249 |\u001b[39m   \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mnot\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/\\/(admin|mapa)/\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 250 |\u001b[39m   expect(\u001b[36mawait\u001b[39m tabToken(page)\u001b[33m,\u001b[39m \u001b[32m'no debe guardarse ningun token falso'\u001b[39m)\u001b[33m.\u001b[39mtoBeNull()\u001b[33m;\u001b[39m\n \u001b[90m 251 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 252 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 26,
+                        "line": 249
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mpage\u001b[39m\u001b[2m).not.\u001b[22mtoHaveURL\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nExpected pattern: not \u001b[32m/\\/(admin|mapa)/\u001b[39m\nReceived string: \u001b[31m\"http://localhost:4200\u001b[7m/admin\u001b[27m\"\u001b[39m\nTimeout: 10000ms\n\nCall log:\n\u001b[2m  - Expect \"not toHaveURL\" with timeout 10000ms\u001b[22m\n\u001b[2m    14 × unexpected value \"http://localhost:4200/admin\"\u001b[22m\n\n\n  247 |   await shot(page, 'E2E-10-login-con-backend-caido');\n  248 |\n> 249 |   await expect(page).not.toHaveURL(/\\/(admin|mapa)/);\n      |                          ^\n  250 |   expect(await tabToken(page), 'no debe guardarse ningun token falso').toBeNull();\n  251 | });\n  252 |\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:249:26"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:43:49.272Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 26,
+                    "line": 249
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-0af7c41644f5a5db72f8",
+          "file": "radar.e2e.spec.ts",
+          "line": 242,
+          "column": 5
+        },
+        {
+          "title": "E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 2845,
+                  "error": {
+                    "message": "Error: la contrasena no debe aparecer en localStorage/sessionStorage\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m",
+                    "stack": "Error: la contrasena no debe aparecer en localStorage/sessionStorage\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:279:102",
+                    "location": {
+                      "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                      "column": 102,
+                      "line": 279
+                    },
+                    "snippet": "\u001b[0m \u001b[90m 277 |\u001b[39m     \u001b[36mreturn\u001b[39m dump\u001b[33m.\u001b[39mjoin(\u001b[32m'\\n'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 278 |\u001b[39m   })\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 279 |\u001b[39m   expect(stored\u001b[33m.\u001b[39mincludes(password)\u001b[33m,\u001b[39m \u001b[32m'la contrasena no debe aparecer en localStorage/sessionStorage'\u001b[39m)\u001b[33m.\u001b[39mtoBe(\u001b[36mfalse\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 280 |\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m 281 |\u001b[39m\u001b[0m"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                        "column": 102,
+                        "line": 279
+                      },
+                      "message": "Error: la contrasena no debe aparecer en localStorage/sessionStorage\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\n  277 |     return dump.join('\\n');\n  278 |   });\n> 279 |   expect(stored.includes(password), 'la contrasena no debe aparecer en localStorage/sessionStorage').toBe(false);\n      |                                                                                                      ^\n  280 | });\n  281 |\n    at C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts:279:102"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-13T17:44:06.864Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\\error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "C:\\Users\\user\\vsprojects\\radar\\e2e\\test-results\\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\\trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\user\\vsprojects\\radar\\e2e\\tests\\radar.e2e.spec.ts",
+                    "column": 102,
+                    "line": 279
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "5b24bc211d3865736b10-8405deeac549b715ff18",
+          "file": "radar.e2e.spec.ts",
+          "line": 253,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-13T17:42:29.733Z",
+    "duration": 100752.99799999999,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 7,
+    "flaky": 0
+  }
+}

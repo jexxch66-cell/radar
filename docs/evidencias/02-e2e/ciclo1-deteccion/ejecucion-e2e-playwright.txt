@@ -1,0 +1,276 @@
+# CICLO 1 (deteccion) E2E con navegador sobre e9e1021 (codigo de produccion sin modificar)
+# Stack: frontend radar-frontend-1 :4200 | backend :8080 | PostgreSQL desechable :5440 | Chrome
+
+Running 11 tests using 1 worker
+
+  ok  1 tests\radar.e2e.spec.ts:80:5 › E2E-01 Visitante: la portada carga y la ruta raiz redirige a /bienvenida (2.9s)
+  ok  2 tests\radar.e2e.spec.ts:87:5 › E2E-02 Visitante: una ruta protegida (/mapa) redirige a /login (1.2s)
+  ok  3 tests\radar.e2e.spec.ts:94:5 › E2E-03 Visitante: ruta inexistente muestra la pagina 404 del frontend (1.0s)
+  ok  4 tests\radar.e2e.spec.ts:100:5 › E2E-04 Login con credenciales invalidas muestra el mensaje de error del backend (2.3s)
+  x   5 tests\radar.e2e.spec.ts:107:5 › E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa (12.7s)
+  x   6 tests\radar.e2e.spec.ts:134:5 › E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado (12.4s)
+  x   7 tests\radar.e2e.spec.ts:159:5 › E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado (13.9s)
+  x   8 tests\radar.e2e.spec.ts:192:5 › E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion (12.3s)
+  x   9 tests\radar.e2e.spec.ts:229:5 › E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa (12.0s)
+  x  10 tests\radar.e2e.spec.ts:242:5 › E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas (16.1s)
+  x  11 tests\radar.e2e.spec.ts:253:5 › E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador (2.8s)
+
+
+  1) tests\radar.e2e.spec.ts:107:5 › E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/mapa/
+    Received string:  "http://localhost:4200/login"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/login"
+
+
+      126 |   ]);
+      127 |   expect(loginResponse.status(), 'el primer login tras registrarse no deberia ser bloqueado').toBe(200);
+    > 128 |   await expect(page).toHaveURL(/\/mapa/);
+          |                      ^
+      129 |   await expect(page.getByRole('button', { name: /Reportar aquí/ })).toBeVisible();
+      130 |   await waitForMapTiles(page);
+      131 |   await shot(page, 'E2E-05b-mapa-tras-primer-login');
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-05-Ciudadano-7ec5d-cio-de-sesion-llega-al-mapa\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\radar.e2e.spec.ts:134:5 › E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/mapa/
+    Received string:  "http://localhost:4200/login"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/login"
+
+
+      137 |
+      138 |   await uiLogin(page, citizen.email, citizen.password);
+    > 139 |   await expect(page).toHaveURL(/\/mapa/);
+          |                      ^
+      140 |   await page.getByRole('button', { name: /Reportar aquí/ }).click();
+      141 |   await page.getByRole('button', { name: /Publicar reporte aquí/ }).waitFor();
+      142 |   await page.locator('textarea').fill('E2E: hueco profundo frente al paradero');
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-06-Ciudadano-8d246-e-el-mapa-y-lo-ve-publicado\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests\radar.e2e.spec.ts:159:5 › E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/admin/
+    Received string:  "http://localhost:4200/login"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/login"
+
+
+      168 |
+      169 |   await uiLogin(page, ADMIN_EMAIL, ADMIN_PASSWORD);
+    > 170 |   await expect(page).toHaveURL(/\/admin/);
+          |                      ^
+      171 |   // La descripcion tambien aparece en la tabla de auditoria: se ubica la fila por su selector de estado
+      172 |   const row = page.locator('tr', { has: page.getByLabel(`Estado del reporte ${reportId}`) });
+      173 |   await expect(row).toContainText(marker);
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-07-Administr-33bfe-iudadano-y-cambia-su-estado\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests\radar.e2e.spec.ts:192:5 › E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/mapa/
+    Received string:  "http://localhost:4200/login"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/login"
+
+
+      202 |
+      203 |   await uiLogin(a, citizen.email, citizen.password);
+    > 204 |   await expect(a).toHaveURL(/\/mapa/);
+          |                   ^
+      205 |   const tokenA = await tabToken(a);
+      206 |   expect(tokenA, 'el navegador A debe tener un token del backend').toMatch(/^eyJ/);
+      207 |
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-08-Sesion-un-5da35-do-el-primero-cierra-sesion\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests\radar.e2e.spec.ts:229:5 › E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa 
+
+    Error: expect(page).toHaveURL(expected) failed
+
+    Expected pattern: /\/mapa/
+    Received string:  "http://localhost:4200/login"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/login"
+
+
+      232 |
+      233 |   await uiLogin(page, citizen.email, citizen.password);
+    > 234 |   await expect(page).toHaveURL(/\/mapa/);
+          |                      ^
+      235 |   await page.getByRole('button', { name: /Cerrar sesión/ }).first().click();
+      236 |   await expect(page).toHaveURL(/\/login/);
+      237 |   await page.goto('/mapa');
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-09-Ciudadano-acfd0-in-y-bloquea-volver-al-mapa\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) tests\radar.e2e.spec.ts:242:5 › E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas 
+
+    Error: expect(page).not.toHaveURL(expected) failed
+
+    Expected pattern: not /\/(admin|mapa)/
+    Received string: "http://localhost:4200/admin"
+    Timeout: 10000ms
+
+    Call log:
+      - Expect "not toHaveURL" with timeout 10000ms
+        14 × unexpected value "http://localhost:4200/admin"
+
+
+      247 |   await shot(page, 'E2E-10-login-con-backend-caido');
+      248 |
+    > 249 |   await expect(page).not.toHaveURL(/\/(admin|mapa)/);
+          |                          ^
+      250 |   expect(await tabToken(page), 'no debe guardarse ningun token falso').toBeNull();
+      251 | });
+      252 |
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-10-Seguridad-6da35-con-credenciales-inventadas\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) tests\radar.e2e.spec.ts:253:5 › E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador 
+
+    Error: la contrasena no debe aparecer en localStorage/sessionStorage
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: false
+    Received: true
+
+      277 |     return dump.join('\n');
+      278 |   });
+    > 279 |   expect(stored.includes(password), 'la contrasena no debe aparecer en localStorage/sessionStorage').toBe(false);
+          |                                                                                                      ^
+      280 | });
+      281 |
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-11-Seguridad-383f4-texto-plano-en-el-navegador\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    tests\radar.e2e.spec.ts:107:5 › E2E-05 Ciudadano: registro por la interfaz y primer inicio de sesion llega al mapa 
+    tests\radar.e2e.spec.ts:134:5 › E2E-06 Ciudadano: inicia sesion, crea un reporte desde el mapa y lo ve publicado 
+    tests\radar.e2e.spec.ts:159:5 › E2E-07 Administrador: inicia sesion, ve el reporte ciudadano y cambia su estado 
+    tests\radar.e2e.spec.ts:192:5 › E2E-08 Sesion unica estricta: un segundo navegador es rechazado y entra solo cuando el primero cierra sesion 
+    tests\radar.e2e.spec.ts:229:5 › E2E-09 Ciudadano: cerrar sesion devuelve a /login y bloquea volver al mapa 
+    tests\radar.e2e.spec.ts:242:5 › E2E-10 Seguridad: si el backend no responde, el login NO concede acceso (ni rol ADMIN) con credenciales inventadas 
+    tests\radar.e2e.spec.ts:253:5 › E2E-11 Seguridad: tras registrarse, la contrasena no queda guardada en texto plano en el navegador 
+  4 passed (1.7m)
+
+To open last HTML report run:
+
+  npx playwright show-report reports\html
+

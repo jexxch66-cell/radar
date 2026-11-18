@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BackupService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.service</a> &gt; <span class="el_source">BackupService.java</span></div><h1>BackupService.java</h1><pre class="source lang-java linenums">package com.radar.api.service;
+
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobProperties;
+import com.azure.storage.blob.models.BlobStorageException;
+import com.radar.api.dto.request.UpdateBackupScheduleRequest;
+import com.radar.api.dto.response.BackupInfoResponse;
+import com.radar.api.dto.response.BackupStatusResponse;
+import com.radar.api.model.BackupSchedule;
+import com.radar.api.repository.BackupScheduleRepository;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+@Service
+<span class="fc" id="L37">@Slf4j</span>
+public class BackupService {
+
+    private static final int SCHEDULE_ID = 1;
+    private static final String BACKUP_PREFIX = &quot;radar-db-&quot;;
+    private static final String PRE_RESTORE_BACKUP_PREFIX = &quot;radar-pre-restore-&quot;;
+<span class="fc" id="L43">    private static final DateTimeFormatter BACKUP_NAME_TIME =</span>
+<span class="fc" id="L44">            DateTimeFormatter.ofPattern(&quot;yyyyMMdd-HHmmss-SSS&quot;).withZone(ZoneOffset.UTC);</span>
+    private static final long COMMAND_TIMEOUT_MINUTES = 30;
+
+    private final BackupScheduleRepository scheduleRepository;
+    private final ObjectProvider&lt;BlobServiceClient&gt; blobServiceClientProvider;
+    private final Environment environment;
+<span class="fc" id="L50">    private final ReentrantLock operationLock = new ReentrantLock();</span>
+
+    @Value(&quot;${app.backup.azure-container:radar-backups}&quot;)
+    private String containerName;
+
+    @Value(&quot;${app.backup.local-directory:}&quot;)
+    private String localDirectory;
+
+    @Value(&quot;${app.backup.docker-container:}&quot;)
+    private String dockerContainer;
+
+    @Value(&quot;${app.backup.docker-path:docker}&quot;)
+    private String dockerPath;
+
+    @Value(&quot;${app.backup.pg-dump-path:pg_dump}&quot;)
+    private String pgDumpPath;
+
+    @Value(&quot;${app.backup.pg-restore-path:pg_restore}&quot;)
+    private String pgRestorePath;
+
+    public BackupService(
+            BackupScheduleRepository scheduleRepository,
+            ObjectProvider&lt;BlobServiceClient&gt; blobServiceClientProvider,
+<span class="fc" id="L73">            Environment environment) {</span>
+<span class="fc" id="L74">        this.scheduleRepository = scheduleRepository;</span>
+<span class="fc" id="L75">        this.blobServiceClientProvider = blobServiceClientProvider;</span>
+<span class="fc" id="L76">        this.environment = environment;</span>
+<span class="fc" id="L77">    }</span>
+
+    @PostConstruct
+    public void initializeSchedule() {
+<span class="fc" id="L81">        scheduleRepository.findById(SCHEDULE_ID).orElseGet(() -&gt; {</span>
+<span class="fc" id="L82">            BackupSchedule schedule = new BackupSchedule();</span>
+<span class="fc" id="L83">            schedule.setId(SCHEDULE_ID);</span>
+<span class="fc" id="L84">            schedule.setIntervalHours(24);</span>
+<span class="fc" id="L85">            schedule.setEnabled(false);</span>
+<span class="fc" id="L86">            return scheduleRepository.save(schedule);</span>
+        });
+<span class="fc" id="L88">    }</span>
+
+    @Scheduled(fixedDelayString = &quot;${app.backup.poll-interval-ms:60000}&quot;)
+    public void runDueBackup() {
+<span class="fc" id="L92">        Optional&lt;BackupSchedule&gt; optionalSchedule = scheduleRepository.findById(SCHEDULE_ID);</span>
+<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if (optionalSchedule.isEmpty()) {</span>
+<span class="nc" id="L94">            return;</span>
+        }
+
+<span class="fc" id="L97">        BackupSchedule schedule = optionalSchedule.get();</span>
+<span class="pc bpc" id="L98" title="3 of 4 branches missed.">        if (!schedule.isEnabled() || schedule.getNextBackupAt() == null</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                || schedule.getNextBackupAt().isAfter(Instant.now())) {</span>
+<span class="fc" id="L100">            return;</span>
+        }
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!operationLock.tryLock()) {</span>
+<span class="nc" id="L104">            return;</span>
+        }
+        try {
+<span class="nc" id="L107">            BackupInfoResponse result = createBackupUnlocked();</span>
+<span class="nc" id="L108">            updateAfterSuccessfulBackup(result.createdAt());</span>
+<span class="nc" id="L109">            log.info(&quot;Scheduled backup completed: {}&quot;, result.name());</span>
+<span class="nc" id="L110">        } catch (RuntimeException exception) {</span>
+<span class="nc" id="L111">            updateAfterFailedBackup(exception);</span>
+<span class="nc" id="L112">            log.error(&quot;Scheduled backup failed&quot;, exception);</span>
+        } finally {
+<span class="nc" id="L114">            operationLock.unlock();</span>
+        }
+<span class="nc" id="L116">    }</span>
+
+    public BackupStatusResponse getStatus() {
+<span class="fc" id="L119">        BackupSchedule schedule = getSchedule();</span>
+<span class="fc" id="L120">        Optional&lt;BackupInfoResponse&gt; latest = findLatestBackup();</span>
+<span class="fc" id="L121">        return new BackupStatusResponse(</span>
+                true,
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">                isAzureConfigured() ? &quot;AZURE&quot; : &quot;LOCAL&quot;,</span>
+<span class="fc" id="L124">                schedule.isEnabled(),</span>
+<span class="fc" id="L125">                schedule.getIntervalHours(),</span>
+<span class="fc" id="L126">                schedule.getNextBackupAt(),</span>
+<span class="fc" id="L127">                schedule.getLastBackupAt(),</span>
+<span class="fc" id="L128">                schedule.getLastError(),</span>
+<span class="fc" id="L129">                latest.map(BackupInfoResponse::name).orElse(null),</span>
+<span class="fc" id="L130">                latest.map(BackupInfoResponse::createdAt).orElse(null));</span>
+    }
+
+    public BackupStatusResponse updateSchedule(UpdateBackupScheduleRequest request) {
+<span class="fc" id="L134">        BackupSchedule schedule = getSchedule();</span>
+<span class="fc" id="L135">        schedule.setEnabled(request.enabled());</span>
+<span class="fc" id="L136">        schedule.setIntervalHours(request.intervalHours());</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        schedule.setNextBackupAt(request.enabled()</span>
+<span class="fc" id="L138">                ? Instant.now().plusSeconds(request.intervalHours() * 3600L)</span>
+<span class="fc" id="L139">                : null);</span>
+<span class="fc" id="L140">        schedule.setLastError(null);</span>
+<span class="fc" id="L141">        scheduleRepository.save(schedule);</span>
+<span class="fc" id="L142">        return getStatus();</span>
+    }
+
+    public BackupInfoResponse createBackup() {
+<span class="nc" id="L146">        operationLock.lock();</span>
+        try {
+<span class="nc" id="L148">            BackupInfoResponse backup = createBackupUnlocked();</span>
+<span class="nc" id="L149">            updateAfterSuccessfulBackup(backup.createdAt());</span>
+<span class="nc" id="L150">            return backup;</span>
+        } finally {
+<span class="nc" id="L152">            operationLock.unlock();</span>
+        }
+    }
+
+    public BackupInfoResponse restoreLatestBackup() {
+<span class="nc" id="L157">        operationLock.lock();</span>
+<span class="nc" id="L158">        Path downloadedDump = null;</span>
+        try {
+<span class="nc" id="L160">            BackupArtifact latest = findLatestBackupArtifact()</span>
+<span class="nc" id="L161">                    .orElseThrow(() -&gt; new IllegalStateException(&quot;No hay un backup disponible para restaurar.&quot;));</span>
+
+<span class="nc" id="L163">            createBackupUnlocked(PRE_RESTORE_BACKUP_PREFIX);</span>
+
+<span class="nc" id="L165">            downloadedDump = Files.createTempFile(&quot;radar-restore-&quot;, &quot;.dump&quot;);</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">            if (latest.blobClient() != null) {</span>
+<span class="nc" id="L167">                latest.blobClient().downloadToFile(downloadedDump.toString(), true);</span>
+            } else {
+<span class="nc" id="L169">                Files.copy(latest.localPath(), downloadedDump, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
+            }
+<span class="nc" id="L171">            runPostgresCommand(buildRestoreCommand(downloadedDump), pgRestorePath, downloadedDump);</span>
+
+<span class="nc" id="L173">            log.warn(&quot;Database restored from backup {}&quot;, latest.name());</span>
+<span class="nc" id="L174">            return new BackupInfoResponse(latest.name(), latest.createdAt(), latest.sizeBytes());</span>
+<span class="nc" id="L175">        } catch (IOException exception) {</span>
+<span class="nc" id="L176">            throw new IllegalStateException(&quot;No se pudo preparar el archivo para restaurarlo.&quot;, exception);</span>
+        } finally {
+<span class="nc" id="L178">            deleteTemporaryFile(downloadedDump);</span>
+<span class="nc" id="L179">            operationLock.unlock();</span>
+        }
+    }
+
+    private BackupInfoResponse createBackupUnlocked() {
+<span class="nc" id="L184">        return createBackupUnlocked(BACKUP_PREFIX);</span>
+    }
+
+    private BackupInfoResponse createBackupUnlocked(String backupPrefix) {
+<span class="nc" id="L188">        Path dump = null;</span>
+        try {
+<span class="nc" id="L190">            dump = Files.createTempFile(&quot;radar-backup-&quot;, &quot;.dump&quot;);</span>
+<span class="nc" id="L191">            runPostgresCommand(buildDumpCommand(dump), pgDumpPath, dump);</span>
+
+<span class="nc" id="L193">            String backupName = backupPrefix + BACKUP_NAME_TIME.format(Instant.now())</span>
+<span class="nc" id="L194">                    + &quot;-&quot; + UUID.randomUUID() + &quot;.dump&quot;;</span>
+<span class="nc" id="L195">            Instant createdAt = Instant.now();</span>
+<span class="nc" id="L196">            long sizeBytes = Files.size(dump);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">            if (isAzureConfigured()) {</span>
+<span class="nc" id="L198">                BlobContainerClient container = requireContainer();</span>
+<span class="nc" id="L199">                container.createIfNotExists();</span>
+<span class="nc" id="L200">                BlobClient blob = container.getBlobClient(backupName);</span>
+<span class="nc" id="L201">                blob.uploadFromFile(dump.toString(), true);</span>
+<span class="nc" id="L202">                BlobProperties properties = blob.getProperties();</span>
+<span class="nc" id="L203">                createdAt = properties.getLastModified().toInstant();</span>
+<span class="nc" id="L204">                sizeBytes = properties.getBlobSize();</span>
+<span class="nc" id="L205">                log.info(&quot;Database backup uploaded to Azure: {}&quot;, backupName);</span>
+<span class="nc" id="L206">            } else {</span>
+<span class="nc" id="L207">                Path destination = localBackupDirectory().resolve(backupName);</span>
+<span class="nc" id="L208">                Files.copy(dump, destination, java.nio.file.StandardCopyOption.REPLACE_EXISTING);</span>
+<span class="nc" id="L209">                log.info(&quot;Database backup saved locally: {}&quot;, destination);</span>
+            }
+<span class="nc" id="L211">            return new BackupInfoResponse(backupName, createdAt, sizeBytes);</span>
+<span class="nc" id="L212">        } catch (IOException exception) {</span>
+<span class="nc" id="L213">            throw new IllegalStateException(&quot;No se pudo generar o subir el backup de la base de datos.&quot;, exception);</span>
+<span class="nc" id="L214">        } catch (BlobStorageException exception) {</span>
+<span class="nc" id="L215">            throw new IllegalStateException(&quot;Azure Blob Storage rechazó la operación de backup.&quot;, exception);</span>
+        } finally {
+<span class="nc" id="L217">            deleteTemporaryFile(dump);</span>
+        }
+    }
+
+    private BlobContainerClient requireContainer() {
+<span class="nc" id="L222">        BlobServiceClient client = blobServiceClientProvider.getIfAvailable();</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (client == null) {</span>
+<span class="nc" id="L224">            throw new IllegalStateException(</span>
+                    &quot;Azure Blob Storage no está configurado. Define AZURE_STORAGE_CONNECTION_STRING.&quot;);
+        }
+<span class="nc" id="L227">        return client.getBlobContainerClient(containerName);</span>
+    }
+
+    private Optional&lt;BackupInfoResponse&gt; findLatestBackup() {
+<span class="pc" id="L231">        return findLatestBackupArtifact().map(artifact -&gt; new BackupInfoResponse(</span>
+<span class="nc" id="L232">                artifact.name(), artifact.createdAt(), artifact.sizeBytes()));</span>
+    }
+
+    private Optional&lt;BackupArtifact&gt; findLatestBackupArtifact() {
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if (isAzureConfigured()) {</span>
+<span class="nc" id="L237">            return findLatestAzureBackup();</span>
+        }
+<span class="fc" id="L239">        Path directory = localBackupDirectory();</span>
+<span class="fc" id="L240">        try (var files = Files.list(directory)) {</span>
+<span class="fc" id="L241">            return files</span>
+<span class="pc" id="L242">                    .filter(Files::isRegularFile)</span>
+<span class="pc" id="L243">                    .filter(path -&gt; path.getFileName().toString().startsWith(BACKUP_PREFIX))</span>
+<span class="pc" id="L244">                    .map(path -&gt; localBackupArtifact(path))</span>
+<span class="fc" id="L245">                    .max(Comparator.comparing(BackupArtifact::createdAt));</span>
+<span class="nc" id="L246">        } catch (IOException exception) {</span>
+<span class="nc" id="L247">            throw new IllegalStateException(&quot;No se pudieron consultar los backups locales.&quot;, exception);</span>
+        }
+    }
+
+    private Optional&lt;BackupArtifact&gt; findLatestAzureBackup() {
+<span class="nc" id="L252">        return findLatestBlob(requireContainer()).map(item -&gt; new BackupArtifact(</span>
+<span class="nc" id="L253">                item.getName(),</span>
+<span class="nc" id="L254">                item.getProperties().getLastModified().toInstant(),</span>
+<span class="nc" id="L255">                item.getProperties().getContentLength(),</span>
+<span class="nc" id="L256">                requireContainer().getBlobClient(item.getName()),</span>
+                null));
+    }
+
+    private Optional&lt;BlobItem&gt; findLatestBlob(BlobContainerClient container) {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (!container.exists()) {</span>
+<span class="nc" id="L262">            return Optional.empty();</span>
+        }
+<span class="nc" id="L264">        return container.listBlobs().stream()</span>
+<span class="nc" id="L265">                .filter(item -&gt; item.getName().startsWith(BACKUP_PREFIX))</span>
+<span class="nc" id="L266">                .max(Comparator.comparing(item -&gt; item.getProperties().getLastModified()));</span>
+    }
+
+    private BackupArtifact localBackupArtifact(Path path) {
+        try {
+<span class="nc" id="L271">            return new BackupArtifact(</span>
+<span class="nc" id="L272">                    path.getFileName().toString(),</span>
+<span class="nc" id="L273">                    Files.getLastModifiedTime(path).toInstant(),</span>
+<span class="nc" id="L274">                    Files.size(path),</span>
+                    null,
+                    path);
+<span class="nc" id="L277">        } catch (IOException exception) {</span>
+<span class="nc" id="L278">            throw new IllegalStateException(&quot;No se pudo leer la metadata del backup local.&quot;, exception);</span>
+        }
+    }
+
+    private boolean isAzureConfigured() {
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">        return blobServiceClientProvider.getIfAvailable() != null;</span>
+    }
+
+    private Path localBackupDirectory() {
+<span class="pc bpc" id="L287" title="2 of 4 branches missed.">        Path directory = localDirectory == null || localDirectory.isBlank()</span>
+<span class="nc" id="L288">                ? Paths.get(System.getProperty(&quot;user.home&quot;), &quot;.radar&quot;, &quot;backups&quot;)</span>
+<span class="fc" id="L289">                : Paths.get(localDirectory);</span>
+        try {
+<span class="fc" id="L291">            Files.createDirectories(directory);</span>
+<span class="fc" id="L292">            return directory.toAbsolutePath().normalize();</span>
+<span class="nc" id="L293">        } catch (IOException exception) {</span>
+<span class="nc" id="L294">            throw new IllegalStateException(&quot;No se pudo crear el directorio local de backups: &quot; + directory, exception);</span>
+        }
+    }
+
+    private BackupSchedule getSchedule() {
+<span class="fc" id="L299">        return scheduleRepository.findById(SCHEDULE_ID)</span>
+<span class="pc" id="L300">                .orElseThrow(() -&gt; new IllegalStateException(&quot;No se encontró la configuración de backups.&quot;));</span>
+    }
+
+    private String[] buildDumpCommand(Path dump) {
+<span class="nc" id="L304">        DatabaseConnection database = databaseConnection();</span>
+<span class="nc" id="L305">        String[] postgresArguments = new String[] {</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">                isDockerMode() ? &quot;pg_dump&quot; : pgDumpPath,</span>
+                &quot;--format=custom&quot;,
+                &quot;--no-owner&quot;,
+                &quot;--no-acl&quot;,
+<span class="nc bnc" id="L310" title="All 2 branches missed.">                &quot;--host=&quot; + (isDockerMode() ? &quot;localhost&quot; : database.host()),</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">                &quot;--port=&quot; + (isDockerMode() ? &quot;5432&quot; : database.port()),</span>
+<span class="nc" id="L312">                &quot;--username=&quot; + database.username(),</span>
+<span class="nc" id="L313">                &quot;--dbname=&quot; + database.database()</span>
+        };
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (isDockerMode()) {</span>
+<span class="nc" id="L316">            return dockerCommand(postgresArguments);</span>
+        }
+<span class="nc" id="L318">        String[] command = java.util.Arrays.copyOf(postgresArguments, postgresArguments.length + 1);</span>
+<span class="nc" id="L319">        command[command.length - 1] = &quot;--file=&quot; + dump;</span>
+<span class="nc" id="L320">        return command;</span>
+    }
+
+    private String[] buildRestoreCommand(Path dump) {
+<span class="nc" id="L324">        DatabaseConnection database = databaseConnection();</span>
+<span class="nc" id="L325">        String[] postgresArguments = new String[] {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                isDockerMode() ? &quot;pg_restore&quot; : pgRestorePath,</span>
+                &quot;--exit-on-error&quot;,
+                &quot;--single-transaction&quot;,
+                &quot;--clean&quot;,
+                &quot;--if-exists&quot;,
+                &quot;--no-owner&quot;,
+                &quot;--no-acl&quot;,
+<span class="nc bnc" id="L333" title="All 2 branches missed.">                &quot;--host=&quot; + (isDockerMode() ? &quot;localhost&quot; : database.host()),</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                &quot;--port=&quot; + (isDockerMode() ? &quot;5432&quot; : database.port()),</span>
+<span class="nc" id="L335">                &quot;--username=&quot; + database.username(),</span>
+<span class="nc" id="L336">                &quot;--dbname=&quot; + database.database()</span>
+        };
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if (isDockerMode()) {</span>
+<span class="nc" id="L339">            return dockerCommand(postgresArguments);</span>
+        }
+<span class="nc" id="L341">        String[] command = java.util.Arrays.copyOf(postgresArguments, postgresArguments.length + 1);</span>
+<span class="nc" id="L342">        command[command.length - 1] = dump.toString();</span>
+<span class="nc" id="L343">        return command;</span>
+    }
+
+    private String[] dockerCommand(String[] postgresArguments) {
+<span class="nc" id="L347">        String[] command = new String[postgresArguments.length + 8];</span>
+<span class="nc" id="L348">        command[0] = dockerPath;</span>
+<span class="nc" id="L349">        command[1] = &quot;exec&quot;;</span>
+<span class="nc" id="L350">        command[2] = &quot;--interactive&quot;;</span>
+<span class="nc" id="L351">        command[3] = &quot;--env&quot;;</span>
+<span class="nc" id="L352">        command[4] = &quot;PGPASSWORD&quot;;</span>
+<span class="nc" id="L353">        command[5] = &quot;--env&quot;;</span>
+<span class="nc" id="L354">        command[6] = &quot;PGSSLMODE&quot;;</span>
+<span class="nc" id="L355">        command[7] = dockerContainer;</span>
+<span class="nc" id="L356">        System.arraycopy(postgresArguments, 0, command, 8, postgresArguments.length);</span>
+<span class="nc" id="L357">        return command;</span>
+    }
+
+    private boolean isDockerMode() {
+<span class="nc bnc" id="L361" title="All 4 branches missed.">        return dockerContainer != null &amp;&amp; !dockerContainer.isBlank();</span>
+    }
+
+    private DatabaseConnection databaseConnection() {
+<span class="nc" id="L365">        String jdbcUrl = environment.getProperty(&quot;spring.datasource.url&quot;);</span>
+<span class="nc" id="L366">        String username = environment.getProperty(&quot;spring.datasource.username&quot;);</span>
+<span class="nc bnc" id="L367" title="All 6 branches missed.">        if (jdbcUrl == null || !jdbcUrl.startsWith(&quot;jdbc:postgresql://&quot;)</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">                || username == null || username.isBlank()) {</span>
+<span class="nc" id="L369">            throw new IllegalStateException(&quot;La conexión PostgreSQL no está configurada para backups.&quot;);</span>
+        }
+
+<span class="nc" id="L372">        URI uri = URI.create(jdbcUrl.substring(&quot;jdbc:&quot;.length()));</span>
+<span class="nc" id="L373">        String path = uri.getPath();</span>
+<span class="nc bnc" id="L374" title="All 4 branches missed.">        String database = path == null || path.length() &lt; 2 ? &quot;&quot; : path.substring(1);</span>
+<span class="nc bnc" id="L375" title="All 4 branches missed.">        if (database.isBlank() || database.contains(&quot;/&quot;)) {</span>
+<span class="nc" id="L376">            throw new IllegalStateException(&quot;No se pudo determinar la base de datos PostgreSQL para el backup.&quot;);</span>
+        }
+
+<span class="nc" id="L379">        return new DatabaseConnection(</span>
+<span class="nc" id="L380">                uri.getHost(),</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">                uri.getPort() &gt; 0 ? uri.getPort() : 5432,</span>
+                username,
+                database,
+<span class="nc" id="L384">                environment.getProperty(&quot;spring.datasource.password&quot;, &quot;&quot;),</span>
+<span class="nc" id="L385">                environment.getProperty(&quot;DB_SSLMODE&quot;, &quot;prefer&quot;));</span>
+    }
+
+    private void runPostgresCommand(String[] command, String executable, Path dump) throws IOException {
+<span class="nc" id="L389">        Path logFile = Files.createTempFile(&quot;radar-postgres-command-&quot;, &quot;.log&quot;);</span>
+        try {
+<span class="nc" id="L391">            ProcessBuilder processBuilder = new ProcessBuilder(command);</span>
+<span class="nc bnc" id="L392" title="All 4 branches missed.">            if (isDockerMode() &amp;&amp; executable.equals(pgDumpPath)) {</span>
+<span class="nc" id="L393">                processBuilder.redirectOutput(dump.toFile());</span>
+<span class="nc" id="L394">                processBuilder.redirectError(logFile.toFile());</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">            } else if (isDockerMode() &amp;&amp; executable.equals(pgRestorePath)) {</span>
+<span class="nc" id="L396">                processBuilder.redirectInput(dump.toFile());</span>
+<span class="nc" id="L397">                processBuilder.redirectError(logFile.toFile());</span>
+            } else {
+<span class="nc" id="L399">                processBuilder.redirectErrorStream(true).redirectOutput(logFile.toFile());</span>
+            }
+<span class="nc" id="L401">            DatabaseConnection database = databaseConnection();</span>
+<span class="nc" id="L402">            processBuilder.environment().put(&quot;PGPASSWORD&quot;, database.password());</span>
+<span class="nc" id="L403">            processBuilder.environment().put(&quot;PGSSLMODE&quot;, database.sslMode());</span>
+            Process process;
+            try {
+<span class="nc" id="L406">                process = processBuilder.start();</span>
+<span class="nc" id="L407">            } catch (IOException exception) {</span>
+<span class="nc" id="L408">                throw new IllegalStateException(</span>
+                        &quot;No se pudo iniciar la herramienta de backup. Configura PostgreSQL client tools o BACKUP_DOCKER_CONTAINER.&quot;,
+                        exception);
+<span class="nc" id="L411">            }</span>
+            boolean completed;
+            try {
+<span class="nc" id="L414">                completed = process.waitFor(COMMAND_TIMEOUT_MINUTES, TimeUnit.MINUTES);</span>
+<span class="nc" id="L415">            } catch (InterruptedException exception) {</span>
+<span class="nc" id="L416">                Thread.currentThread().interrupt();</span>
+<span class="nc" id="L417">                process.destroyForcibly();</span>
+<span class="nc" id="L418">                throw new IllegalStateException(&quot;La operación de PostgreSQL fue interrumpida.&quot;, exception);</span>
+<span class="nc" id="L419">            }</span>
+
+<span class="nc bnc" id="L421" title="All 2 branches missed.">            if (!completed) {</span>
+<span class="nc" id="L422">                process.destroyForcibly();</span>
+<span class="nc" id="L423">                throw new IllegalStateException(&quot;La operación de PostgreSQL superó el límite de 30 minutos.&quot;);</span>
+            }
+
+<span class="nc" id="L426">            String output = Files.readString(logFile).trim();</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">            if (process.exitValue() != 0) {</span>
+<span class="nc" id="L428">                log.error(&quot;{} failed: {}&quot;, executable, output);</span>
+<span class="nc" id="L429">                throw new IllegalStateException(</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">                        output.isBlank()</span>
+<span class="nc" id="L431">                                ? &quot;No se pudo ejecutar &quot; + executable + &quot;. Verifica que PostgreSQL client tools esté instalado.&quot;</span>
+<span class="nc" id="L432">                                : &quot;Falló &quot; + executable + &quot;: &quot; + output);</span>
+            }
+
+<span class="nc bnc" id="L435" title="All 4 branches missed.">            if (executable.equals(pgDumpPath) &amp;&amp; Files.size(dump) == 0) {</span>
+<span class="nc" id="L436">                throw new IllegalStateException(&quot;pg_dump generó un archivo de backup vacío.&quot;);</span>
+            }
+        } finally {
+<span class="nc" id="L439">            deleteTemporaryFile(logFile);</span>
+        }
+<span class="nc" id="L441">    }</span>
+
+    protected void updateAfterSuccessfulBackup(Instant createdAt) {
+<span class="nc" id="L444">        BackupSchedule schedule = getSchedule();</span>
+<span class="nc" id="L445">        schedule.setLastBackupAt(createdAt);</span>
+<span class="nc" id="L446">        schedule.setLastError(null);</span>
+<span class="nc bnc" id="L447" title="All 2 branches missed.">        schedule.setNextBackupAt(schedule.isEnabled()</span>
+<span class="nc" id="L448">                ? Instant.now().plusSeconds(schedule.getIntervalHours() * 3600L)</span>
+<span class="nc" id="L449">                : null);</span>
+<span class="nc" id="L450">        scheduleRepository.save(schedule);</span>
+<span class="nc" id="L451">    }</span>
+
+    protected void updateAfterFailedBackup(RuntimeException exception) {
+<span class="nc" id="L454">        BackupSchedule schedule = getSchedule();</span>
+<span class="nc" id="L455">        schedule.setLastError(shortErrorMessage(exception));</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        schedule.setNextBackupAt(schedule.isEnabled()</span>
+<span class="nc" id="L457">                ? Instant.now().plusSeconds(schedule.getIntervalHours() * 3600L)</span>
+<span class="nc" id="L458">                : null);</span>
+<span class="nc" id="L459">        scheduleRepository.save(schedule);</span>
+<span class="nc" id="L460">    }</span>
+
+    private String shortErrorMessage(RuntimeException exception) {
+<span class="nc" id="L463">        String message = exception.getMessage();</span>
+<span class="nc bnc" id="L464" title="All 4 branches missed.">        if (message == null || message.isBlank()) {</span>
+<span class="nc" id="L465">            return &quot;Falló el backup automático. Revisa la configuración y los registros del servidor.&quot;;</span>
+        }
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        return message.length() &lt;= 500 ? message : message.substring(0, 500);</span>
+    }
+
+    private void deleteTemporaryFile(Path path) {
+<span class="nc bnc" id="L471" title="All 2 branches missed.">        if (path == null) {</span>
+<span class="nc" id="L472">            return;</span>
+        }
+        try {
+<span class="nc" id="L475">            Files.deleteIfExists(path);</span>
+<span class="nc" id="L476">        } catch (IOException exception) {</span>
+<span class="nc" id="L477">            log.warn(&quot;Could not remove temporary backup file {}&quot;, path, exception);</span>
+<span class="nc" id="L478">        }</span>
+<span class="nc" id="L479">    }</span>
+
+<span class="nc" id="L481">    private record DatabaseConnection(</span>
+            String host,
+            int port,
+            String username,
+            String database,
+            String password,
+            String sslMode) {
+    }
+
+<span class="nc" id="L490">    private record BackupArtifact(</span>
+            String name,
+            Instant createdAt,
+            long sizeBytes,
+            BlobClient blobClient,
+            Path localPath) {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,33 @@
+# CICLO 2: verificacion de los defectos por HTTP contra el backend CORREGIDO (Spring Boot :8080 + PostgreSQL 16 desechable :5440)
+# Script: e2e/scripts/verificar-defectos-api.sh
+# Verificacion de defectos contra http://localhost:8080/api | 2026-11-13T15:02:30-05:00
+OK   DEF-01  admin crea administrador adminv.179460015013690      -> HTTP 201 (esperado 201) | {"id":3,"nombre":"Admin V","email":"adminv.179460015013690@radar.test","createdAt":"2026-11-13T20:02:31.313058
+OK   DEF-01  ciudadano se registra con ese correo (mayusculas)    -> HTTP 409 (esperado 409) | {"timestamp":"2026-11-13T20:02:31.522917500Z","status":409,"message":"Ya existe una cuenta registrada con el e
+OK   DEF-01  el administrador conserva su acceso                  -> HTTP 200 (esperado 200) | {"token":"<JWT-redactado>","id":3,"nombre":"Admin V","email":"adminv.179460015013690@radar.test","role":"ADMIN
+OK   DEF-02  registro original                                    -> HTTP 201 (esperado 201) | {"token":"<JWT-redactado>","id":21,"nombre":"Caso","email":"caso.179460015013690@radar.test","role":"USER","ti
+OK   DEF-02  mismo correo en MAYUSCULAS                           -> HTTP 409 (esperado 409) | {"timestamp":"2026-11-13T20:02:32.690337600Z","status":409,"message":"Ya existe una cuenta registrada con el e
+OK   DEF-02  correo mixto se guarda en minusculas                 -> HTTP 201 (esperado 201) | {"token":"<JWT-redactado>","id":22,"nombre":"Mixto","email":"mixto.179460015013690@radar.test","role":"USER","
+OK   DEF-09  token del registro -> GET /reportes                  -> HTTP 200 (esperado 200) | [{"id":4,"categoria":"ZONA_OSCURA","descripcion":"E2E admin 1794600007058","latitud":4.65,"longitud":-74.08,"e
+OK   DEF-03  registro con JSON mal formado                        -> HTTP 400 (esperado 400) | {"timestamp":"2026-11-13T20:02:34.597957Z","status":400,"message":"El cuerpo de la peticion no es valido o con
+OK   DEF-03  reporte con categoria INCENDIO                       -> HTTP 400 (esperado 400) | {"timestamp":"2026-11-13T20:02:34.815208900Z","status":400,"message":"El cuerpo de la peticion no es valido o 
+OK   DEF-03  reporte con latitud de tipo texto                    -> HTTP 400 (esperado 400) | {"timestamp":"2026-11-13T20:02:35.073055300Z","status":400,"message":"El cuerpo de la peticion no es valido o 
+OK   DEF-03  GET /reportes/abc                                    -> HTTP 400 (esperado 400) | {"timestamp":"2026-11-13T20:02:35.317552200Z","status":400,"message":"El parametro 'id' tiene un tipo de dato 
+OK   DEF-04  GET /api/no-existe (autenticado)                     -> HTTP 404 (esperado 404) | {"timestamp":"2026-11-13T20:02:35.554490100Z","status":404,"message":"Recurso no encontrado","fieldErrors":nul
+OK   DEF-04  DELETE /api/health                                   -> HTTP 405 (esperado 405) | {"timestamp":"2026-11-13T20:02:35.846731700Z","status":405,"message":"Metodo HTTP no permitido para este recur
+OK   DEF-05  administrador crea un reporte                        -> HTTP 403 (esperado 403) | {"timestamp":"2026-11-13T20:02:36.089867200Z","status":403,"message":"No tienes permiso para realizar esta acc
+OK   DEF-07  auditoria: el autor sale de la sesion                -> HTTP 201 (esperado 201) | {"id":8,"modulo":"REPORTES","accion":"ELIMINACION","usuario":"Administrador (admin.e2e@radar.test)","rol":"ADM
+OK   DEF-10  logout anonimo con ?emailParam= de otra persona      -> HTTP 200 (esperado 200) | 
+OK   DEF-10  la victima sigue autenticada                         -> HTTP 200 (esperado 200) | [{"id":4,"categoria":"ZONA_OSCURA","descripcion":"E2E admin 1794600007058","latitud":4.65,"longitud":-74.08,"e
+OK   DEF-15  logout con el token de la sesion anterior            -> HTTP 200 (esperado 200) | 
+OK   DEF-15  la sesion nueva sigue activa                         -> HTTP 200 (esperado 200) | [{"id":4,"categoria":"ZONA_OSCURA","descripcion":"E2E admin 1794600007058","latitud":4.65,"longitud":-74.08,"e
+OK   DEF-13  claim autenticado tras el login                      -> HTTP 200 (esperado 200) | {"ok":true,"locked":false}
+OK   DEF-11  claim anonimo sobre cuenta ajena                     -> HTTP 401 (esperado 401) | {"message":"Debes iniciar sesión para gestionar el candado de tu propia cuenta.","locked":false}
+OK   DEF-11  la victima inicia sesion                             -> HTTP 200 (esperado 200) | {"token":"<JWT-redactado>","id":24,"nombre":"Victima","email":"victima.179460015013690@radar.test","role":"USE
+OK   DEF-06  primer login inmediato tras registrarse              -> HTTP 200 (esperado 200) | {"token":"<JWT-redactado>","id":25,"nombre":"Nuevo","email":"nuevo.179460015013690@radar.test","role":"USER","
+
+# Resultado: 23 verificaciones correctas, 0 fallidas
+exit=0
+
+# DEF-08 - mensajes de AdminSeeder en el log del backend:
+Administrador por defecto creado -> email: admin.e2e@radar.test
+# Errores 500 no controlados registrados en el log: 0

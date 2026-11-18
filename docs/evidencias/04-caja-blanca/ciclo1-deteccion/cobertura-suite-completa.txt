@@ -1,0 +1,26 @@
+service.JwtService                               instr 100.0% | ramas  87.5% | lineas 100.0% | metodos 100.0%
+service.AuditLogService                          instr 100.0% | ramas 100.0% | lineas 100.0% | metodos 100.0%
+service.BackupService                            instr  17.5% | ramas   9.2% | lineas  22.2% | metodos  30.8%
+service.AuthService                              instr  86.8% | ramas  84.4% | lineas  85.6% | metodos  95.0%
+service.GoogleTokenService                       instr  23.7% | ramas  37.5% | lineas  27.8% | metodos 100.0%
+service.AdminService                             instr 100.0% | ramas 100.0% | lineas 100.0% | metodos 100.0%
+service.RecaptchaService                         instr  39.2% | ramas  58.3% | lineas  47.4% | metodos  66.7%
+service.UserDetailsServiceImpl                   instr 100.0% | ramas  90.0% | lineas 100.0% | metodos 100.0%
+service.ReportService                            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+controller.AdminController                       instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+controller.HealthController                      instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+controller.ReportController                      instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+controller.AuditLogController                    instr  86.3% | ramas  37.5% | lineas 100.0% | metodos 100.0%
+controller.BackupController                      instr  51.6% | ramas  50.0% | lineas  50.0% | metodos  50.0%
+controller.AuthController                        instr  80.6% | ramas  63.3% | lineas  78.4% | metodos  71.4%
+exception.ReportNotFoundException                instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.InvalidCredentialsException            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.GlobalExceptionHandler                 instr  90.1% | ramas    n/a | lineas  90.0% | metodos  90.9%
+exception.EmailAlreadyExistsException            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.ConcurrentSessionException             instr  50.0% | ramas    n/a | lineas  50.0% | metodos  50.0%
+config.SecurityConfig                            instr  99.4% | ramas  50.0% | lineas 100.0% | metodos 100.0%
+config.BackupStorageConfig                       instr  30.0% | ramas    n/a | lineas  25.0% | metodos  50.0%
+config.JwtAuthenticationFilter                   instr 100.0% | ramas  83.3% | lineas 100.0% | metodos 100.0%
+config.AdminSeeder                               instr  97.4% | ramas  50.0% | lineas  90.9% | metodos 100.0%
+
+TOTAL                                            instr 64.8% (2525/3896) | ramas 53.4% (158/296) | lineas 67.1% (570/850) | metodos 75.7%

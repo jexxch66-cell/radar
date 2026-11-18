@@ -1,0 +1,129 @@
+# Integracion continua de RADAR.
+# Valida en cada push y pull request que el backend compile y pase sus pruebas (unitarias, caja negra
+# y E2E de API sobre H2) con reporte de cobertura JaCoCo, y que el frontend pase sus pruebas y compile.
+name: CI RADAR
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Spring Boot) - build, pruebas y cobertura
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Obtener el codigo
+        uses: actions/checkout@v5
+
+      - name: Configurar JDK 21 (java.version del pom.xml)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Permisos del Maven Wrapper
+        run: chmod +x mvnw
+
+      - name: Compilar, ejecutar pruebas y generar cobertura (mvn verify)
+        run: ./mvnw -B verify
+
+      - name: Resumen en la ejecucion
+        if: always()
+        run: |
+          {
+            echo "## Backend"
+            echo "| Suite | Resultado |"
+            echo "|---|---|"
+            for f in target/surefire-reports/TEST-*.xml; do
+              n=$(basename "$f" .xml | sed 's/TEST-//')
+              t=$(grep -o 'tests="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*')
+              fl=$(grep -o 'failures="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*')
+              e=$(grep -o 'errors="[0-9]*"' "$f" | head -1 | grep -o '[0-9]*')
+              echo "| $n | $t pruebas, $fl fallos, $e errores |"
+            done
+            if [ -f target/site/jacoco/jacoco.csv ]; then
+              awk -F, 'NR>1 {im+=$4; ic+=$5; bm+=$6; bc+=$7} END {printf "\n**Cobertura JaCoCo:** instrucciones %.1f%%, ramas %.1f%%\n", 100*ic/(im+ic), 100*bc/(bm+bc)}' target/site/jacoco/jacoco.csv
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publicar reportes de pruebas y cobertura
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: backend-reportes
+          path: |
+            backend/target/surefire-reports/
+            backend/target/site/jacoco/
+          retention-days: 14
+
+      # Ejecuta las pruebas etiquetadas "known-defect" (defectos confirmados y documentados en el informe).
+      # Se espera que fallen hasta que se corrijan; no bloquean la integracion pero quedan visibles.
+      - name: Pruebas de defectos conocidos (informativo, no bloquea)
+        id: known_defects
+        if: success()
+        continue-on-error: true
+        run: |
+          rm -rf target/surefire-reports
+          ./mvnw -B surefire:test -Dtest.excludedGroups=none -Dgroups=known-defect -Djacoco.skip=true
+
+      - name: Resumen de defectos conocidos
+        if: always() && steps.known_defects.outcome != 'skipped'
+        run: echo "Defectos conocidos (known-defect) -> ${{ steps.known_defects.outcome }} (failure = siguen abiertos)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publicar reporte de defectos conocidos
+        if: always() && steps.known_defects.outcome != 'skipped'
+        uses: actions/upload-artifact@v6
+        with:
+          name: backend-defectos-conocidos
+          path: backend/target/surefire-reports/
+          # Sin defectos abiertos no se generan reportes: no es un error
+          if-no-files-found: ignore
+          retention-days: 14
+
+  frontend:
+    name: Frontend (Angular) - pruebas y build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Obtener el codigo
+        uses: actions/checkout@v5
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias (npm ci)
+        run: npm ci
+
+      - name: Pruebas unitarias (Vitest)
+        run: npx ng test --watch=false
+
+      - name: Build de produccion
+        run: npx ng build
+
+      - name: Publicar build
+        if: success()
+        uses: actions/upload-artifact@v6
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7

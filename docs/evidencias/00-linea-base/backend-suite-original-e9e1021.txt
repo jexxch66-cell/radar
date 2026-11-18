@@ -1,0 +1,25 @@
+# Linea base sobre el commit e9e1021 (origin/main) con la suite ORIGINAL (26 pruebas), antes de cualquier cambio
+# Fecha: 2026-11-13T12:40:04-05:00 | Comando: ./mvnw -B clean test | JDK: openjdk version "25.0.4.1" 2026-08-18 LTS
+
+[ERROR] Tests run: 2, Failures: 1, Errors: 1, Skipped: 0, Time elapsed: 1.309 s <<< FAILURE! -- in com.radar.api.service.AdminServiceTest
+[ERROR] Tests run: 8, Failures: 3, Errors: 5, Skipped: 0, Time elapsed: 0.433 s <<< FAILURE! -- in com.radar.api.service.AuthServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.471 s -- in com.radar.api.service.BackupServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.533 s -- in com.radar.api.service.JwtServiceTest
+[ERROR] Tests run: 6, Failures: 0, Errors: 4, Skipped: 0, Time elapsed: 0.230 s <<< FAILURE! -- in com.radar.api.service.ReportServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in com.radar.api.service.UserDetailsServiceImplTest
+[ERROR]   AdminServiceTest.rejectsEmailUsedByAUser:46 Unexpected exception type thrown, expected: <com.radar.api.exception.EmailAlreadyExistsException> but was: <java.lang.IllegalArgumentException>
+[ERROR]   AuthServiceTest.rejectsBadCredentials:84 Unexpected exception type thrown, expected: <com.radar.api.exception.InvalidCredentialsException> but was: <java.lang.IllegalArgumentException>
+[ERROR]   AuthServiceTest.rejectsDuplicateRegistration:75 Unexpected exception type thrown, expected: <com.radar.api.exception.EmailAlreadyExistsException> but was: <java.lang.IllegalArgumentException>
+[ERROR]   AuthServiceTest.rejectsLoginWhenSessionIsAlreadyActive:150 Unexpected exception type thrown, expected: <com.radar.api.exception.ConcurrentSessionException> but was: <java.lang.IllegalArgumentException>
+[ERROR]   AdminServiceTest.registersAdministratorWithEncodedPassword:33 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   AuthServiceTest.allowsLoginWhenForceIsTrueEvenIfSessionIsActive:205 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   AuthServiceTest.allowsLoginWhenSessionIdExistsButLastActiveAtIsNull:177 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   AuthServiceTest.logsInAdministrator:100 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   AuthServiceTest.logsInUserWhenNoActiveSession:128 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   AuthServiceTest.registersUserAndReturnsToken:61 » IllegalArgument La contrasena debe tener minimo 8 caracteres, al menos una letra mayuscula y un numero.
+[ERROR]   ReportServiceTest.createsReportForExistingAuthor:59 » NullPointer Cannot invoke "com.radar.api.service.AuditLogService.registrarEvento(String, String, String, String, String, String, String, String)" because "this.auditLogService" is null
+[ERROR]   ReportServiceTest.deletesExistingReport:118 » ReportNotFound No existe un reporte con id: 9
+[ERROR]   ReportServiceTest.throwsForMissingFindAndDelete » UnnecessaryStubbing 
+[ERROR]   ReportServiceTest.updatesStatusAndDetails:95 » NullPointer Cannot invoke "com.radar.api.service.AuditLogService.registrarEvento(String, String, String, String, String, String, String, String)" because "this.auditLogService" is null
+[ERROR] Tests run: 26, Failures: 4, Errors: 10, Skipped: 0
+[INFO] BUILD FAILURE

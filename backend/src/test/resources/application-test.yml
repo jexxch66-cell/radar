@@ -1,0 +1,46 @@
+# Perfil "test": usado solo por las pruebas de integracion/caja negra (@ActiveProfiles("test")).
+# Sustituye PostgreSQL por H2 en memoria (modo compatibilidad PostgreSQL) y aisla logs y backups
+# para no tocar los archivos ni la base de datos de desarrollo.
+spring:
+  datasource:
+    url: jdbc:h2:mem:radar_test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+logging:
+  file:
+    name: target/test-logs/radar-api-test.log
+  level:
+    root: WARN
+    com.radar.api: INFO
+
+jwt:
+  secret: clave-exclusiva-de-pruebas-automatizadas-radar-0123456789
+  expiration-ms: 3600000
+
+google:
+  client-id: test-client-id.apps.googleusercontent.com
+
+recaptcha:
+  enabled: false
+  secret-key: ""
+
+app:
+  cors:
+    allowed-origin: http://localhost:4200
+  admin:
+    default-email: admin.pruebas@radar.test
+    default-password: AdminPruebas123!
+  backup:
+    azure-connection-string: ""
+    local-directory: target/test-backups
+    docker-container: ""
+    poll-interval-ms: 3600000

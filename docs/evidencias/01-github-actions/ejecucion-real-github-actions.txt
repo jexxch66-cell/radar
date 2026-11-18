@@ -1,0 +1,60 @@
+# Ejecuciones REALES del workflow 'CI RADAR' en GitHub Actions (GA-05)
+# Consultado: 2026-11-13T15:20:03-05:00 | Fuente: API publica de GitHub
+
+## Ejecucion 1 (commit 55def16): success - ambos jobs correctos; dejo 3 avisos (acciones sobre Node 20, setup-java@v4 obsoleto, artefacto de defectos conocidos vacio)
+url: https://github.com/jexxch66-cell/radar/actions/runs/43499400378
+
+## Ejecucion 2 (commit 173f135, tras actualizar las acciones a v5)
+run_id: 43500250264
+workflow: CI RADAR
+rama: qa/auditoria-pruebas-y-correcciones
+commit: 173f1357de69bfec9a2c5024d864f6ecd57816cf
+evento: push
+estado: completed | conclusion: success
+inicio: 2026-11-13T20:17:54Z | fin: 2026-11-13T20:19:35Z
+url: https://github.com/jexxch66-cell/radar/actions/runs/43500250264
+
+JOB: Frontend (Angular) - pruebas y build -> success (41s)
+   [success] 1. Set up job
+   [success] 2. Obtener el codigo
+   [success] 3. Configurar Node.js
+   [success] 4. Instalar dependencias (npm ci)
+   [success] 5. Pruebas unitarias (Vitest)
+   [success] 6. Build de produccion
+   [success] 7. Publicar build
+   [success] 13. Post Configurar Node.js
+   [success] 14. Post Obtener el codigo
+   [success] 15. Complete job
+
+JOB: Backend (Spring Boot) - build, pruebas y cobertura -> success (98s)
+   [success] 1. Set up job
+   [success] 2. Obtener el codigo
+   [success] 3. Configurar JDK 21 (java.version del pom.xml)
+   [success] 4. Permisos del Maven Wrapper
+   [success] 5. Compilar, ejecutar pruebas y generar cobertura (mvn verify)
+   [success] 6. Resumen en la ejecucion
+   [success] 7. Publicar reportes de pruebas y cobertura
+   [success] 8. Pruebas de defectos conocidos (informativo, no bloquea)
+   [success] 9. Resumen de defectos conocidos
+   [success] 10. Publicar reporte de defectos conocidos
+   [success] 19. Post Configurar JDK 21 (java.version del pom.xml)
+   [success] 20. Post Obtener el codigo
+   [success] 21. Complete job
+
+ARTEFACTOS:
+   frontend-dist (766 KB)
+   backend-reportes (433 KB)
+
+ANOTACIONES:
+   Backend (Spring Boot) - build, pruebas y cobertura: [warning] Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v5. For more information se
+   Backend (Spring Boot) - build, pruebas y cobertura: [notice] "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+   Frontend (Angular) - pruebas y build: [warning] Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/upload-artifact@v5. For more information se
+   Frontend (Angular) - pruebas y build: [notice] "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+
+## Ejecucion 3 - DEFINITIVA (commit 997e98b, upload-artifact@v6)
+run_id: 43500669028 | commit: 997e98becddaafa46d26e20058885c70887c7fb7 | evento: push
+conclusion: success | inicio: 2026-11-13T20:20:37Z | fin: 2026-11-13T20:21:58Z
+url: https://github.com/jexxch66-cell/radar/actions/runs/43500669028
+JOB: Frontend (Angular) - pruebas y build -> success (30s) | pasos propios: 6, todos success
+JOB: Backend (Spring Boot) - build, pruebas y cobertura -> success (78s) | pasos propios: 9, todos success
+ANOTACIONES: solo el aviso informativo de GitHub sobre la migracion de ubuntu-latest a Ubuntu 26 (sin advertencias de la configuracion)

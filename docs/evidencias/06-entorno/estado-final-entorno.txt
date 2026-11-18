@@ -1,0 +1,20 @@
+# Estado del entorno de ejecucion al terminar las pruebas
+# Fecha: 2026-11-13T15:11:15-05:00
+
+## Contenedores Docker
+NAMES                   IMAGE                 STATUS                     PORTS
+radar-frontend-1        frontend              Up 2 hours                 0.0.0.0:4200->4200/tcp, [::]:4200->4200/tcp
+raices-app-frontend-1   raices-app-frontend   Exited (255) 3 weeks ago   0.0.0.0:3000->3000/tcp
+raices-app-backend-1    raices-app-backend    Exited (255) 3 weeks ago   0.0.0.0:8081->8081/tcp
+radar-db                postgres:16           Up 4 hours                 0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp
+
+## Puertos de RADAR
+4200  en uso
+4300  libre
+8080  libre
+9229  libre
+5433  en uso
+5440  libre
+
+## Rama y commit base
+rama: qa/auditoria-pruebas-y-correcciones | base: e9e1021 fix(auth): asegurar candado de sesion unica entre navegadores en proxy Vite y endpoint /api/auth/session-lock

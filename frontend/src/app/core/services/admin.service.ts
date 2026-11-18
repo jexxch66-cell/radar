@@ -44,9 +44,10 @@ export class AdminService {
         acceptDataTreatment: true,
       })
       .pipe(
-        timeout(1500),
+        timeout(environment.offlineDemo ? 1500 : 15_000),
         catchError((err: unknown) => {
-          if (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500) {
+          // Sin modo presentacion, el error se informa: no se simula un alta que no ocurrio (DEF-14)
+          if (!environment.offlineDemo || (err instanceof HttpErrorResponse && err.status >= 400 && err.status < 500)) {
             return throwError(() => err);
           }
           return of({
@@ -58,7 +59,6 @@ export class AdminService {
           });
         }),
         tap((created) => {
-          this.authService.saveLocalUser(request.email, request.nombre, request.password, 'ADMIN');
           this.auditService.record({
             modulo: 'ADMINISTRADORES',
             accion: 'CREACION',

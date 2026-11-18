@@ -20,13 +20,15 @@ public class AdminService {
 
     public AdministradorResponse registrar(RegisterRequest request) {
         AuthService.validatePasswordPolicy(request.getPassword());
-        if (administradorRepository.existsByEmail(request.getEmail()) || userRepository.existsByEmail(request.getEmail())) {
-            throw new EmailAlreadyExistsException(request.getEmail());
+        // Unicidad sin distinguir mayusculas en ambas tablas y correo normalizado (DEF-01 / DEF-02)
+        String email = AuthService.normalizeEmail(request.getEmail());
+        if (administradorRepository.existsByEmailIgnoreCase(email) || userRepository.existsByEmailIgnoreCase(email)) {
+            throw new EmailAlreadyExistsException(email);
         }
 
         Administrador administrador = Administrador.builder()
                 .nombre(request.getNombre())
-                .email(request.getEmail())
+                .email(email)
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         administradorRepository.save(administrador);

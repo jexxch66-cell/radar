@@ -27,6 +27,7 @@ class UserDetailsServiceImplTest {
     @Test
     void mapsRegularUserToUserDetails() {
         User user = User.builder().email("user@example.com").password("hash").role(Role.USER).build();
+        when(administradorRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
         var details = service.loadUserByUsername(user.getEmail());
@@ -34,18 +35,32 @@ class UserDetailsServiceImplTest {
         assertEquals(user.getEmail(), details.getUsername());
         assertEquals("hash", details.getPassword());
         assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
-        verifyNoInteractions(administradorRepository);
     }
 
     @Test
-    void fallsBackToAdministrator() {
+    void resolvesAdministratorFirst() {
         Administrador admin = Administrador.builder().email("admin@example.com").password("hash").build();
-        when(userRepository.findByEmail(admin.getEmail())).thenReturn(Optional.empty());
         when(administradorRepository.findByEmail(admin.getEmail())).thenReturn(Optional.of(admin));
 
         var details = service.loadUserByUsername(admin.getEmail());
 
         assertEquals("ROLE_ADMIN", details.getAuthorities().iterator().next().getAuthority());
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void administratorPrevailsOverCitizenWithSameEmail() {
+        // Regresion DEF-01 (CB-UDS-01): si ya existiera un ciudadano con el correo de un administrador, prevalece el administrador
+        Administrador admin = Administrador.builder().email("admin@example.com").password("admin-hash")
+                .activeSessionId("admin-session").build();
+        when(administradorRepository.findByEmail("admin@example.com")).thenReturn(Optional.of(admin));
+
+        var details = service.loadUserByUsername("admin@example.com");
+
+        assertEquals("admin-hash", details.getPassword());
+        assertEquals("ROLE_ADMIN", details.getAuthorities().iterator().next().getAuthority());
+        assertTrue(service.isActiveSession("admin@example.com", "admin-session"));
+        verifyNoInteractions(userRepository);
     }
 
     @Test
@@ -65,12 +80,12 @@ class UserDetailsServiceImplTest {
                 .role(Role.USER)
                 .activeSessionId("new-session")
                 .build();
+        when(administradorRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
 
         assertTrue(service.isActiveSession(user.getEmail(), "new-session"));
         assertFalse(service.isActiveSession(user.getEmail(), "old-session"));
         assertFalse(service.isActiveSession(user.getEmail(), null));
-        verifyNoInteractions(administradorRepository);
     }
 
     @Test
@@ -80,7 +95,6 @@ class UserDetailsServiceImplTest {
                 .password("hash")
                 .activeSessionId("admin-session")
                 .build();
-        when(userRepository.findByEmail(admin.getEmail())).thenReturn(Optional.empty());
         when(administradorRepository.findByEmail(admin.getEmail())).thenReturn(Optional.of(admin));
 
         assertTrue(service.isActiveSession(admin.getEmail(), "admin-session"));

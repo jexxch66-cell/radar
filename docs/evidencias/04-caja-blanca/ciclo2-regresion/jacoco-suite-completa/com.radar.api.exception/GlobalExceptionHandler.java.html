@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalExceptionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.exception</a> &gt; <span class="el_source">GlobalExceptionHandler.java</span></div><h1>GlobalExceptionHandler.java</h1><pre class="source lang-java linenums">package com.radar.api.exception;
+
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.radar.api.dto.response.ErrorResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+// Centraliza el manejo de errores: toda excepcion se traduce a un ErrorResponse JSON consistente
+<span class="fc" id="L23">@Slf4j</span>
+@RestControllerAdvice
+<span class="fc" id="L25">public class GlobalExceptionHandler {</span>
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleValidation(MethodArgumentNotValidException ex) {
+<span class="fc" id="L29">        Map&lt;String, String&gt; fieldErrors = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L30">        ex.getBindingResult().getFieldErrors()</span>
+<span class="fc" id="L31">                .forEach(error -&gt; fieldErrors.put(error.getField(), error.getDefaultMessage()));</span>
+
+<span class="fc" id="L33">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L34">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L35">                .message(&quot;Hay errores de validacion en los datos enviados&quot;)</span>
+<span class="fc" id="L36">                .fieldErrors(fieldErrors)</span>
+<span class="fc" id="L37">                .build();</span>
+<span class="fc" id="L38">        return ResponseEntity.badRequest().body(body);</span>
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleEmailExists(EmailAlreadyExistsException ex) {
+<span class="fc" id="L43">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L44">                .status(HttpStatus.CONFLICT.value())</span>
+<span class="fc" id="L45">                .message(ex.getMessage())</span>
+<span class="fc" id="L46">                .build();</span>
+<span class="fc" id="L47">        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);</span>
+    }
+
+    @ExceptionHandler(ConcurrentSessionException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleConcurrentSession(ConcurrentSessionException ex) {
+<span class="fc" id="L52">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L53">                .status(HttpStatus.CONFLICT.value())</span>
+<span class="fc" id="L54">                .message(ex.getMessage())</span>
+<span class="fc" id="L55">                .build();</span>
+<span class="fc" id="L56">        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);</span>
+    }
+
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleReportNotFound(ReportNotFoundException ex) {
+<span class="fc" id="L61">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L62">                .status(HttpStatus.NOT_FOUND.value())</span>
+<span class="fc" id="L63">                .message(ex.getMessage())</span>
+<span class="fc" id="L64">                .build();</span>
+<span class="fc" id="L65">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);</span>
+    }
+
+    @ExceptionHandler({InvalidCredentialsException.class, BadCredentialsException.class})
+    public ResponseEntity&lt;ErrorResponse&gt; handleInvalidCredentials(RuntimeException ex) {
+<span class="fc" id="L70">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L71">                .status(HttpStatus.UNAUTHORIZED.value())</span>
+<span class="fc" id="L72">                .message(&quot;Email o contrasena invalidos&quot;)</span>
+<span class="fc" id="L73">                .build();</span>
+<span class="fc" id="L74">        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);</span>
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleConfigurationError(IllegalStateException ex) {
+<span class="nc" id="L79">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="nc" id="L80">                .status(HttpStatus.SERVICE_UNAVAILABLE.value())</span>
+<span class="nc" id="L81">                .message(ex.getMessage())</span>
+<span class="nc" id="L82">                .build();</span>
+<span class="nc" id="L83">        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(body);</span>
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleExternalAuthenticationError(IllegalArgumentException ex) {
+<span class="fc" id="L88">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L89">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L90">                .message(ex.getMessage())</span>
+<span class="fc" id="L91">                .build();</span>
+<span class="fc" id="L92">        return ResponseEntity.badRequest().body(body);</span>
+    }
+
+    // Sin este handler, el @PreAuthorize denegado caeria en el handler generico y responderia 500
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleAccessDenied(AccessDeniedException ex) {
+<span class="fc" id="L98">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L99">                .status(HttpStatus.FORBIDDEN.value())</span>
+<span class="fc" id="L100">                .message(&quot;No tienes permiso para realizar esta accion&quot;)</span>
+<span class="fc" id="L101">                .build();</span>
+<span class="fc" id="L102">        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);</span>
+    }
+
+    // JSON mal formado, enum fuera de dominio o tipo incorrecto en el cuerpo -&gt; 400 (DEF-03)
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleUnreadableBody(HttpMessageNotReadableException ex) {
+<span class="fc" id="L108">        Map&lt;String, String&gt; fieldErrors = new HashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">        if (ex.getCause() instanceof MismatchedInputException mismatch &amp;&amp; !mismatch.getPath().isEmpty()) {</span>
+<span class="fc" id="L110">            String field = mismatch.getPath().get(mismatch.getPath().size() - 1).getFieldName();</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            if (field != null) {</span>
+<span class="fc" id="L112">                fieldErrors.put(field, &quot;Valor o tipo de dato no valido&quot;);</span>
+            }
+        }
+<span class="fc" id="L115">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L116">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L117">                .message(&quot;El cuerpo de la peticion no es valido o contiene valores con formato incorrecto&quot;)</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">                .fieldErrors(fieldErrors.isEmpty() ? null : fieldErrors)</span>
+<span class="fc" id="L119">                .build();</span>
+<span class="fc" id="L120">        return ResponseEntity.badRequest().body(body);</span>
+    }
+
+    // Parametro de ruta o de consulta con tipo incorrecto, p. ej. /api/reportes/abc -&gt; 400 (DEF-03)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+<span class="fc" id="L126">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L127">                .status(HttpStatus.BAD_REQUEST.value())</span>
+<span class="fc" id="L128">                .message(&quot;El parametro '&quot; + ex.getName() + &quot;' tiene un tipo de dato no valido&quot;)</span>
+<span class="fc" id="L129">                .fieldErrors(Map.of(ex.getName(), &quot;Tipo de dato no valido&quot;))</span>
+<span class="fc" id="L130">                .build();</span>
+<span class="fc" id="L131">        return ResponseEntity.badRequest().body(body);</span>
+    }
+
+    // Ruta inexistente -&gt; 404 (DEF-04)
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleNoResource(NoResourceFoundException ex) {
+<span class="fc" id="L137">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L138">                .status(HttpStatus.NOT_FOUND.value())</span>
+<span class="fc" id="L139">                .message(&quot;Recurso no encontrado&quot;)</span>
+<span class="fc" id="L140">                .build();</span>
+<span class="fc" id="L141">        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);</span>
+    }
+
+    // Metodo HTTP no soportado por la ruta -&gt; 405
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+<span class="fc" id="L147">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="fc" id="L148">                .status(HttpStatus.METHOD_NOT_ALLOWED.value())</span>
+<span class="fc" id="L149">                .message(&quot;Metodo HTTP no permitido para este recurso&quot;)</span>
+<span class="fc" id="L150">                .build();</span>
+<span class="fc" id="L151">        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);</span>
+    }
+
+    // Content-Type no soportado -&gt; 415
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleMediaType(HttpMediaTypeNotSupportedException ex) {
+<span class="nc" id="L157">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="nc" id="L158">                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())</span>
+<span class="nc" id="L159">                .message(&quot;Tipo de contenido no soportado; usa application/json&quot;)</span>
+<span class="nc" id="L160">                .build();</span>
+<span class="nc" id="L161">        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(body);</span>
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity&lt;ErrorResponse&gt; handleGeneric(Exception ex) {
+        // El cliente recibe un mensaje generico, pero el detalle queda en el log del servidor (OBS-02)
+<span class="nc" id="L167">        log.error(&quot;Error no controlado: {}&quot;, ex.getMessage(), ex);</span>
+<span class="nc" id="L168">        ErrorResponse body = ErrorResponse.builder()</span>
+<span class="nc" id="L169">                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())</span>
+<span class="nc" id="L170">                .message(&quot;Ocurrio un error inesperado&quot;)</span>
+<span class="nc" id="L171">                .build();</span>
+<span class="nc" id="L172">        return ResponseEntity.internalServerError().body(body);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

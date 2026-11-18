@@ -30,6 +30,7 @@ class ReportServiceTest {
 
     @Mock ReportRepository reportRepository;
     @Mock UserRepository userRepository;
+    @Mock AuditLogService auditLogService;
     @InjectMocks ReportService service;
 
     private User author;
@@ -104,7 +105,6 @@ class ReportServiceTest {
     @Test
     void throwsForMissingFindAndDelete() {
         when(reportRepository.findByIdWithAutor(99L)).thenReturn(Optional.empty());
-        when(reportRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(ReportNotFoundException.class, () -> service.findById(99L));
         assertThrows(ReportNotFoundException.class, () -> service.delete(99L));
@@ -113,7 +113,7 @@ class ReportServiceTest {
 
     @Test
     void deletesExistingReport() {
-        when(reportRepository.existsById(report.getId())).thenReturn(true);
+        when(reportRepository.findByIdWithAutor(report.getId())).thenReturn(Optional.of(report));
 
         service.delete(report.getId());
 

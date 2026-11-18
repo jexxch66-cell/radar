@@ -1,0 +1,63 @@
+2026-11-13T12:42:16.146-05:00  INFO 23460 --- [radar-api] [main] com.radar.api.ApiApplication             : Starting ApiApplication using Java 25.0.4.1 with PID 23460 (C:\Users\user\vsprojects\radar\backend\target\classes started by user in C:\Users\user\vsprojects\radar\backend)
+2026-11-13T12:42:16.149-05:00  INFO 23460 --- [radar-api] [main] com.radar.api.ApiApplication             : No active profile set, falling back to 1 default profile: "default"
+2026-11-13T12:42:17.196-05:00  INFO 23460 --- [radar-api] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-13T12:42:17.399-05:00  INFO 23460 --- [radar-api] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 191 ms. Found 5 JPA repository interfaces.
+2026-11-13T12:42:18.268-05:00  INFO 23460 --- [radar-api] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-11-13T12:42:18.284-05:00  INFO 23460 --- [radar-api] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-11-13T12:42:18.284-05:00  INFO 23460 --- [radar-api] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.46]
+2026-11-13T12:42:18.382-05:00  INFO 23460 --- [radar-api] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-11-13T12:42:18.383-05:00  INFO 23460 --- [radar-api] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2182 ms
+2026-11-13T12:42:18.575-05:00  INFO 23460 --- [radar-api] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-13T12:42:18.668-05:00  INFO 23460 --- [radar-api] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.29.Final
+2026-11-13T12:42:18.739-05:00  INFO 23460 --- [radar-api] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-13T12:42:19.091-05:00  INFO 23460 --- [radar-api] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-13T12:42:19.129-05:00  INFO 23460 --- [radar-api] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-11-13T12:42:19.335-05:00  INFO 23460 --- [radar-api] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@50f3ba6a
+2026-11-13T12:42:19.336-05:00  INFO 23460 --- [radar-api] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-11-13T12:42:19.421-05:00  INFO 23460 --- [radar-api] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 16.15
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-13T12:42:20.461-05:00  INFO 23460 --- [radar-api] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-13T12:42:20.604-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:42:20.604-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "ukb30tmqkasj8a7pab2bowag73l" of relation "administradores" does not exist, skipping
+2026-11-13T12:42:20.614-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:42:20.615-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uk6dotkott2kjsp8vw4d0m25fb7" of relation "users" does not exist, skipping
+2026-11-13T12:42:20.628-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Warning Code: 0, SQLState: 00000
+2026-11-13T12:42:20.628-05:00  WARN 23460 --- [radar-api] [main] o.h.engine.jdbc.spi.SqlExceptionHelper   : constraint "uksp4u85eojl905i5bqmtxxskgy" of relation "users" does not exist, skipping
+2026-11-13T12:42:20.641-05:00  INFO 23460 --- [radar-api] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-13T12:42:20.938-05:00  INFO 23460 --- [radar-api] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-13T12:42:21.717-05:00  INFO 23460 --- [radar-api] [main] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-11-13T12:42:21.717-05:00  WARN 23460 --- [radar-api] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-11-13T12:42:22.685-05:00  INFO 23460 --- [radar-api] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-11-13T12:42:22.695-05:00  INFO 23460 --- [radar-api] [main] com.radar.api.ApiApplication             : Started ApiApplication in 7.242 seconds (process running for 7.941)
+2026-11-13T12:42:22.841-05:00  INFO 23460 --- [radar-api] [main] com.radar.api.config.AdminSeeder         : Administrador creado -> email: admin.e2e@radar.test / password: <REDACTADO: el log original contiene la contrasena en texto plano (DEF-08)>
+2026-11-13T12:42:24.267-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-11-13T12:42:24.267-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-11-13T12:42:24.268-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-11-13T12:42:37.791-05:00  WARN 23460 --- [radar-api] [http-nio-8080-exec-3] com.radar.api.service.AuthService        : Intento de login fallido (credenciales inválidas) para email=nadie.e2e@radar.test
+2026-11-13T12:42:39.963-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.registro.17945917586931@radar.test, id=1
+2026-11-13T12:42:40.850-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.registro.17945917586931@radar.test
+2026-11-13T12:42:53.122-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.reporte.17945917729871@radar.test, id=2
+2026-11-13T12:42:53.251-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-1] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17945917729871@radar.test
+2026-11-13T12:42:53.327-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.reporte.17945917729871@radar.test
+2026-11-13T12:42:54.957-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.reporte.17945917729871@radar.test
+2026-11-13T12:43:07.049-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.vecino.17945917869391@radar.test, id=3
+2026-11-13T12:43:07.167-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-9] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.vecino.17945917869391@radar.test
+2026-11-13T12:43:07.218-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.ReportService      : Reporte creado: id=1, categoria=ZONA_OSCURA, autor=e2e.vecino.17945917869391@radar.test
+2026-11-13T12:43:07.225-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuditLogService    : [AUDITORIA] modulo=REPORTES, accion=CREACION, usuario=Ciudadano e2e.vecino (e2e.vecino.17945917869391@radar.test) (USER), entidad=Reporte #1, antes='-', despues='ZONA_OSCURA · PENDIENTE', detalle='Creación de reporte urbano: E2E admin 1794591787174'
+2026-11-13T12:43:10.475-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Inicio de sesión exitoso (ADMIN): email=admin.e2e@radar.test
+2026-11-13T12:43:22.193-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.sesion.17945918020541@radar.test, id=4
+2026-11-13T12:43:22.315-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-7] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17945918020541@radar.test
+2026-11-13T12:43:22.348-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.sesion.17945918020541@radar.test
+2026-11-13T12:43:24.165-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-10] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.sesion.17945918020541@radar.test
+2026-11-13T12:43:36.469-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-4] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.logout.17945918163391@radar.test, id=5
+2026-11-13T12:43:36.670-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-5] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17945918163391@radar.test
+2026-11-13T12:43:36.700-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-6] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=e2e.logout.17945918163391@radar.test
+2026-11-13T12:43:38.000-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Inicio de sesión exitoso (USER): email=e2e.logout.17945918163391@radar.test
+2026-11-13T12:44:05.622-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-2] com.radar.api.service.AuthService        : Sesión cerrada correctamente para email=admin.inventado@radar.test
+2026-11-13T12:44:09.600-05:00  INFO 23460 --- [radar-api] [http-nio-8080-exec-8] com.radar.api.service.AuthService        : Nuevo usuario ciudadano registrado: email=e2e.almacen.17945918473731@radar.test, id=6

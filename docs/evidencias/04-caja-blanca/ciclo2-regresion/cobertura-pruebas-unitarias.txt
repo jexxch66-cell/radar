@@ -1,0 +1,47 @@
+# Cobertura JaCoCo - CICLO 2 - SOLO pruebas unitarias / caja blanca
+# Fecha: 2026-11-13T12:53:44-05:00 | Comando: ./mvnw -B verify '-Dtest=*ServiceTest,*ServiceImplTest,*WhiteBoxTest*'
+[INFO] Tests run: 91, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.370 s -- in com.radar.api.service.AdminServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.606 s -- in com.radar.api.service.AuthServiceTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.492 s -- in com.radar.api.service.BackupServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.070 s -- in com.radar.api.service.JwtServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.287 s -- in com.radar.api.service.ReportServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.035 s -- in com.radar.api.service.UserDetailsServiceImplTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in loginWithGoogle, heartbeat y logout
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.240 s -- in login
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in validatePasswordPolicy
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.040 s -- in register
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.066 s -- in isMemorySessionMatching y handleSessionLockAction
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.485 s -- in com.radar.api.whitebox.AuthServiceWhiteBoxTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.119 s -- in AuditLogService
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.672 s -- in RecaptchaService y GoogleTokenService
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.131 s -- in JwtAuthenticationFilter
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in JwtService
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.004 s -- in com.radar.api.whitebox.SecurityComponentsWhiteBoxTest
+
+service.JwtService                               instr 100.0% | ramas  87.5% | lineas 100.0% | metodos 100.0%
+service.AuditLogService                          instr  95.3% | ramas 100.0% | lineas  93.8% | metodos  66.7%
+service.BackupService                            instr  13.6% | ramas   7.1% | lineas  17.5% | metodos  23.1%
+service.AuthService                              instr  85.2% | ramas  84.7% | lineas  84.7% | metodos  90.9%
+service.GoogleTokenService                       instr  23.7% | ramas  37.5% | lineas  27.8% | metodos 100.0%
+service.AdminService                             instr 100.0% | ramas  75.0% | lineas 100.0% | metodos 100.0%
+service.RecaptchaService                         instr  39.2% | ramas  58.3% | lineas  47.4% | metodos  66.7%
+service.UserDetailsServiceImpl                   instr  98.4% | ramas  80.0% | lineas  95.2% | metodos 100.0%
+service.ReportService                            instr  98.0% | ramas    n/a | lineas  98.4% | metodos  91.7%
+controller.AdminController                       instr   0.0% | ramas    n/a | lineas   0.0% | metodos   0.0%
+controller.HealthController                      instr   0.0% | ramas    n/a | lineas   0.0% | metodos   0.0%
+controller.ReportController                      instr   0.0% | ramas    n/a | lineas   0.0% | metodos   0.0%
+controller.AuditLogController                    instr   0.0% | ramas    n/a | lineas   0.0% | metodos   0.0%
+controller.BackupController                      instr   0.0% | ramas   0.0% | lineas   0.0% | metodos   0.0%
+controller.AuthController                        instr   0.0% | ramas   0.0% | lineas   0.0% | metodos   0.0%
+exception.ReportNotFoundException                instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.InvalidCredentialsException            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.GlobalExceptionHandler                 instr   0.0% | ramas   0.0% | lineas   0.0% | metodos   0.0%
+exception.EmailAlreadyExistsException            instr 100.0% | ramas    n/a | lineas 100.0% | metodos 100.0%
+exception.ConcurrentSessionException             instr  50.0% | ramas    n/a | lineas  50.0% | metodos  50.0%
+config.SecurityConfig                            instr   0.0% | ramas   0.0% | lineas   0.0% | metodos   0.0%
+config.BackupStorageConfig                       instr   0.0% | ramas    n/a | lineas   0.0% | metodos   0.0%
+config.JwtAuthenticationFilter                   instr 100.0% | ramas  83.3% | lineas 100.0% | metodos 100.0%
+config.AdminSeeder                               instr   0.0% | ramas   0.0% | lineas   0.0% | metodos   0.0%
+
+TOTAL                                            instr 45.4% (1871/4118) | ramas 42.4% (134/316) | lineas 45.0% (406/902) | metodos 44.0%

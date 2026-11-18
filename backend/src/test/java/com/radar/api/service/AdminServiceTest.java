@@ -26,9 +26,9 @@ class AdminServiceTest {
     @Test
     void registersAdministratorWithEncodedPassword() {
         RegisterRequest request = request("admin@example.com");
-        when(administradorRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(passwordEncoder.encode("password")).thenReturn("encoded");
+        when(administradorRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("Password1")).thenReturn("encoded");
 
         var response = service.registrar(request);
 
@@ -40,8 +40,8 @@ class AdminServiceTest {
     @Test
     void rejectsEmailUsedByAUser() {
         RegisterRequest request = request("existing@example.com");
-        when(administradorRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+        when(administradorRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCase(request.getEmail())).thenReturn(true);
 
         assertThrows(EmailAlreadyExistsException.class, () -> service.registrar(request));
         verify(administradorRepository, never()).save(any(Administrador.class));
@@ -51,7 +51,7 @@ class AdminServiceTest {
         RegisterRequest request = new RegisterRequest();
         request.setNombre("Admin");
         request.setEmail(email);
-        request.setPassword("password");
+        request.setPassword("Password1");
         return request;
     }
 }

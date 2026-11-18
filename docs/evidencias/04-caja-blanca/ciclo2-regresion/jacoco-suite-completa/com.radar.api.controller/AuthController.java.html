@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.controller</a> &gt; <span class="el_source">AuthController.java</span></div><h1>AuthController.java</h1><pre class="source lang-java linenums">package com.radar.api.controller;
+
+import com.radar.api.dto.request.LoginRequest;
+import com.radar.api.dto.request.GoogleAuthRequest;
+import com.radar.api.dto.request.RegisterRequest;
+import com.radar.api.dto.response.AuthResponse;
+import com.radar.api.service.AuthService;
+import com.radar.api.service.JwtService;
+import com.radar.api.service.UserDetailsServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+// Controlador REST que expone los endpoints públicos y de sesión bajo la ruta /api/auth
+@RestController
+@RequestMapping(&quot;/api/auth&quot;)
+@RequiredArgsConstructor
+public class AuthController {
+
+    // Servicios inyectados para lógica de autenticación y lectura de claims del token JWT
+    private final AuthService authService;
+    private final JwtService jwtService;
+    private final UserDetailsServiceImpl userDetailsService;
+
+    // POST /api/auth/register: registra un nuevo usuario ciudadano y devuelve su token JWT con estado HTTP 201
+    @PostMapping(&quot;/register&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; register(@Valid @RequestBody RegisterRequest request) {
+<span class="fc" id="L39">        AuthResponse response = authService.register(request);</span>
+<span class="fc" id="L40">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
+    }
+
+    // POST /api/auth/login: autentica usuario o administrador con email/contraseña y valida sesión única activa
+    @PostMapping(&quot;/login&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; login(@Valid @RequestBody LoginRequest request) {
+<span class="fc" id="L46">        AuthResponse response = authService.login(request);</span>
+<span class="fc" id="L47">        return ResponseEntity.ok(response);</span>
+    }
+
+    // POST /api/auth/google: autentica o registra mediante token de Google Identity Services
+    @PostMapping(&quot;/google&quot;)
+    public ResponseEntity&lt;AuthResponse&gt; loginWithGoogle(@Valid @RequestBody GoogleAuthRequest request) {
+<span class="nc" id="L53">        AuthResponse response = authService.loginWithGoogle(</span>
+<span class="nc" id="L54">                request.getIdToken(), request.isAcceptDataTreatment(), request.getCaptchaToken(), request.isForce());</span>
+<span class="nc" id="L55">        return ResponseEntity.ok(response);</span>
+    }
+
+    // GET y POST /api/auth/session-lock: candado en memoria del servidor para impedir doble sesión entre navegadores distintos.
+    // &quot;check&quot; es público (se consulta antes de iniciar sesión); &quot;claim&quot;, &quot;heartbeat&quot; y &quot;release&quot; exigen estar autenticado
+    // y solo sobre la propia cuenta, para que un tercero no pueda bloquear ni liberar el candado de otra persona (DEF-11)
+    @GetMapping(&quot;/session-lock&quot;)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; sessionLockGet(
+            @RequestParam(defaultValue = &quot;check&quot;) String action,
+            @RequestParam(defaultValue = &quot;&quot;) String email,
+            @RequestParam(defaultValue = &quot;&quot;) String tabId,
+            Authentication authentication
+    ) {
+<span class="fc bfc" id="L68" title="All 4 branches covered.">        if (!&quot;check&quot;.equals(action) &amp;&amp; !isOwner(authentication, email)) {</span>
+<span class="fc" id="L69">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(</span>
+<span class="fc" id="L70">                    &quot;locked&quot;, false,</span>
+                    &quot;message&quot;, &quot;Debes iniciar sesión para gestionar el candado de tu propia cuenta.&quot;
+            ));
+        }
+<span class="fc" id="L74">        boolean allowed = authService.handleSessionLockAction(action, email, tabId);</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (!allowed) {</span>
+<span class="nc" id="L76">            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(</span>
+<span class="nc" id="L77">                    &quot;locked&quot;, true,</span>
+                    &quot;message&quot;, &quot;No se puede iniciar sesión: esta cuenta ya tiene una sesión activa en este u otro navegador.&quot;
+            ));
+        }
+<span class="fc" id="L81">        return ResponseEntity.ok(Map.of(&quot;ok&quot;, true, &quot;locked&quot;, false));</span>
+    }
+
+    @PostMapping(&quot;/session-lock&quot;)
+    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; sessionLockPost(
+            @RequestParam(defaultValue = &quot;check&quot;) String action,
+            @RequestParam(defaultValue = &quot;&quot;) String email,
+            @RequestParam(defaultValue = &quot;&quot;) String tabId,
+            Authentication authentication
+    ) {
+<span class="nc" id="L91">        return sessionLockGet(action, email, tabId, authentication);</span>
+    }
+
+    private static boolean isAuthenticated(Authentication authentication) {
+<span class="pc bpc" id="L95" title="1 of 4 branches missed.">        return authentication != null &amp;&amp; authentication.isAuthenticated()</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                &amp;&amp; !&quot;anonymousUser&quot;.equals(authentication.getPrincipal());</span>
+    }
+
+    private static boolean isOwner(Authentication authentication, String email) {
+<span class="pc bpc" id="L100" title="2 of 6 branches missed.">        return isAuthenticated(authentication) &amp;&amp; email != null &amp;&amp; authentication.getName().equalsIgnoreCase(email.trim());</span>
+    }
+
+    // POST /api/auth/heartbeat: señal periódica enviada por el frontend para mantener viva la sesión única
+    @PostMapping(&quot;/heartbeat&quot;)
+    public ResponseEntity&lt;?&gt; heartbeat(Authentication authentication, HttpServletRequest request) {
+<span class="pc bpc" id="L106" title="2 of 6 branches missed.">        if (authentication == null || !authentication.isAuthenticated() || &quot;anonymousUser&quot;.equals(authentication.getPrincipal())) {</span>
+<span class="fc" id="L107">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(&quot;message&quot;, &quot;Sesión inválida o expirada&quot;));</span>
+        }
+
+<span class="fc" id="L110">        String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L111" title="2 of 4 branches missed.">        if (authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L112">            String token = authHeader.substring(7);</span>
+            try {
+<span class="fc" id="L114">                String sessionId = jwtService.extractSessionId(token);</span>
+<span class="fc" id="L115">                authService.heartbeat(authentication.getName(), sessionId);</span>
+<span class="nc" id="L116">            } catch (Exception ignored) {</span>
+<span class="fc" id="L117">            }</span>
+        }
+<span class="fc" id="L119">        return ResponseEntity.ok().build();</span>
+    }
+
+    // POST /api/auth/logout: libera inmediatamente el activeSessionId en base de datos y en memoria al cerrar sesión o pestaña.
+    // Solo cierra la sesión del titular de un token válido de la sesión ACTIVA: por la autenticación de la petición, la
+    // cabecera Authorization o el parámetro &quot;token&quot; (para navigator.sendBeacon al cerrar la pestaña, que no admite
+    // cabeceras). Ya no se acepta un correo arbitrario sin autenticar (DEF-10).
+    @PostMapping(&quot;/logout&quot;)
+    public ResponseEntity&lt;Void&gt; logout(
+            Authentication authentication,
+            HttpServletRequest request,
+            @RequestParam(required = false) String token
+    ) {
+<span class="fc" id="L132">        String email = null;</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        if (isAuthenticated(authentication)) {</span>
+<span class="fc" id="L134">            email = authentication.getName();</span>
+        } else {
+<span class="fc" id="L136">            String authHeader = request.getHeader(&quot;Authorization&quot;);</span>
+<span class="pc bpc" id="L137" title="1 of 4 branches missed.">            String rawToken = authHeader != null &amp;&amp; authHeader.startsWith(&quot;Bearer &quot;) ? authHeader.substring(7) : token;</span>
+<span class="fc" id="L138">            email = ownerOfActiveSession(rawToken);</span>
+        }
+
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (email != null) {</span>
+<span class="fc" id="L142">            authService.logout(email);</span>
+        }
+<span class="fc" id="L144">        return ResponseEntity.ok().build();</span>
+    }
+
+    // Devuelve el titular del token solo si su firma es válida y corresponde a la sesión activa (un token antiguo no puede
+    // cerrar la sesión más reciente de la misma cuenta)
+    private String ownerOfActiveSession(String rawToken) {
+<span class="pc bpc" id="L150" title="1 of 4 branches missed.">        if (rawToken == null || rawToken.isBlank()) {</span>
+<span class="fc" id="L151">            return null;</span>
+        }
+        try {
+<span class="fc" id="L154">            String username = jwtService.extractUsername(rawToken);</span>
+<span class="fc" id="L155">            String sessionId = jwtService.extractSessionId(rawToken);</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">            return userDetailsService.isActiveSession(username, sessionId) ? username : null;</span>
+<span class="nc" id="L157">        } catch (Exception invalidToken) {</span>
+<span class="nc" id="L158">            return null;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

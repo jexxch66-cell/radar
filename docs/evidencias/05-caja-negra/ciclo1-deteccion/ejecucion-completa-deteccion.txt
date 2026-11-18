@@ -1,0 +1,98 @@
+# CICLO 1 (deteccion) sobre e9e1021: suite completa sin exclusiones, antes de corregir
+# Fecha: 2026-11-13T12:40:04-05:00 | Comando: ./mvnw -B clean verify -Dtest.excludedGroups=none
+
+[ERROR] Tests run: 68, Failures: 15, Errors: 0, Skipped: 0, Time elapsed: 33.37 s <<< FAILURE! -- in Caja negra - API REST
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.createReportInvalidCategory -- Time elapsed: 0.384 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.adminCreatesReport -- Time elapsed: 0.276 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<403> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.adminKeepsAccessAfterEmailCollision -- Time elapsed: 0.468 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<401>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.unknownRoute -- Time elapsed: 0.296 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<404> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.registerTokenIsUsable -- Time elapsed: 0.325 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<401>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.anonymousCannotLogOutSomeoneElse -- Time elapsed: 0.403 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<401>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.anonymousCannotLockSomeoneElse -- Time elapsed: 0.383 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<409>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.reportIdWrongType -- Time elapsed: 0.253 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.createReportWrongType -- Time elapsed: 0.256 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.methodNotAllowed -- Time elapsed: 0.230 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<405> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.registerNormalisesEmail -- Time elapsed: 0.285 s <<< FAILURE!
+java.lang.AssertionError: JSON path "$.email" expected:<mixto.caso.1206100981233600.57@radar.test> but was:<MIXTO.CASO.1206100981233600.57@RADAR.TEST>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.auditAuthorComesFromSession -- Time elapsed: 0.242 s <<< FAILURE!
+java.lang.AssertionError: 
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.registerMalformedJson -- Time elapsed: 0.221 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<400> but was:<500>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.registerDuplicateDifferentCase -- Time elapsed: 0.428 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<409> but was:<201>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[ERROR] com.radar.api.blackbox.BlackBoxApiTest.registerWithAdminEmail -- Time elapsed: 0.353 s <<< FAILURE!
+java.lang.AssertionError: Status expected:<409> but was:<201>
+	at org.springframework.test.util.AssertionErrors.fail(AssertionErrors.java:61)
+	at org.springframework.test.util.AssertionErrors.assertEquals(AssertionErrors.java:128)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.124 s -- in E2E de API - flujos completos
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.636 s -- in com.radar.api.service.AdminServiceTest
+[ERROR] Tests run: 8, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.617 s <<< FAILURE! -- in com.radar.api.service.AuthServiceTest
+[ERROR] com.radar.api.service.AuthServiceTest.registersUserAndReturnsToken -- Time elapsed: 0.076 s <<< FAILURE!
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.416 s -- in com.radar.api.service.BackupServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in com.radar.api.service.JwtServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.241 s -- in com.radar.api.service.ReportServiceTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in com.radar.api.service.UserDetailsServiceImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in loginWithGoogle, heartbeat y logout
+[ERROR] Tests run: 3, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0.030 s <<< FAILURE! -- in register
+[ERROR] com.radar.api.whitebox.AuthServiceWhiteBoxTest.registeredSessionMatchesReturnedToken -- Time elapsed: 0.015 s <<< FAILURE!
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.108 s -- in login
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.099 s -- in isMemorySessionMatching y handleSessionLockAction
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.104 s -- in validatePasswordPolicy
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.399 s -- in com.radar.api.whitebox.AuthServiceWhiteBoxTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.182 s -- in AuditLogService
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in RecaptchaService y GoogleTokenService
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.119 s -- in JwtAuthenticationFilter
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in JwtService
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.394 s -- in com.radar.api.whitebox.SecurityComponentsWhiteBoxTest
+[ERROR]   BlackBoxApiTest.adminCreatesReport:351 Status expected:<403> but was:<500>
+[ERROR]   BlackBoxApiTest.adminKeepsAccessAfterEmailCollision:123 Status expected:<200> but was:<401>
+[ERROR]   BlackBoxApiTest.anonymousCannotLockSomeoneElse:448 Status expected:<200> but was:<409>
+[ERROR]   BlackBoxApiTest.anonymousCannotLogOutSomeoneElse:436 Status expected:<200> but was:<401>
+[ERROR]   BlackBoxApiTest.createReportInvalidCategory:298 Status expected:<400> but was:<500>
+[ERROR]   BlackBoxApiTest.createReportWrongType:307 Status expected:<400> but was:<500>
+[ERROR]   BlackBoxApiTest.methodNotAllowed:413 Status expected:<405> but was:<500>
+[ERROR]   BlackBoxApiTest.registerDuplicateDifferentCase:99 Status expected:<409> but was:<201>
+[ERROR]   BlackBoxApiTest.registerMalformedJson:131 Status expected:<400> but was:<500>
+[ERROR]   BlackBoxApiTest.registerNormalisesEmail:407 JSON path "$.email" expected:<mixto.caso.1206100981233600.57@radar.test> but was:<MIXTO.CASO.1206100981233600.57@RADAR.TEST>
+[ERROR]   BlackBoxApiTest.registerTokenIsUsable:424 Status expected:<200> but was:<401>
+[ERROR]   BlackBoxApiTest.registerWithAdminEmail:110 Status expected:<409> but was:<201>
+[ERROR]   BlackBoxApiTest.reportIdWrongType:322 Status expected:<400> but was:<500>
+[ERROR]   BlackBoxApiTest.unknownRoute:387 Status expected:<404> but was:<500>
+[ERROR] Tests run: 156, Failures: 17, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

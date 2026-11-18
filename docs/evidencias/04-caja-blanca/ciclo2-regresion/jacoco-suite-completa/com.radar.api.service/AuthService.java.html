@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.service</a> &gt; <span class="el_source">AuthService.java</span></div><h1>AuthService.java</h1><pre class="source lang-java linenums">package com.radar.api.service;
+
+import com.radar.api.dto.request.LoginRequest;
+import com.radar.api.dto.request.RegisterRequest;
+import com.radar.api.dto.response.AuthResponse;
+import com.radar.api.exception.ConcurrentSessionException;
+import com.radar.api.exception.EmailAlreadyExistsException;
+import com.radar.api.exception.InvalidCredentialsException;
+import com.radar.api.model.Administrador;
+import com.radar.api.model.Role;
+import com.radar.api.model.User;
+import com.radar.api.repository.AdministradorRepository;
+import com.radar.api.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+
+// Servicio de negocio para registro, login tradicional/Google, control de sesión única (concurrencia) y heartbeat
+// @Slf4j habilita el logger automático (log.info, log.warn) que escribe en la carpeta logs/radar-api.log
+<span class="fc" id="L33">@Slf4j</span>
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+
+    // Si el usuario está activo (heartbeat periódico), el timeout mantiene bloqueado cualquier intento de doble sesión.
+    // Una vez que el usuario cierra sesión o el timeout expira, la sesión se libera.
+<span class="fc" id="L40">    public static final Duration SESSION_INACTIVITY_TIMEOUT = Duration.ofSeconds(30);</span>
+
+<span class="fc" id="L42">    private static final Pattern PASSWORD_POLICY_PATTERN = Pattern.compile(&quot;^(?=.*[A-Z])(?=.*\\d).{8,}$&quot;);</span>
+
+    // Registro atómico en memoria de sesiones AUTENTICADAS (clave: email, valor: sessionId del JWT) para bloquear
+    // doble sesión entre navegadores de forma inmediata
+<span class="fc" id="L46">    private static final Map&lt;String, ActiveSessionRecord&gt; ACTIVE_SESSIONS = new ConcurrentHashMap&lt;&gt;();</span>
+    // Candado de pestañas del frontend (clave: email, valor: tabId). Se mantiene SEPARADO de ACTIVE_SESSIONS:
+    // mezclar tabId y sessionId en el mismo mapa hacía que el &quot;claim&quot; posterior al login fallara siempre (DEF-13)
+    // y permitía que un tercero bloqueara el login ajeno reclamando el candado (DEF-11)
+<span class="fc" id="L50">    private static final Map&lt;String, ActiveSessionRecord&gt; BROWSER_LOCKS = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L51">    private static final Map&lt;String, Object&gt; EMAIL_LOCKS = new ConcurrentHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L53">    public record ActiveSessionRecord(String sessionId, Instant lastActiveAt) {}</span>
+
+    // Repositorios JPA y servicios auxiliares inyectados por constructor gracias a @RequiredArgsConstructor
+    private final UserRepository userRepository;
+    private final AdministradorRepository administradorRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final GoogleTokenService googleTokenService;
+    private final RecaptchaService recaptchaService;
+
+    public static void validatePasswordPolicy(String password) {
+<span class="fc bfc" id="L66" title="All 4 branches covered.">        if (password == null || !PASSWORD_POLICY_PATTERN.matcher(password).matches()) {</span>
+<span class="fc" id="L67">            throw new IllegalArgumentException(</span>
+                    &quot;La contraseña debe tener mínimo 8 caracteres, al menos una letra mayúscula y un número.&quot;
+            );
+        }
+<span class="fc" id="L71">    }</span>
+
+    public static boolean isMemorySessionMatching(String email, String sessionId) {
+<span class="fc bfc" id="L74" title="All 4 branches covered.">        if (email == null || sessionId == null) {</span>
+<span class="fc" id="L75">            return false;</span>
+        }
+<span class="fc" id="L77">        ActiveSessionRecord record = ACTIVE_SESSIONS.get(email.trim().toLowerCase());</span>
+<span class="fc bfc" id="L78" title="All 4 branches covered.">        return record != null &amp;&amp; sessionId.equals(record.sessionId());</span>
+    }
+
+    // Gestión atómica de candado de sesión entre navegadores sin depender de base de datos
+    public boolean handleSessionLockAction(String action, String email, String tabId) {
+<span class="pc bpc" id="L83" title="1 of 4 branches missed.">        if (email == null || email.isBlank()) {</span>
+<span class="fc" id="L84">            return true;</span>
+        }
+<span class="fc" id="L86">        String normalized = email.trim().toLowerCase();</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        String safeTabId = tabId != null ? tabId.trim() : &quot;&quot;;</span>
+<span class="fc" id="L88">        Object lock = EMAIL_LOCKS.computeIfAbsent(normalized, k -&gt; new Object());</span>
+
+<span class="fc" id="L90">        synchronized (lock) {</span>
+<span class="fc" id="L91">            Instant now = Instant.now();</span>
+<span class="fc" id="L92">            ActiveSessionRecord current = BROWSER_LOCKS.get(normalized);</span>
+<span class="fc bfc" id="L93" title="All 4 branches covered.">            boolean currentActive = current != null &amp;&amp; isSessionActive(current.sessionId(), current.lastActiveAt());</span>
+<span class="fc bfc" id="L94" title="All 4 branches covered.">            if (!currentActive &amp;&amp; current != null) {</span>
+<span class="fc" id="L95">                BROWSER_LOCKS.remove(normalized);</span>
+<span class="fc" id="L96">                current = null;</span>
+            }
+
+<span class="fc bfc" id="L99" title="All 6 branches covered.">            switch (action != null ? action : &quot;check&quot;) {</span>
+                case &quot;claim&quot;:
+<span class="fc bfc" id="L101" title="All 4 branches covered.">                    if (current != null &amp;&amp; !current.sessionId().equals(safeTabId)) {</span>
+<span class="fc" id="L102">                        return false;</span>
+                    }
+<span class="fc" id="L104">                    BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));</span>
+<span class="fc" id="L105">                    return true;</span>
+                case &quot;heartbeat&quot;:
+<span class="fc bfc" id="L107" title="All 4 branches covered.">                    if (current != null &amp;&amp; current.sessionId().equals(safeTabId)) {</span>
+<span class="fc" id="L108">                        BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));</span>
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">                    } else if (current == null &amp;&amp; !safeTabId.isEmpty()) {</span>
+<span class="fc" id="L110">                        BROWSER_LOCKS.put(normalized, new ActiveSessionRecord(safeTabId, now));</span>
+                    }
+<span class="fc" id="L112">                    return true;</span>
+                case &quot;release&quot;:
+<span class="pc bpc" id="L114" title="1 of 6 branches missed.">                    if (current == null || safeTabId.isEmpty() || current.sessionId().equals(safeTabId)) {</span>
+<span class="fc" id="L115">                        BROWSER_LOCKS.remove(normalized);</span>
+                    }
+<span class="fc" id="L117">                    return true;</span>
+                default:
+<span class="fc bfc" id="L119" title="All 4 branches covered.">                    return current == null || current.sessionId().equals(safeTabId);</span>
+            }
+        }
+    }
+
+    // Registra un nuevo ciudadano verificando reCAPTCHA, política de contraseña, unicidad de email y cifrando con BCrypt
+    public AuthResponse register(RegisterRequest request) {
+<span class="fc" id="L126">        validatePasswordPolicy(request.getPassword());</span>
+<span class="fc" id="L127">        recaptchaService.verify(request.getCaptchaToken());</span>
+        // El correo se normaliza y debe ser único entre ciudadanos Y administradores, sin distinguir mayúsculas
+        // (DEF-01: un ciudadano podía registrarse con el correo de un administrador; DEF-02: duplicados por mayúsculas)
+<span class="fc" id="L130">        String email = normalizeEmail(request.getEmail());</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        if (emailInUse(email)) {</span>
+<span class="fc" id="L132">            log.warn(&quot;Intento de registro con email ya existente: {}&quot;, email);</span>
+<span class="fc" id="L133">            throw new EmailAlreadyExistsException(email);</span>
+        }
+
+<span class="fc" id="L136">        String sessionId = jwtService.newSessionId();</span>
+<span class="fc" id="L137">        Instant now = Instant.now();</span>
+        // Al registrarse no se abre una sesión &quot;en uso&quot; (lastActiveAt nulo y sin registro en memoria), de modo que el
+        // primer login no se bloquea; pero se guarda el sessionId para que el token devuelto sea válido (DEF-09)
+<span class="fc" id="L140">        User user = User.builder()</span>
+<span class="fc" id="L141">                .nombre(request.getNombre())</span>
+<span class="fc" id="L142">                .email(email)</span>
+<span class="fc" id="L143">                .password(passwordEncoder.encode(request.getPassword()))</span>
+<span class="fc" id="L144">                .privacyConsentAt(now)</span>
+<span class="fc" id="L145">                .role(Role.USER)</span>
+<span class="fc" id="L146">                .activeSessionId(sessionId)</span>
+<span class="fc" id="L147">                .lastActiveAt(null)</span>
+<span class="fc" id="L148">                .build();</span>
+<span class="fc" id="L149">        userRepository.save(user);</span>
+<span class="fc" id="L150">        log.info(&quot;Nuevo usuario ciudadano registrado: email={}, id={}&quot;, user.getEmail(), user.getId());</span>
+
+<span class="fc" id="L152">        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());</span>
+<span class="fc" id="L153">        String token = jwtService.generateToken(userDetails, sessionId);</span>
+
+<span class="fc" id="L155">        return AuthResponse.builder()</span>
+<span class="fc" id="L156">                .token(token)</span>
+<span class="fc" id="L157">                .id(user.getId())</span>
+<span class="fc" id="L158">                .nombre(user.getNombre())</span>
+<span class="fc" id="L159">                .email(user.getEmail())</span>
+<span class="fc" id="L160">                .role(Role.USER.name())</span>
+<span class="fc" id="L161">                .build();</span>
+    }
+
+    // Autentica usuario o administrador, bloquea estrictamente si ya hay una sesión activa y emite un JWT con sessionId único
+    public AuthResponse login(LoginRequest request) {
+<span class="fc" id="L166">        validatePasswordPolicy(request.getPassword());</span>
+        try {
+<span class="fc" id="L168">            authenticationManager.authenticate(</span>
+<span class="fc" id="L169">                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())</span>
+            );
+<span class="fc" id="L171">        } catch (BadCredentialsException ex) {</span>
+<span class="fc" id="L172">            log.warn(&quot;Intento de login fallido (credenciales inválidas) para email={}&quot;, request.getEmail());</span>
+<span class="fc" id="L173">            throw new InvalidCredentialsException();</span>
+<span class="fc" id="L174">        }</span>
+
+<span class="pc bpc" id="L176" title="1 of 2 branches missed.">        String rawEmail = request.getEmail() != null ? request.getEmail().trim() : &quot;&quot;;</span>
+<span class="fc" id="L177">        String normalizedEmail = rawEmail.toLowerCase();</span>
+<span class="fc" id="L178">        Object lock = EMAIL_LOCKS.computeIfAbsent(normalizedEmail, k -&gt; new Object());</span>
+
+<span class="fc" id="L180">        synchronized (lock) {</span>
+            // Primero verifica si el correo corresponde a un Administrador
+<span class="fc" id="L182">            var adminMatch = administradorRepository.findByEmail(rawEmail)</span>
+<span class="fc" id="L183">                    .or(() -&gt; administradorRepository.findByEmail(normalizedEmail));</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">            if (adminMatch.isPresent()) {</span>
+<span class="fc" id="L185">                Administrador admin = adminMatch.get();</span>
+                // Bloqueo estricto: no se permite iniciar sesión si ya hay una sesión activa en el mismo u otro navegador
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">                if (hasActiveSession(normalizedEmail, admin.getActiveSessionId(), admin.getLastActiveAt())) {</span>
+<span class="nc" id="L188">                    log.warn(&quot;Sesión concurrente bloqueada para administrador: email={}&quot;, admin.getEmail());</span>
+<span class="nc" id="L189">                    throw new ConcurrentSessionException();</span>
+                }
+
+<span class="fc" id="L192">                String sessionId = jwtService.newSessionId();</span>
+<span class="fc" id="L193">                Instant now = Instant.now();</span>
+<span class="fc" id="L194">                requireSessionUpdated(administradorRepository.updateActiveSessionId(admin.getEmail(), sessionId, now));</span>
+<span class="fc" id="L195">                ACTIVE_SESSIONS.put(normalizedEmail, new ActiveSessionRecord(sessionId, now));</span>
+<span class="fc" id="L196">                log.info(&quot;Inicio de sesión exitoso (ADMIN): email={}&quot;, admin.getEmail());</span>
+<span class="fc" id="L197">                String token = jwtService.generateToken(</span>
+<span class="fc" id="L198">                        userDetailsService.loadUserByUsername(admin.getEmail()), sessionId);</span>
+<span class="fc" id="L199">                return AuthResponse.builder()</span>
+<span class="fc" id="L200">                        .token(token)</span>
+<span class="fc" id="L201">                        .id(admin.getId())</span>
+<span class="fc" id="L202">                        .nombre(admin.getNombre())</span>
+<span class="fc" id="L203">                        .email(admin.getEmail())</span>
+<span class="fc" id="L204">                        .role(Role.ADMIN.name())</span>
+<span class="fc" id="L205">                        .build();</span>
+            }
+
+            // Si no es administrador, busca en la tabla de usuarios ciudadanos
+<span class="fc" id="L209">            User user = userRepository.findByEmail(rawEmail)</span>
+<span class="fc" id="L210">                    .or(() -&gt; userRepository.findByEmail(normalizedEmail))</span>
+<span class="fc" id="L211">                    .orElseThrow(InvalidCredentialsException::new);</span>
+
+<span class="fc bfc" id="L213" title="All 2 branches covered.">            if (hasActiveSession(normalizedEmail, user.getActiveSessionId(), user.getLastActiveAt())) {</span>
+<span class="fc" id="L214">                log.warn(&quot;Sesión concurrente bloqueada para usuario: email={}&quot;, user.getEmail());</span>
+<span class="fc" id="L215">                throw new ConcurrentSessionException();</span>
+            }
+
+<span class="fc" id="L218">            String sessionId = jwtService.newSessionId();</span>
+<span class="fc" id="L219">            Instant now = Instant.now();</span>
+<span class="fc" id="L220">            requireSessionUpdated(userRepository.updateActiveSessionId(user.getEmail(), sessionId, now));</span>
+<span class="fc" id="L221">            ACTIVE_SESSIONS.put(normalizedEmail, new ActiveSessionRecord(sessionId, now));</span>
+<span class="fc" id="L222">            log.info(&quot;Inicio de sesión exitoso (USER): email={}&quot;, user.getEmail());</span>
+<span class="fc" id="L223">            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());</span>
+<span class="fc" id="L224">            String token = jwtService.generateToken(userDetails, sessionId);</span>
+
+<span class="fc" id="L226">            return AuthResponse.builder()</span>
+<span class="fc" id="L227">                    .token(token)</span>
+<span class="fc" id="L228">                    .id(user.getId())</span>
+<span class="fc" id="L229">                    .nombre(user.getNombre())</span>
+<span class="fc" id="L230">                    .email(user.getEmail())</span>
+<span class="fc" id="L231">                    .role(user.getRole().name())</span>
+<span class="fc" id="L232">                    .build();</span>
+        }
+    }
+
+    public AuthResponse loginWithGoogle(String idToken, boolean acceptDataTreatment, String captchaToken) {
+<span class="nc" id="L237">        return loginWithGoogle(idToken, acceptDataTreatment, captchaToken, false);</span>
+    }
+
+    // Valida el idToken con Google, crea la cuenta si es la primera vez y aplica el mismo bloqueo estricto de sesión única
+    public AuthResponse loginWithGoogle(String idToken, boolean acceptDataTreatment, String captchaToken, boolean force) {
+<span class="fc" id="L242">        recaptchaService.verify(captchaToken);</span>
+<span class="fc" id="L243">        GoogleTokenService.GoogleProfile profile = googleTokenService.verify(idToken);</span>
+<span class="fc" id="L244">        String normalizedEmail = profile.email().trim().toLowerCase();</span>
+<span class="fc" id="L245">        Object lock = EMAIL_LOCKS.computeIfAbsent(normalizedEmail, k -&gt; new Object());</span>
+
+<span class="fc" id="L247">        synchronized (lock) {</span>
+<span class="fc" id="L248">            User user = userRepository.findByEmail(profile.email()).orElseGet(() -&gt; {</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">                if (!acceptDataTreatment) {</span>
+<span class="fc" id="L250">                    throw new IllegalArgumentException(&quot;Debes aceptar el tratamiento de datos personales&quot;);</span>
+                }
+                // Una cuenta de Google no puede crear un ciudadano con el correo de un administrador (DEF-01)
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">                if (administradorRepository.existsByEmailIgnoreCase(normalizedEmail)) {</span>
+<span class="fc" id="L254">                    log.warn(&quot;Intento de crear cuenta Google con email de administrador: {}&quot;, normalizedEmail);</span>
+<span class="fc" id="L255">                    throw new EmailAlreadyExistsException(normalizedEmail);</span>
+                }
+<span class="nc" id="L257">                User created = User.builder()</span>
+<span class="nc" id="L258">                        .nombre(profile.name())</span>
+<span class="nc" id="L259">                        .email(normalizedEmail)</span>
+<span class="nc" id="L260">                        .password(passwordEncoder.encode(UUID.randomUUID().toString() + &quot;A1&quot;))</span>
+<span class="nc" id="L261">                        .googleSubject(profile.subject())</span>
+<span class="nc" id="L262">                        .privacyConsentAt(Instant.now())</span>
+<span class="nc" id="L263">                        .role(Role.USER)</span>
+<span class="nc" id="L264">                        .build();</span>
+<span class="nc" id="L265">                log.info(&quot;Cuenta creada mediante Google OAuth: email={}&quot;, profile.email());</span>
+<span class="nc" id="L266">                return userRepository.save(created);</span>
+            });
+
+<span class="pc bpc" id="L269" title="2 of 4 branches missed.">            if (user.getId() != null &amp;&amp; hasActiveSession(normalizedEmail, user.getActiveSessionId(), user.getLastActiveAt())) {</span>
+<span class="fc" id="L270">                log.warn(&quot;Sesión concurrente bloqueada en login Google: email={}&quot;, user.getEmail());</span>
+<span class="fc" id="L271">                throw new ConcurrentSessionException();</span>
+            }
+
+<span class="nc" id="L274">            String sessionId = jwtService.newSessionId();</span>
+<span class="nc" id="L275">            Instant now = Instant.now();</span>
+<span class="nc" id="L276">            requireSessionUpdated(userRepository.updateActiveSessionId(user.getEmail(), sessionId, now));</span>
+<span class="nc" id="L277">            ACTIVE_SESSIONS.put(normalizedEmail, new ActiveSessionRecord(sessionId, now));</span>
+<span class="nc" id="L278">            log.info(&quot;Login con Google exitoso: email={}&quot;, user.getEmail());</span>
+<span class="nc" id="L279">            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());</span>
+<span class="nc" id="L280">            return AuthResponse.builder()</span>
+<span class="nc" id="L281">                    .token(jwtService.generateToken(userDetails, sessionId))</span>
+<span class="nc" id="L282">                    .id(user.getId())</span>
+<span class="nc" id="L283">                    .nombre(user.getNombre())</span>
+<span class="nc" id="L284">                    .email(user.getEmail())</span>
+<span class="nc" id="L285">                    .role(user.getRole().name())</span>
+<span class="nc" id="L286">                    .build();</span>
+        }
+    }
+
+    // Actualiza la marca de tiempo lastActiveAt para confirmar que el navegador del usuario sigue abierto
+    public void heartbeat(String email, String sessionId) {
+<span class="fc" id="L292">        Instant now = Instant.now();</span>
+<span class="pc bpc" id="L293" title="2 of 4 branches missed.">        if (email != null &amp;&amp; sessionId != null) {</span>
+<span class="fc" id="L294">            String normalizedEmail = email.trim().toLowerCase();</span>
+<span class="fc" id="L295">            ACTIVE_SESSIONS.computeIfPresent(normalizedEmail, (k, existing) -&gt;</span>
+<span class="fc bfc" id="L296" title="All 2 branches covered.">                    sessionId.equals(existing.sessionId()) ? new ActiveSessionRecord(sessionId, now) : existing</span>
+            );
+        }
+        try {
+<span class="fc" id="L300">            userRepository.updateLastActiveAt(email, sessionId, now);</span>
+<span class="fc" id="L301">            administradorRepository.updateLastActiveAt(email, sessionId, now);</span>
+<span class="fc" id="L302">        } catch (Exception ignored) {</span>
+<span class="fc" id="L303">        }</span>
+<span class="fc" id="L304">    }</span>
+
+    // Limpia el activeSessionId en memoria y base de datos cuando el usuario cierra sesión explícitamente
+    public void logout(String email) {
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">        if (email != null) {</span>
+<span class="fc" id="L309">            String normalized = email.trim().toLowerCase();</span>
+<span class="fc" id="L310">            ACTIVE_SESSIONS.remove(normalized);</span>
+<span class="fc" id="L311">            BROWSER_LOCKS.remove(normalized);</span>
+        }
+        try {
+<span class="fc" id="L314">            userRepository.clearActiveSession(email);</span>
+<span class="fc" id="L315">            administradorRepository.clearActiveSession(email);</span>
+<span class="fc" id="L316">        } catch (Exception ignored) {</span>
+<span class="fc" id="L317">        }</span>
+<span class="fc" id="L318">        log.info(&quot;Sesión cerrada correctamente para email={}&quot;, email);</span>
+<span class="fc" id="L319">    }</span>
+
+    private boolean hasActiveSession(String normalizedEmail, String dbSessionId, Instant dbLastActiveAt) {
+<span class="fc" id="L322">        ActiveSessionRecord memRecord = ACTIVE_SESSIONS.get(normalizedEmail);</span>
+<span class="pc bpc" id="L323" title="1 of 4 branches missed.">        if (memRecord != null &amp;&amp; isSessionActive(memRecord.sessionId(), memRecord.lastActiveAt())) {</span>
+<span class="fc" id="L324">            return true;</span>
+        }
+<span class="fc" id="L326">        return isSessionActive(dbSessionId, dbLastActiveAt);</span>
+    }
+
+    private boolean isSessionActive(String activeSessionId, Instant lastActiveAt) {
+        // Sin sessionId o sin timestamp de actividad → no hay sesión en curso
+<span class="pc bpc" id="L331" title="1 of 6 branches missed.">        if (activeSessionId == null || activeSessionId.trim().isEmpty() || lastActiveAt == null) {</span>
+<span class="fc" id="L332">            return false;</span>
+        }
+        // Hay sesión sólo si hubo un heartbeat reciente dentro del margen de tolerancia
+<span class="fc" id="L335">        return lastActiveAt.isAfter(Instant.now().minus(SESSION_INACTIVITY_TIMEOUT));</span>
+    }
+
+    // Normaliza el correo (sin espacios, en minúsculas) para almacenarlo y compararlo siempre igual
+    public static String normalizeEmail(String email) {
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        return email == null ? null : email.trim().toLowerCase(Locale.ROOT);</span>
+    }
+
+    // Un correo está en uso si ya pertenece a un ciudadano o a un administrador (sin distinguir mayúsculas)
+    private boolean emailInUse(String email) {
+<span class="fc bfc" id="L345" title="All 4 branches covered.">        return userRepository.existsByEmailIgnoreCase(email) || administradorRepository.existsByEmailIgnoreCase(email);</span>
+    }
+
+    private void requireSessionUpdated(int updatedAccounts) {
+<span class="fc bfc" id="L349" title="All 2 branches covered.">        if (updatedAccounts != 1) {</span>
+<span class="fc" id="L350">            throw new IllegalStateException(&quot;No se pudo activar la sesión. Intenta iniciar sesión nuevamente.&quot;);</span>
+        }
+<span class="fc" id="L352">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

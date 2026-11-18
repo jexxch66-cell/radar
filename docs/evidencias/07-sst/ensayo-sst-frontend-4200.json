@@ -1,0 +1,123 @@
+{
+  "tool": "SST",
+  "version": "2.0.0",
+  "target": "http://localhost:4200/",
+  "started_at": "2026-11-17T19:09:23-05:00",
+  "finished_at": "2026-11-17T19:09:24-05:00",
+  "cancelled": false,
+  "results": [
+    {
+      "module": "Cabeceras HTTP",
+      "status": "PASS",
+      "detail": "HTTP 200. Hallazgos: 0."
+    },
+    {
+      "module": "Archivos expuestos",
+      "status": "PASS",
+      "detail": "5 rutas revisadas. Los resultados HTTP 200 requieren interpretación."
+    },
+    {
+      "module": "Errores y validación de entradas",
+      "status": "NOT_DETECTED",
+      "detail": "3 solicitudes de prueba. No se enviaron formularios."
+    },
+    {
+      "module": "Indicadores de SQL Injection",
+      "status": "NOT_CONFIRMED",
+      "detail": "3 solicitudes revisadas. La ausencia de errores SQL visibles no descarta SQLi."
+    },
+    {
+      "module": "Reflexión de entradas / XSS",
+      "status": "NOT_DETECTED",
+      "detail": "No se encontró el marcador literal ni codificado. Esto no descarta XSS en otros puntos de entrada."
+    },
+    {
+      "module": "Cookies y sesión",
+      "status": "PASS",
+      "detail": "0 cabeceras Set-Cookie inspeccionadas en la respuesta inicial. No se evaluó el ciclo de vida de la sesión."
+    },
+    {
+      "module": "Indicadores CSRF",
+      "status": "PASS",
+      "detail": "0 formularios inspeccionados. SST no envió los formularios."
+    },
+    {
+      "module": "Autenticación (pasiva)",
+      "status": "INFO",
+      "detail": "No se detectó un formulario de login en la página inicial. Puede existir en otra ruta."
+    },
+    {
+      "module": "Autorización (rutas comunes)",
+      "status": "REVIEW",
+      "detail": "6 rutas candidatas revisadas sin sesión. No se confirmó ningún fallo de autorización."
+    }
+  ],
+  "findings": [
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/admin/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    },
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/dashboard/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    },
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/usuarios/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    },
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/users/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    },
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/api/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    },
+    {
+      "title": "Ruta candidata accesible sin sesión",
+      "severity": "Informativa",
+      "endpoint": "http://localhost:4200/private/",
+      "status": "MANUAL_REVIEW",
+      "confidence": "Baja",
+      "evidence": "La ruta devolvió HTTP 200 sin autenticación. Puede ser pública o una página genérica.",
+      "remediation": "Verifica con cuentas de prueba que cada recurso aplique las reglas de acceso esperadas.",
+      "cwe": "CWE-862",
+      "module": "Autorización"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JwtAuthenticationFilter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">api</a> &gt; <a href="index.source.html" class="el_package">com.radar.api.config</a> &gt; <span class="el_source">JwtAuthenticationFilter.java</span></div><h1>JwtAuthenticationFilter.java</h1><pre class="source lang-java linenums">package com.radar.api.config;
+
+import com.radar.api.service.JwtService;
+import com.radar.api.service.UserDetailsServiceImpl;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+// Se ejecuta en cada peticion: si trae un Bearer token valido, autentica al usuario en el contexto de seguridad
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final String HEADER_NAME = &quot;Authorization&quot;;
+    private static final String TOKEN_PREFIX = &quot;Bearer &quot;;
+
+    private final JwtService jwtService;
+    private final UserDetailsServiceImpl userDetailsService;
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                     @NonNull HttpServletResponse response,
+                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
+
+<span class="fc" id="L36">        String authHeader = request.getHeader(HEADER_NAME);</span>
+<span class="fc bfc" id="L37" title="All 4 branches covered.">        if (authHeader == null || !authHeader.startsWith(TOKEN_PREFIX)) {</span>
+<span class="fc" id="L38">            filterChain.doFilter(request, response);</span>
+<span class="fc" id="L39">            return;</span>
+        }
+
+        try {
+<span class="fc" id="L43">            String token = authHeader.substring(TOKEN_PREFIX.length());</span>
+<span class="fc" id="L44">            String email = jwtService.extractUsername(token);</span>
+
+<span class="pc bpc" id="L46" title="1 of 4 branches missed.">            if (email != null &amp;&amp; SecurityContextHolder.getContext().getAuthentication() == null) {</span>
+<span class="fc" id="L47">                UserDetails userDetails = userDetailsService.loadUserByUsername(email);</span>
+
+<span class="fc" id="L49">                String sessionId = jwtService.extractSessionId(token);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">                if (jwtService.isTokenValid(token, userDetails, sessionId)</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">                        &amp;&amp; userDetailsService.isActiveSession(email, sessionId)) {</span>
+<span class="fc" id="L52">                    UsernamePasswordAuthenticationToken authToken =</span>
+<span class="fc" id="L53">                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());</span>
+<span class="fc" id="L54">                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));</span>
+<span class="fc" id="L55">                    SecurityContextHolder.getContext().setAuthentication(authToken);</span>
+                }
+            }
+<span class="fc" id="L58">        } catch (Exception ex) {</span>
+            // Token invalido/expirado/malformado: se ignora y la peticion sigue sin autenticar
+<span class="fc" id="L60">            SecurityContextHolder.clearContext();</span>
+<span class="fc" id="L61">        }</span>
+
+<span class="fc" id="L63">        filterChain.doFilter(request, response);</span>
+<span class="fc" id="L64">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

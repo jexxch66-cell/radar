@@ -1,0 +1,88 @@
+# DEF-14 (deteccion): E2E-12 y E2E-13 contra el FRONTEND ORIGINAL de e9e1021 (backend corregido para poder iniciar sesion, ver DEF-13)
+
+Running 2 tests using 1 worker
+
+  x  1 tests\radar.e2e.spec.ts:253:5 › E2E-12 Integridad: si el servidor falla al crear un reporte, se informa el error y no se simula la publicacion (15.2s)
+  x  2 tests\radar.e2e.spec.ts:275:5 › E2E-13 Integridad: si el servidor falla al crear un backup, el panel muestra el error y no un backup inexistente (12.8s)
+
+
+  1) tests\radar.e2e.spec.ts:253:5 › E2E-12 Integridad: si el servidor falla al crear un reporte, se informa el error y no se simula la publicacion 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('No se pudo crear el reporte. Intenta nuevamente.')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for getByText('No se pudo crear el reporte. Intenta nuevamente.')
+
+
+      267 |   await page.getByRole('button', { name: /Publicar reporte aquí/ }).click();
+      268 |
+    > 269 |   await expect(page.getByText('No se pudo crear el reporte. Intenta nuevamente.')).toBeVisible();
+          |                                                                                    ^
+      270 |   await expect(page.getByRole('button', { name: /Publicar reporte aquí/ })).toBeVisible();
+      271 |   await shot(page, 'E2E-12-error-al-crear-reporte');
+      272 |   await page.getByRole('button', { name: /Cerrar sesión/ }).first().click();
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-12-Integrida-75383-no-se-simula-la-publicacion\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-12-Integrida-75383-no-se-simula-la-publicacion\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-12-Integrida-75383-no-se-simula-la-publicacion\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-12-Integrida-75383-no-se-simula-la-publicacion\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests\radar.e2e.spec.ts:275:5 › E2E-13 Integridad: si el servidor falla al crear un backup, el panel muestra el error y no un backup inexistente 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: /backup|almacenamiento/i })
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 10000ms
+      - waiting for getByRole('alert').filter({ hasText: /backup|almacenamiento/i })
+
+
+      285 |
+      286 |   const alert = page.getByRole('alert').filter({ hasText: /backup|almacenamiento/i });
+    > 287 |   await expect(alert).toBeVisible();
+          |                       ^
+      288 |   await alert.scrollIntoViewIfNeeded();
+      289 |   await shot(page, 'E2E-13-error-al-crear-backup');
+      290 |   await page.getByRole('button', { name: /Cerrar sesión/ }).first().click();
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-13-Integrida-eee36--y-no-un-backup-inexistente\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\radar.e2e-E2E-13-Integrida-eee36--y-no-un-backup-inexistente\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\radar.e2e-E2E-13-Integrida-eee36--y-no-un-backup-inexistente\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\radar.e2e-E2E-13-Integrida-eee36--y-no-un-backup-inexistente\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    tests\radar.e2e.spec.ts:253:5 › E2E-12 Integridad: si el servidor falla al crear un reporte, se informa el error y no se simula la publicacion 
+    tests\radar.e2e.spec.ts:275:5 › E2E-13 Integridad: si el servidor falla al crear un backup, el panel muestra el error y no un backup inexistente 
+
+To open last HTML report run:
+
+  npx playwright show-report reports\html
+

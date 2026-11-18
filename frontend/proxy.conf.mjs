@@ -75,4 +75,15 @@ export default {
       return req.url || '/session-lock';
     },
   },
+
+  // Endurecimiento del servidor de desarrollo: archivos ocultos (/.env, /.git/...) y archivos de servidor o de respaldo
+  // (.php, .bak, .sql, .log...) nunca forman parte de esta aplicacion. Se responde 404 en lugar de servir la pagina de
+  // la SPA con HTTP 200, que podia confundirse con un archivo sensible expuesto. Las rutas de la aplicacion
+  // (/login, /mapa, /admin...) y los recursos de Angular/Vite (/@vite, /@fs, *.js, *.css...) no se ven afectados.
+  [String.raw`^/(?:\.|[^?#]*\.(?:php\d?|phps|phtml|bak|backup|old|orig|save|swp|tmp|sql|ini|log|conf|cfg|env)(?:[?#].*)?$)`]: {
+    target: 'http://localhost:4200',
+    bypass() {
+      return false;
+    },
+  },
 };
