@@ -10,6 +10,11 @@ declare global {
   }
 }
 
+// Tiempo máximo de espera para cargar el script y obtener el token. En producción la primera ejecución tarda
+// alrededor de 1,5 s; con un límite menor se enviaba la petición sin token y el backend respondía
+// "Verificación CAPTCHA requerida".
+const RECAPTCHA_TIMEOUT_MS = 10_000;
+
 @Injectable({ providedIn: 'root' })
 export class RecaptchaService {
   private scriptPromise?: Promise<void>;
@@ -22,7 +27,7 @@ export class RecaptchaService {
     try {
       await Promise.race([
         this.loadScript(),
-        new Promise<void>((resolve) => setTimeout(resolve, 1200)),
+        new Promise<void>((resolve) => setTimeout(resolve, RECAPTCHA_TIMEOUT_MS)),
       ]);
       if (!window.grecaptcha) {
         return null;
@@ -37,7 +42,7 @@ export class RecaptchaService {
               .catch(() => resolve(null));
           });
         }),
-        new Promise<string | null>((resolve) => setTimeout(() => resolve(null), 1200)),
+        new Promise<string | null>((resolve) => setTimeout(() => resolve(null), RECAPTCHA_TIMEOUT_MS)),
       ]);
     } catch {
       return null;
