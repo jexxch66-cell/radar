@@ -103,6 +103,7 @@ export class Register implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.recaptcha.preload();
+    this.authService.warmUp();
     this.renderGoogleButton();
   }
 

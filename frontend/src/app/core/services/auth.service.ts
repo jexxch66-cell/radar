@@ -11,7 +11,9 @@ const USER_KEY = 'radar_user';
 // Clave usada por versiones anteriores para guardar usuarios y CONTRASENAS en texto plano (DEF-12); solo se purga
 const LEGACY_LOCAL_USERS_KEY = 'radar_local_users_v1';
 // Tiempo maximo de espera de las llamadas de autenticacion (el backend en Render puede tardar en "despertar")
-const AUTH_TIMEOUT_MS = 15_000;
+// El backend en Render (plan gratuito) se suspende sin uso y tarda hasta ~50 s en despertar. Con un limite menor la
+// pagina abandonaba el login mientras el backend lo completaba, y la sesion quedaba "activa" sin que nadie la usara.
+const AUTH_TIMEOUT_MS = 60_000;
 const ACTIVE_SESSION_LOCK_KEY = 'radar_active_session_lock_v2';
 const TAB_OWNER_KEY = 'radar_tab_owner_id';
 const AUTH_CHANNEL_NAME = 'radar_auth_channel';
@@ -157,6 +159,11 @@ export class AuthService {
       ),
       tap((response) => this.storeSession(response)),
     );
+  }
+
+  // Despierta el backend al abrir el login o el registro, para que el usuario no espere el arranque al enviar el formulario
+  warmUp(): void {
+    this.http.get(`${environment.apiUrl}/health`).subscribe({ next: () => {}, error: () => {} });
   }
 
   heartbeat(): Observable<void> {
