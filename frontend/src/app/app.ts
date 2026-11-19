@@ -2,6 +2,8 @@
 import { Component, inject, signal } from '@angular/core';
 // RouterOutlet renderiza dinámicamente el componente de la ruta actual (/bienvenida, /login, /mapa, /admin...)
 import { RouterOutlet } from '@angular/router';
+// Actualizaciones del service worker (PWA)
+import { SwUpdate } from '@angular/service-worker';
 // Banner de consentimiento de cookies y pantalla de bloqueo por inactividad
 import { CookieConsent } from './shared/cookie-consent/cookie-consent';
 import { SessionLock } from './shared/session-lock/session-lock';
@@ -31,6 +33,8 @@ export class App {
   private installPrompt: InstallPromptEvent | null = null;
 
   constructor() {
+    this.watchForUpdates();
+
     // Si la aplicación ya corre instalada como ventana independiente (standalone), no mostramos el botón
     if (this.isInstalled()) {
       return;
@@ -58,6 +62,22 @@ export class App {
     if (choice.outcome === 'accepted') {
       this.canInstall.set(false);
     }
+  }
+
+  // El service worker guarda la aplicación para funcionar como PWA. Sin esto, quien ya la había abierto seguía
+  // usando la versión anterior hasta cerrar todas las pestañas. Al detectar una versión nueva, se activa y se recarga.
+  private watchForUpdates(): void {
+    const swUpdate = inject(SwUpdate, { optional: true });
+    if (!swUpdate?.isEnabled) {
+      return;
+    }
+    swUpdate.versionUpdates.subscribe((event) => {
+      if (event.type === 'VERSION_READY') {
+        void swUpdate.activateUpdate().then(() => document.location.reload());
+      }
+    });
+    swUpdate.unrecoverable.subscribe(() => document.location.reload());
+    void swUpdate.checkForUpdate().catch(() => undefined);
   }
 
   // Cierra el modal con instrucciones de instalación

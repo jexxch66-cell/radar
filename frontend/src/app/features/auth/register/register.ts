@@ -102,6 +102,7 @@ export class Register implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    this.recaptcha.preload();
     this.renderGoogleButton();
   }
 
@@ -124,6 +125,11 @@ export class Register implements AfterViewInit {
 
     const { nombre, email, password, acceptDataTreatment } = this.form.getRawValue();
     const captchaToken = await this.recaptcha.execute('register');
+    if (this.recaptcha.enabled && !captchaToken) {
+      this.submitting.set(false);
+      this.errorMessage.set(RecaptchaService.UNAVAILABLE_MESSAGE);
+      return;
+    }
     this.authService.register({ nombre, email, password, acceptDataTreatment, captchaToken }).subscribe({
       next: () => {
         this.submitting.set(false);
@@ -149,6 +155,11 @@ export class Register implements AfterViewInit {
     this.submitting.set(true);
     this.errorMessage.set(null);
     const captchaToken = await this.recaptcha.execute('google_register');
+    if (this.recaptcha.enabled && !captchaToken) {
+      this.submitting.set(false);
+      this.errorMessage.set(RecaptchaService.UNAVAILABLE_MESSAGE);
+      return;
+    }
     this.authService.loginWithGoogle({
       idToken,
       acceptDataTreatment: true,

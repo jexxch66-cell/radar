@@ -82,6 +82,8 @@ export class Login implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Precarga reCAPTCHA para que el token esté listo al iniciar sesión con Google
+    this.recaptcha.preload();
     // Una vez cargado el HTML, inicializamos el botón de Google
     this.renderGoogleButton();
   }
@@ -127,6 +129,11 @@ export class Login implements AfterViewInit {
     this.submitting.set(true);
     this.errorMessage.set(null);
     const captchaToken = await this.recaptcha.execute('google_login');
+    if (this.recaptcha.enabled && !captchaToken) {
+      this.submitting.set(false);
+      this.errorMessage.set(RecaptchaService.UNAVAILABLE_MESSAGE);
+      return;
+    }
     this.authService.loginWithGoogle({ idToken, acceptDataTreatment: true, captchaToken, force: false }).subscribe({
       next: () => {
         this.submitting.set(false);
