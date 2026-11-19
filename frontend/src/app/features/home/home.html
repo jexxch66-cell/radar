@@ -44,9 +44,15 @@
       {{ i18n.t('map.locPending') }}
     </div>
   }
+  @if (locStatus() === 'prompt') {
+    <div class="fixed z-[500] top-24 left-1/2 -translate-x-1/2 max-w-[92vw] bg-panel/95 backdrop-blur-md text-fg text-sm px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3">
+      <span>{{ i18n.t('map.locPrompt') }}</span>
+      <button type="button" (click)="startLocation()" class="shrink-0 rounded-full bg-[#e8702a] px-3 py-1.5 font-semibold text-white whitespace-nowrap">{{ i18n.t('map.allowLocation') }}</button>
+    </div>
+  }
   @if (locStatus() === 'denied' || locStatus() === 'unavailable') {
     <div class="fixed z-[500] top-24 left-1/2 -translate-x-1/2 max-w-[92vw] bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-200 text-sm px-4 py-2 rounded-2xl shadow-lg flex items-center gap-3">
-      <span>{{ locStatus() === 'denied' ? i18n.t('map.locDenied') : i18n.t('map.locUnavailable') }}</span>
+      <span>{{ locStatus() === 'denied' ? i18n.t(locDeniedKey) : i18n.t('map.locUnavailable') }}</span>
       <button type="button" (click)="startLocation()" class="font-semibold underline whitespace-nowrap">{{ i18n.t('map.retry') }}</button>
     </div>
   }

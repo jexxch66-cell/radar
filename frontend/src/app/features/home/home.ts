@@ -67,7 +67,10 @@ export class Home implements AfterViewInit, OnDestroy {
   protected readonly formError = signal<string | null>(null);
 
   // Ubicación en vivo del usuario (estilo Waze)
-  protected readonly locStatus = signal<'pending' | 'ok' | 'denied' | 'unavailable'>('pending');
+  protected readonly locStatus = signal<'pending' | 'ok' | 'prompt' | 'denied' | 'unavailable'>('pending');
+  // Instrucciones para desbloquear la ubicación según el dispositivo (Android, iPhone, navegador integrado o escritorio)
+  protected readonly locDeniedKey = Home.deniedHelpKey();
+  private permissionStatus: PermissionStatus | null = null;
   protected readonly userPos = signal<{ lat: number; lng: number; accuracy: number } | null>(null);
   protected readonly following = signal(true);
 
@@ -116,15 +119,77 @@ export class Home implements AfterViewInit, OnDestroy {
     // Al arrastrar el mapa el usuario deja de "seguirse"
     this.map.on('dragstart', () => this.following.set(false));
 
-    this.startLocation();
+    void this.initLocation();
     this.loadReports();
   }
 
   ngOnDestroy(): void {
+    if (this.permissionStatus) {
+      this.permissionStatus.onchange = null;
+    }
     if (this.watchId !== null) {
       navigator.geolocation.clearWatch(this.watchId);
     }
     this.map?.remove();
+  }
+
+  // Consulta el estado del permiso antes de pedir la ubicación y vigila sus cambios: si el usuario la habilita en los
+  // ajustes del navegador o del teléfono, el mapa la retoma solo, sin tener que pulsar "Reintentar"
+  private async initLocation(): Promise<void> {
+    if (!('geolocation' in navigator)) {
+      this.locStatus.set('unavailable');
+      return;
+    }
+    try {
+      const status = await navigator.permissions?.query({ name: 'geolocation' as PermissionName });
+      if (status) {
+        this.permissionStatus = status;
+        status.onchange = () => {
+          if (status.state === 'granted') {
+            this.startLocation();
+          } else if (status.state === 'denied') {
+            this.locStatus.set('denied');
+          }
+        };
+        if (status.state === 'denied') {
+          this.locStatus.set('denied');
+          return;
+        }
+      }
+    } catch {
+      // Navegadores sin Permissions API (algunos Safari): se pide la ubicación directamente
+    }
+    this.startLocation();
+  }
+
+  // Si el usuario cerró el aviso sin responder, el navegador informa "denegado" aunque todavía se puede volver a
+  // preguntar: en ese caso se ofrece el botón "Permitir ubicación" en lugar del mensaje de bloqueo
+  private async onPermissionError(): Promise<void> {
+    try {
+      const status =
+        this.permissionStatus ?? (await navigator.permissions?.query({ name: 'geolocation' as PermissionName }));
+      if (status?.state === 'prompt') {
+        this.locStatus.set('prompt');
+        return;
+      }
+    } catch {
+      // Sin Permissions API se asume bloqueo
+    }
+    this.locStatus.set('denied');
+  }
+
+  private static deniedHelpKey(): 'map.locInApp' | 'map.locDeniedIos' | 'map.locDeniedAndroid' | 'map.locDenied' {
+    const ua = navigator.userAgent;
+    if (/FBAN|FBAV|Instagram|Line\/|; wv\)/i.test(ua)) {
+      return 'map.locInApp';
+    }
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return 'map.locDeniedIos';
+    }
+    if (/Android/i.test(ua)) {
+      return 'map.locDeniedAndroid';
+    }
+    return 'map.locDenied';
   }
 
   protected startLocation(): void {
@@ -163,7 +228,11 @@ export class Home implements AfterViewInit, OnDestroy {
         }
       },
       (error) => {
-        this.locStatus.set(error.code === error.PERMISSION_DENIED ? 'denied' : 'unavailable');
+        if (error.code === error.PERMISSION_DENIED) {
+          void this.onPermissionError();
+        } else {
+          this.locStatus.set('unavailable');
+        }
       },
       { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 },
     );
